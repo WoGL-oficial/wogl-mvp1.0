@@ -286,220 +286,6 @@ a { color: var(--accent); text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   Academy real layout — Bloque 5
-   Two-column shell: section drawers + lesson stage.
-   ═══════════════════════════════════════════════ */
-.academy-shell.live {
-  flex-direction: row;
-  padding: 0;
-  min-height: calc(100vh - 65px);
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  overflow: hidden;
-}
-
-.academy-side {
-  border-right: 1px solid var(--line);
-  background: var(--bg-side);
-  padding: 18px 0 64px;
-  overflow-y: auto;
-}
-
-.drawer {
-  border-bottom: 1px solid var(--line);
-}
-.drawer:last-child { border-bottom: none; }
-
-.drawer-head {
-  display: flex; align-items: center; gap: 12px;
-  padding: 16px 22px;
-  cursor: pointer;
-  min-height: 44px;
-  transition: background .2s var(--ease);
-  user-select: none;
-}
-.drawer-head:hover { background: rgba(232,217,192,0.025); }
-.drawer.open .drawer-head { background: linear-gradient(90deg, rgba(232,217,192,0.04), transparent 70%); }
-
-.drawer-num {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--section-accent, var(--ink-mute));
-  letter-spacing: 0.14em;
-  min-width: 22px;
-}
-.drawer-name {
-  font-family: var(--font-display);
-  font-size: 13px; font-weight: 500;
-  color: var(--ink);
-  letter-spacing: 0.04em;
-  flex: 1;
-}
-.drawer-progress {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-mute);
-  letter-spacing: 0.10em;
-}
-.drawer-chevron {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-faint);
-  transition: transform .25s var(--ease);
-  display: inline-block;
-  margin-left: 4px;
-}
-.drawer.open .drawer-chevron { transform: rotate(90deg); }
-
-.drawer-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .3s var(--ease);
-}
-.drawer.open .drawer-body { max-height: 720px; }
-
-.lesson-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 22px 11px 56px;
-  cursor: pointer;
-  min-height: 44px;
-  border-left: 3px solid transparent;
-  transition: background .15s var(--ease), border-left-color .15s var(--ease);
-}
-.lesson-item:hover:not(.active) {
-  background: rgba(232,217,192,0.020);
-  border-left-color: rgba(232,217,192,0.18);
-}
-.lesson-item.active {
-  background: linear-gradient(90deg, var(--section-accent-soft, var(--gold-soft)), transparent 70%);
-  border-left-color: var(--section-accent, var(--gold));
-}
-
-.lesson-num {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-faint);
-  letter-spacing: 0.12em;
-  min-width: 22px;
-}
-.lesson-name {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--ink-soft);
-  flex: 1;
-  line-height: 1.4;
-}
-.lesson-item:hover .lesson-name,
-.lesson-item.active .lesson-name { color: var(--ink); }
-.lesson-check {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--green);
-  opacity: 0.85;
-}
-
-.academy-main {
-  padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px) 80px;
-  overflow-y: auto;
-  min-width: 0;
-}
-
-/* Mobile-only second-tier strip: shows the open section's lessons
-   inside the main area, since the sidebar's drawer-body is hidden
-   on small screens. Desktop hides this strip. */
-.lesson-strip-mobile { display: none; }
-
-.academy-welcome {
-  max-width: 620px;
-}
-.academy-welcome-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--gold);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.academy-welcome h1 {
-  font-family: var(--font-display);
-  font-weight: 300;
-  font-size: clamp(32px, 4.5vw, 46px);
-  color: var(--ink);
-  letter-spacing: -0.01em;
-  line-height: 1.12;
-  margin-bottom: 18px;
-}
-.academy-welcome h1 em {
-  font-style: italic;
-  color: var(--gold);
-  font-weight: 400;
-}
-.academy-welcome p {
-  font-family: var(--font-body);
-  font-weight: 300;
-  font-size: 15px;
-  color: var(--ink-soft);
-  line-height: 1.7;
-  margin-bottom: 28px;
-  max-width: 540px;
-}
-.academy-welcome .cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 22px;
-  border: 1px solid var(--gold);
-  background: var(--gold-soft);
-  color: var(--gold);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background .2s var(--ease), color .2s var(--ease);
-  min-height: 44px;
-}
-.academy-welcome .cta:hover { background: var(--gold); color: var(--bg-deep); }
-
-.lesson-placeholder {
-  max-width: 620px;
-}
-.lesson-placeholder-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--section-accent, var(--gold));
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.lesson-placeholder h1 {
-  font-family: var(--font-display);
-  font-weight: 300;
-  font-size: clamp(28px, 3.8vw, 38px);
-  color: var(--ink);
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-  margin-bottom: 14px;
-}
-.lesson-placeholder p {
-  font-family: var(--font-body);
-  font-weight: 300;
-  font-size: 14px;
-  color: var(--ink-mute);
-  line-height: 1.7;
-  margin-bottom: 24px;
-}
-.lesson-placeholder .build-note {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-faint);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
-}
-
-/* ═══════════════════════════════════════════════
    Modal scaffolding — shared by all modals.
    ═══════════════════════════════════════════════ */
 .modal {
@@ -1328,87 +1114,6 @@ a { color: var(--accent); text-decoration: none; }
   .world-theme-card { min-height: 60px; }
   .backpack-empty { padding: 40px 18px; }
   .delete-card { padding: 24px 18px; }
-
-  /* Academy live layout: sidebar becomes a top horizontal strip,
-     mirrors world-side mobile pattern. Drawers expand inline below. */
-  .academy-shell.live {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-  }
-  .academy-side {
-    display: flex; flex-direction: row;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    padding: 0;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-  .drawer {
-    flex: 0 0 auto;
-    border-bottom: none;
-    border-right: 1px solid var(--line);
-    min-width: 140px;
-  }
-  .drawer:last-child { border-right: none; }
-  .drawer-head {
-    padding: 12px 16px;
-    min-height: 56px;
-    flex-wrap: wrap;
-  }
-  .drawer-name { font-size: 12px; flex: 1 1 100%; }
-  .drawer-num { font-size: 10px; }
-  .drawer-progress { font-size: 9px; }
-  .drawer-chevron { display: none; }
-  /* On mobile, body opens as a horizontal pop-out under the strip when active;
-     simpler: hide body in the strip, and render the active drawer's lessons
-     inside the main area at the top instead. */
-  .drawer-body { display: none; }
-
-  .academy-main { padding: 20px 18px 80px; }
-  .academy-welcome h1 { font-size: 28px; }
-  .academy-welcome p { font-size: 14px; }
-  .lesson-placeholder h1 { font-size: 24px; }
-
-  /* Mobile lesson strip — horizontal scroll under the section strip,
-     rendered inside academy-main so it stays close to the lesson. */
-  .lesson-strip-mobile {
-    display: flex; flex-direction: row;
-    gap: 8px;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding: 0 2px 16px;
-    margin: -4px -18px 22px;
-    padding-left: 18px; padding-right: 18px;
-    border-bottom: 1px solid var(--line);
-  }
-  .lesson-chip {
-    flex: 0 0 auto;
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 14px;
-    min-height: 40px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: transparent;
-    cursor: pointer;
-    transition: border-color .15s var(--ease), background .15s var(--ease);
-  }
-  .lesson-chip.active {
-    border-color: var(--section-accent, var(--gold));
-    background: var(--section-accent-soft, var(--gold-soft));
-  }
-  .lesson-chip-num {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--ink-faint);
-    letter-spacing: 0.12em;
-  }
-  .lesson-chip.active .lesson-chip-num { color: var(--ink); }
-  .lesson-chip-check {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--green);
-    opacity: 0.85;
-  }
 }
 </style>
 </head>
@@ -1428,14 +1133,17 @@ a { color: var(--accent); text-decoration: none; }
 </header>
 
 <!-- ═══════════════════════════════════════
-     Academy shell — Bloque 5 live layout.
-     Sidebar with 6 collapsible section drawers
-     on the left, lesson stage on the right.
-     Populated by academyRender() at boot.
+     Academy shell — populated in Bloque 5-6.
+     Right now this is a placeholder so the
+     scaffolding (header + chassis modals) can
+     be validated standalone.
      ═══════════════════════════════════════ -->
-<main class="academy-shell live" id="academyShell">
-  <aside class="academy-side" id="academySide"></aside>
-  <section class="academy-main" id="academyMain"></section>
+<main class="academy-shell" id="academyShell">
+  <div class="placeholder">
+    <h1 data-i18n="placeholderTitle">A world of GL, <em>built lesson by lesson.</em></h1>
+    <p data-i18n="placeholderText">The academy lives here. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sixty interactive lessons that run real WebGL on your GPU. We are building this view next.</p>
+    <div class="build-note" data-i18n="placeholderNote">scaffolding · blocks 1–2 of 8 done</div>
+  </div>
 </main>
 
 <!-- ═══════════════════════════════════════
@@ -1746,17 +1454,10 @@ var I18N = {
     brandSub: 'academy',
     headerLogin: 'Log in',
 
-    /* Academy chrome — Bloque 5 */
-    academyWelcomeEyebrow: 'Start Here · Empieza aquí',
-    academyWelcomeTitle: 'Sixty lessons. <em>One world of GL.</em>',
-    academyWelcomeText: 'Six sections, sixty interactive lessons that run real WebGL on your GPU. Patterns, forces, noise, domain warp, motion — built lesson by lesson. Pick a section on the left to begin.',
-    academyWelcomeCta: 'Start with 00 · 01 →',
-    academyLessonsCount: '{done}/{total}',
-    academyLessonPh: 'Lesson',
-    academyLessonPlaceholderEyebrow: '{section} · {num}',
-    academyLessonPlaceholderTitle: 'Lesson coming online',
-    academyLessonPlaceholderText: 'This lesson loads next — sandbox, shader and explain block ship in the next sprint. The chassis around it is live.',
-    academyLessonPlaceholderNote: 'b5 · structure live · b6 · content next',
+    /* Placeholder (will be replaced by real academy content in B5-6) */
+    placeholderTitle: 'A world of GL, <em>built lesson by lesson.</em>',
+    placeholderText: 'The academy lives here. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sixty interactive lessons that run real WebGL on your GPU. We are building this view next.',
+    placeholderNote: 'scaffolding · blocks 1–3 of 8 done',
 
     /* Auth modal — register + login share most fields, only title/CTA flip */
     authSubRegister: 'your progress travels with you',
@@ -1930,17 +1631,10 @@ var I18N = {
     brandSub: 'academy',
     headerLogin: 'Entrar',
 
-    /* Academy chrome — Bloque 5 */
-    academyWelcomeEyebrow: 'Start Here · Empieza aquí',
-    academyWelcomeTitle: 'Sesenta lecciones. <em>Un mundo de GL.</em>',
-    academyWelcomeText: 'Seis secciones, sesenta lecciones interactivas que corren WebGL real en tu GPU. Patterns, forces, noise, domain warp, motion — lección por lección. Elige una sección a la izquierda para empezar.',
-    academyWelcomeCta: 'Empieza con 00 · 01 →',
-    academyLessonsCount: '{done}/{total}',
-    academyLessonPh: 'Lección',
-    academyLessonPlaceholderEyebrow: '{section} · {num}',
-    academyLessonPlaceholderTitle: 'Lección encendiéndose',
-    academyLessonPlaceholderText: 'La lección carga a continuación — sandbox, shader y bloque de explicación llegan en el siguiente sprint. El chassis alrededor ya está vivo.',
-    academyLessonPlaceholderNote: 'b5 · estructura viva · b6 · contenido a continuación',
+    /* Placeholder */
+    placeholderTitle: 'Un mundo de GL, <em>lección por lección.</em>',
+    placeholderText: 'La academia vive aquí. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sesenta lecciones interactivas que corren WebGL real en tu GPU. Esta vista la estamos construyendo a continuación.',
+    placeholderNote: 'scaffolding · bloques 1–3 de 8 listos',
 
     /* Auth */
     authSubRegister: 'tu progreso viaja contigo',
@@ -2176,11 +1870,7 @@ function setBrowseLang(lang) {
   browseLang = lang;
   localStorage.setItem('wogl-browse-lang', lang);
   document.documentElement.setAttribute('lang', lang);
-  /* academyRender() rewrites lesson titles that aren't data-i18n
-     (they come from academyLessonTitle()) and also calls applyLang
-     so chrome translations refresh in the same pass. */
-  if (typeof academyRender === 'function') academyRender();
-  else applyLang();
+  applyLang();
 }
 
 function pickAccountLang(lang) {
@@ -3119,176 +2809,13 @@ if (document.readyState === 'loading') {
   wireNameCheck();
 }
 
-/* ═══════════════════════════════════════════════
-   Academy — Bloque 5 structure render
-   Reads WORLD_SECTIONS (declared in B4), renders 6
-   collapsible drawers in the sidebar and a welcome /
-   lesson placeholder in the main area. Progress checks
-   come from _worldProgress (loaded by worldLoadData
-   when logged in; empty array otherwise).
-   ═══════════════════════════════════════════════ */
-var _currentSection = null;     /* null = show welcome banner */
-var _currentLessonIdx = null;
-var _drawerOpen = {};
-WORLD_SECTIONS.forEach(function(s, i){ _drawerOpen[s.num] = (i === 0); });
-
-/* Lesson titles — placeholder for B5. B6 will overwrite with real titles
-   from the LESSONS_XX catalogs. Bilingual neutral here on purpose. */
-function academyLessonTitle(section, lessonIdx) {
-  var num = String(lessonIdx + 1).padStart(2, '0');
-  return t('academyLessonPh', 'academy') + ' ' + num;
-}
-
-function academyDoneInSection(num) {
-  if (!_worldProgress || !_worldProgress.length) return 0;
-  return _worldProgress.filter(function(p){ return p.section === num; }).length;
-}
-
-function academyIsDone(section, lessonIdx) {
-  if (!_worldProgress || !_worldProgress.length) return false;
-  return _worldProgress.some(function(p){
-    return p.section === section && p.lesson_idx === lessonIdx;
-  });
-}
-
-function academyEsc(s) {
-  var d = document.createElement('div');
-  d.textContent = (s == null) ? '' : String(s);
-  return d.innerHTML;
-}
-
-function academyRender() {
-  var side = document.getElementById('academySide');
-  var main = document.getElementById('academyMain');
-  if (!side || !main) return;
-
-  /* Sidebar — 6 drawers */
-  side.innerHTML = WORLD_SECTIONS.map(function(s){
-    return academyRenderDrawer(s);
-  }).join('');
-
-  /* Main area */
-  if (_currentSection === null || _currentLessonIdx === null) {
-    main.innerHTML = academyRenderWelcome();
-  } else {
-    main.innerHTML = academyRenderLessonPlaceholder(_currentSection, _currentLessonIdx);
-  }
-
-  applyLang();
-}
-
-function academyRenderDrawer(s) {
-  var open = _drawerOpen[s.num];
-  var done = academyDoneInSection(s.num);
-  var countTpl = t('academyLessonsCount', 'academy');
-  var countStr = fmt(countTpl, { done: done, total: s.total });
-  var items = '';
-  for (var i = 0; i < s.total; i++) {
-    items += academyRenderLessonItem(s, i);
-  }
-  return ''
-    + '<div class="drawer ' + (open ? 'open' : '') + '" data-section="' + s.num + '"'
-    +      ' style="--section-accent:' + s.accent + ';--section-accent-soft:' + s.accent + '22;">'
-    +   '<div class="drawer-head" onclick="academyToggleDrawer(\'' + s.num + '\')">'
-    +     '<span class="drawer-num">' + s.num + '</span>'
-    +     '<span class="drawer-name">' + academyEsc(s.name) + '</span>'
-    +     '<span class="drawer-progress">' + countStr + '</span>'
-    +     '<span class="drawer-chevron">›</span>'
-    +   '</div>'
-    +   '<div class="drawer-body">' + items + '</div>'
-    + '</div>';
-}
-
-function academyRenderLessonItem(s, lessonIdx) {
-  var num = String(lessonIdx + 1).padStart(2, '0');
-  var active = (_currentSection === s.num && _currentLessonIdx === lessonIdx);
-  var done = academyIsDone(s.num, lessonIdx);
-  return ''
-    + '<div class="lesson-item ' + (active ? 'active' : '') + '"'
-    +      ' onclick="academyOpenLesson(\'' + s.num + '\',' + lessonIdx + ')">'
-    +   '<span class="lesson-num">' + num + '</span>'
-    +   '<span class="lesson-name">' + academyEsc(academyLessonTitle(s.num, lessonIdx)) + '</span>'
-    +   (done ? '<span class="lesson-check">✓</span>' : '')
-    + '</div>';
-}
-
-/* Mobile strip — horizontal chips of the currently-open section's
-   lessons. Hidden on desktop via CSS. */
-function academyRenderMobileStrip() {
-  var openSection = Object.keys(_drawerOpen).find(function(k){ return _drawerOpen[k]; });
-  if (!openSection) return '';
-  var s = WORLD_SECTIONS.find(function(x){ return x.num === openSection; });
-  if (!s) return '';
-  var chips = '';
-  for (var i = 0; i < s.total; i++) {
-    var num = String(i + 1).padStart(2, '0');
-    var active = (_currentSection === s.num && _currentLessonIdx === i);
-    var done = academyIsDone(s.num, i);
-    chips += ''
-      + '<button class="lesson-chip ' + (active ? 'active' : '') + '"'
-      +        ' onclick="academyOpenLesson(\'' + s.num + '\',' + i + ')">'
-      +   '<span class="lesson-chip-num">' + s.num + '·' + num + '</span>'
-      +   (done ? '<span class="lesson-chip-check">✓</span>' : '')
-      + '</button>';
-  }
-  return '<div class="lesson-strip-mobile" style="--section-accent:' + s.accent
-       + ';--section-accent-soft:' + s.accent + '22;">' + chips + '</div>';
-}
-
-function academyRenderWelcome() {
-  return ''
-    + academyRenderMobileStrip()
-    + '<div class="academy-welcome">'
-    +   '<div class="academy-welcome-eyebrow" data-i18n="academyWelcomeEyebrow"></div>'
-    +   '<h1 data-i18n="academyWelcomeTitle" data-i18n-html></h1>'
-    +   '<p data-i18n="academyWelcomeText"></p>'
-    +   '<button class="cta" data-i18n="academyWelcomeCta"'
-    +          ' onclick="academyOpenLesson(\'00\',0)"></button>'
-    + '</div>';
-}
-
-function academyRenderLessonPlaceholder(section, lessonIdx) {
-  var s = WORLD_SECTIONS.find(function(x){ return x.num === section; });
-  if (!s) return '';
-  var num = String(lessonIdx + 1).padStart(2, '0');
-  var eyebrowTpl = t('academyLessonPlaceholderEyebrow', 'academy');
-  var eyebrow = fmt(eyebrowTpl, { section: s.name, num: num });
-  return ''
-    + academyRenderMobileStrip()
-    + '<div class="lesson-placeholder" style="--section-accent:' + s.accent + ';">'
-    +   '<div class="lesson-placeholder-eyebrow">' + academyEsc(eyebrow) + '</div>'
-    +   '<h1 data-i18n="academyLessonPlaceholderTitle"></h1>'
-    +   '<p data-i18n="academyLessonPlaceholderText"></p>'
-    +   '<div class="build-note" data-i18n="academyLessonPlaceholderNote"></div>'
-    + '</div>';
-}
-
-function academyToggleDrawer(section) {
-  /* One-at-a-time: opening a drawer closes the others. */
-  var wasOpen = _drawerOpen[section];
-  Object.keys(_drawerOpen).forEach(function(k){ _drawerOpen[k] = false; });
-  _drawerOpen[section] = !wasOpen;
-  academyRender();
-}
-
-function academyOpenLesson(section, lessonIdx) {
-  _currentSection = section;
-  _currentLessonIdx = lessonIdx;
-  /* Make sure the drawer holding this lesson is open. */
-  Object.keys(_drawerOpen).forEach(function(k){ _drawerOpen[k] = (k === section); });
-  academyRender();
-  /* Scroll main area to top so the new lesson is in view on mobile. */
-  var main = document.getElementById('academyMain');
-  if (main) main.scrollTop = 0;
-}
-
 /* ─── Modal helpers ─── */
 function show(id) { var el = document.getElementById(id); if (el) el.classList.add('active'); }
 function hide(id) { var el = document.getElementById(id); if (el) el.classList.remove('active'); }
 
 /* ─── Boot ─── */
 document.documentElement.setAttribute('lang', browseLang);
-academyRender();  /* renders the academy and calls applyLang() internally */
+applyLang();
 
 /* Expose for console tinkering during the build. */
 window.WOGL = {
