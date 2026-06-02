@@ -34,17 +34,23 @@ hierarchy and flow decision is auditable here.
 
 ## Status
 
-Built block by block, each one validated end-to-end on iPhone Safari
-before moving on:
+Built block by block, each one validated end-to-end on **iPhone Safari
+AND web desktop** before moving on.
 
-- [x] B1 Scaffold + design tokens
-- [x] B2 Chassis bilingual with browse vs account split
-- [x] B3 Auth + onboarding + welcome confirmations + Turnstile + reset + change password
-- [ ] B4 Your World — Profile, Settings, Backpack
-- [ ] B5 Academy structure — sidebar drawers, sections
-- [ ] B6 Ten Start Here lessons with sandbox
-- [ ] B7 Progress wiring — record completions, auto-award badges
-- [ ] B8 Smoke test end-to-end
+- [x] **B1 — Scaffold + design tokens** ✅
+- [x] **B2 — Chassis bilingual with browse vs account split** ✅
+- [x] **B3 — Auth + onboarding + welcome confirmations + Turnstile + reset + change password** ✅ validated 2026-06-02 on iPhone Safari with user "Claudita" creating a fresh account, then re-validated on web desktop. Same flow, same result.
+- [ ] B4 — Your World — Profile, Settings, Backpack
+- [ ] B5 — Academy structure — sidebar drawers, sections
+- [ ] B6 — Ten Start Here lessons with sandbox
+- [ ] B7 — Progress wiring — record completions, auto-award badges
+- [ ] B8 — Smoke test end-to-end
+
+**Chassis = backbone of the product, holds together in both surfaces.**
+Everything from B4 onward is content on top of this foundation.
+
+Milestone snapshot of the validated B1–B3 state:
+`_iterations/2026-06-02-mvp1.0-chassis-validated-iphone-claudita.html`
 
 ## Working tree
 
