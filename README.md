@@ -40,17 +40,18 @@ AND web desktop** before moving on.
 - [x] **B1 — Scaffold + design tokens** ✅
 - [x] **B2 — Chassis bilingual with browse vs account split** ✅
 - [x] **B3 — Auth + onboarding + welcome confirmations + Turnstile + reset + change password** ✅ validated 2026-06-02 on iPhone Safari with user "Claudita" creating a fresh account, then re-validated on web desktop. Same flow, same result.
-- [ ] B4 — Your World — Profile, Settings, Backpack
+- [x] **B4 — Your World — Profile, Settings, Backpack** ✅ validated 2026-06-02 on iPhone Safari with a fresh signup after wiping the previous test accounts in Supabase. Old session zombies cleared correctly, new signup flowed smooth into the hub, Profile tab rendered with stats grid, badges and progress bars.
 - [ ] B5 — Academy structure — sidebar drawers, sections
 - [ ] B6 — Ten Start Here lessons with sandbox
 - [ ] B7 — Progress wiring — record completions, auto-award badges
 - [ ] B8 — Smoke test end-to-end
 
-**Chassis = backbone of the product, holds together in both surfaces.**
-Everything from B4 onward is content on top of this foundation.
+**Half the build is closed. The backbone (chassis + Your World) is solid.**
+Everything from B5 onward is the academy content the user actually came for.
 
-Milestone snapshot of the validated B1–B3 state:
-`_iterations/2026-06-02-mvp1.0-chassis-validated-iphone-claudita.html`
+Milestone snapshots:
+- `_iterations/2026-06-02-mvp1.0-chassis-validated-iphone-claudita.html` — B1–B3 chassis
+- `_iterations/2026-06-02-mvp1.0-b4-your-world-validated-iphone.html` — B1–B4 backbone
 
 ## Working tree
 
