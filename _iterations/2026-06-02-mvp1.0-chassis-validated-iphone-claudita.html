@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
+<title>WoGL Academy — Learn GLSL from zero</title>
+
+<!-- ═══════════════════════════════════════
+     WoGL — World of GL
+     wogl.io | worldofgl.com | mundogl.com
+     hello@wogl.io | hola@mundogl.com
+
+     Proprietary. All rights reserved.
+
+     WoGL Academy MVP 1.0
+     Full user experience: open academy → login → onboarding →
+     personalized world. Browse language (header toggle) and
+     account language (set at login) are two separate states.
+
+     This file is written from scratch — no patches from prior
+     iterations. Approved tier S content from the v1 academy is
+     referenced; structure, hierarchy and tokens are audited and
+     unified here.
+     ═══════════════════════════════════════ -->
+
+<!-- ─── SEO (deliberately preserved from indexed canonical) ─── -->
+<meta name="description" content="WoGL Academy — interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+<meta name="keywords" content="GLSL tutorial, WebGL shaders, learn GLSL, shader tutorial, fragment shader, creative coding, generative art, noise tutorial, SDF tutorial, Voronoi shader, GPU programming, interactive shaders, bilingual shader course, WoGL Academy">
+<meta name="author" content="WoGL — World of GL">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WoGL — World of GL">
+<meta property="og:title" content="WoGL Academy — Learn GLSL from zero">
+<meta property="og:description" content="Interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WoGL Academy — Learn GLSL from zero">
+<meta name="twitter:description" content="Interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&family=Allura&display=swap" rel="stylesheet">
+
+<!-- ─── Cloudflare Turnstile — env-aware sitekey ─── -->
+<script>
+  /* Local dev gets the always-pass test sitekey so we can iterate without
+     hitting the real verifier. Anything else uses the prod sitekey that's
+     already whitelisted in the Cloudflare dashboard for wogl.io / staging
+     / GitHub Pages preview. */
+  window.TURNSTILE_SITEKEY = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '1x00000000000000000000AA'
+    : '0x4AAAAAADbetMk8Z4E1X0nP';
+  window._turnstileWidgets = {};
+  window.onTurnstileLoad = function() {
+    if (!window.turnstile) return;
+    if (document.getElementById('turnstileAuth')) {
+      window._turnstileWidgets.auth = turnstile.render('#turnstileAuth', {
+        sitekey: window.TURNSTILE_SITEKEY, theme: 'dark',
+        callback: function(token) { window._tokenAuth = token; }
+      });
+    }
+    if (document.getElementById('turnstileReset')) {
+      window._turnstileWidgets.reset = turnstile.render('#turnstileReset', {
+        sitekey: window.TURNSTILE_SITEKEY, theme: 'dark',
+        callback: function(token) { window._tokenReset = token; }
+      });
+    }
+  };
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   Design tokens — single source of truth.
+   Every magic number lives here.
+   ═══════════════════════════════════════════════ */
+:root {
+  /* Backgrounds */
+  --bg: #06030f;
+  --bg-deep: #02010a;
+  --bg-card: rgba(255,255,255,0.025);
+  --bg-side: rgba(0,0,0,0.18);
+  --bg-header: rgba(0,0,0,0.30);
+
+  /* Ink (text) — every value above 0.55 contrast (WoGL ≥0.75 rule respected via solid colors). */
+  --ink: #f8f0e8;          /* headlines, primary text */
+  --ink-soft: #c0bcc0;     /* body text */
+  --ink-mute: #8a8690;     /* tertiary, labels */
+  --ink-faint: #5e5868;    /* disabled, hints */
+
+  /* Brand */
+  --gold: #d4ab78;
+  --gold-soft: rgba(212,171,120,0.18);
+  --copper: #a86458;
+
+  /* Accent — driven by chosen ship/theme; defaults to gold. */
+  --accent: var(--gold);
+  --accent-soft: rgba(212,171,120,0.15);
+
+  /* States */
+  --green: #8acc8a;
+  --red: #ff8585;
+
+  /* Lines / dividers */
+  --line: rgba(232,217,192,0.08);
+  --line-strong: rgba(232,217,192,0.18);
+
+  /* Fonts */
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-script: 'Allura', cursive;
+
+  /* Geometry */
+  --radius: 4px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* z layers — explicit hierarchy. */
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+}
+
+/* ─── Ship/theme palettes — applied via [data-theme="key"] ─── */
+[data-theme="nebula"] { --accent: #d080ff; --accent-soft: rgba(208,128,255,0.16); }
+[data-theme="lava"]   { --accent: #ffb060; --accent-soft: rgba(255,176,96,0.16); }
+[data-theme="aurora"] { --accent: #40e8c8; --accent-soft: rgba(64,232,200,0.16); }
+[data-theme="royal"]  { --accent: #809cff; --accent-soft: rgba(128,156,255,0.16); }
+[data-theme="ember"]  { --accent: #ff6040; --accent-soft: rgba(255,96,64,0.16); }
+[data-theme="void"]   { --accent: #a0a0b0; --accent-soft: rgba(160,160,176,0.16); }
+[data-theme="solar"]  { --accent: #ffd700; --accent-soft: rgba(255,215,0,0.16); }
+[data-theme="moss"]   { --accent: #80c860; --accent-soft: rgba(128,200,96,0.16); }
+
+/* ═══════════════════════════════════════════════
+   Reset + base
+   ═══════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse at top, var(--accent-soft) 0%, var(--bg-deep) 60%, var(--bg) 100%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ═══════════════════════════════════════════════
+   Header — persistent across academy + chassis.
+   Three regions: brand · browse-lang toggle · auth/profile action
+   ═══════════════════════════════════════════════ */
+.header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: var(--z-header);
+}
+.header-brand {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-display); font-weight: 300;
+  color: var(--ink); letter-spacing: 0.06em;
+  font-size: 16px;
+  text-decoration: none;
+}
+.header-brand .sub {
+  font-family: var(--font-mono);
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  font-weight: 400;
+}
+.header-spacer { flex: 1; }
+
+/* Browse-language toggle — quick access, always present. */
+.browse-lang {
+  display: flex; gap: 4px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.browse-lang button {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 6px 10px;
+  text-transform: uppercase;
+  transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 30px;
+}
+.browse-lang button.active {
+  color: var(--gold);
+  border-color: rgba(212,171,120,0.45);
+  background: var(--gold-soft);
+}
+.browse-lang button:hover:not(.active) {
+  color: var(--ink-soft);
+  border-color: rgba(232,217,192,0.30);
+}
+
+/* Auth action (Log in / user name) — same shape as browse-lang for visual cohesion. */
+.header-action {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  min-height: 34px;
+  transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+}
+.header-action:hover {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.header-action.logged {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.header-action.logged:hover {
+  background: var(--accent-soft);
+}
+
+/* ═══════════════════════════════════════════════
+   Main academy region (placeholder for Bloque 5-6)
+   ═══════════════════════════════════════════════ */
+.academy-shell {
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - 65px);
+  padding: clamp(28px, 4vw, 56px) clamp(20px, 4vw, 64px);
+}
+.academy-shell .placeholder {
+  margin: auto;
+  max-width: 580px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.academy-shell .placeholder h1 {
+  font-family: var(--font-display); font-weight: 300;
+  font-size: clamp(34px, 5vw, 52px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.academy-shell .placeholder h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.academy-shell .placeholder p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 28px;
+  max-width: 480px;
+  margin-left: auto; margin-right: auto;
+}
+.academy-shell .placeholder .build-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* ═══════════════════════════════════════════════
+   Modal scaffolding — shared by all modals.
+   ═══════════════════════════════════════════════ */
+.modal {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(2,1,10,0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.modal.active { display: flex; }
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(28px, 4vw, 44px);
+  max-width: 460px; width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 60px rgba(0,0,0,0.45);
+}
+.modal-logo {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: 26px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.modal-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 28px);
+  color: var(--ink);
+  line-height: 1.2;
+  margin-top: 22px;
+}
+.modal-subtitle {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-top: 10px;
+  max-width: 360px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ═══════════════════════════════════════════════
+   Account-language picker — appears after Log in click,
+   if the user hasn't yet decided which language they want
+   their account / chassis in. Browse language stays as
+   chosen in the header toggle.
+   ═══════════════════════════════════════════════ */
+.lang-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 28px;
+}
+.lang-pick {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 24px 14px;
+  color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 90px;
+}
+.lang-pick:hover {
+  border-color: rgba(212,171,120,0.45);
+  background: var(--gold-soft);
+}
+.lang-pick .flag {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+}
+.lang-pick .name {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+.lang-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 18px;
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════════
+   Form primitives — inputs, buttons, toggles, errors.
+   Shared across auth, onboarding, settings.
+   ═══════════════════════════════════════════════ */
+.modal-input {
+  width: 100%;
+  padding: 13px 16px;
+  margin-top: 14px;
+  background: rgba(212,165,116,0.06);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  outline: none;
+  transition: border-color .2s var(--ease);
+}
+.modal-input:focus { border-color: rgba(232,217,192,0.30); }
+.modal-input::placeholder { color: var(--ink-faint); }
+
+.modal-btn {
+  width: 100%;
+  padding: 14px 24px;
+  margin-top: 22px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--copper), var(--gold));
+  color: var(--bg-deep);
+  transition: opacity .2s var(--ease), transform .1s var(--ease);
+  min-height: 48px;
+}
+.modal-btn:hover { opacity: 0.88; }
+.modal-btn:active { transform: scale(0.98); }
+.modal-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+.modal-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+
+.modal-error, .modal-success {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 12px;
+  min-height: 16px;
+  line-height: 1.5;
+}
+.modal-error { color: var(--red); }
+.modal-success { color: var(--green); }
+
+.modal-toggle {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 18px;
+}
+.modal-toggle .link {
+  color: var(--gold);
+  cursor: pointer;
+  margin-left: 6px;
+  transition: opacity .2s;
+}
+.modal-toggle .link:hover { opacity: 0.85; text-decoration: underline; }
+
+.modal-forgot {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color .2s;
+}
+.modal-forgot:hover { color: var(--ink-mute); }
+
+.modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: none; border: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color .2s;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-step {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 20px;
+}
+
+.turnstile-slot {
+  display: flex; justify-content: center;
+  margin-top: 16px;
+  min-height: 65px;
+}
+
+/* ═══════════════════════════════════════════════
+   Gracias overlay — reward moment after signup
+   ═══════════════════════════════════════════════ */
+.gracias-list {
+  margin: 28px auto 0;
+  max-width: 360px;
+  text-align: left;
+}
+.gracias-list .item {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  padding: 6px 0 6px 24px;
+  position: relative;
+}
+.gracias-list .item::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding name — live availability feedback
+   ═══════════════════════════════════════════════ */
+.name-feedback {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 8px;
+  min-height: 16px;
+  line-height: 1.5;
+}
+.name-feedback.ok  { color: var(--green); }
+.name-feedback.err { color: var(--red); }
+
+/* ═══════════════════════════════════════════════
+   Onboarding ship — 4×2 grid of theme swatches
+   ═══════════════════════════════════════════════ */
+.ship-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+.ship-cell {
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 76px;
+}
+.ship-cell:hover { border-color: var(--line-strong); }
+.ship-cell.selected {
+  border-color: rgba(212,171,120,0.55);
+  background: var(--gold-soft);
+}
+.ship-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.ship-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════
+   Welcome confirmation — cinematic moments
+   ═══════════════════════════════════════════════ */
+.confirm-icon {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  margin-top: 8px;
+}
+.confirm-name {
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive — iPhone first, no fluff.
+   ═══════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .header { padding: 14px 16px; gap: 10px; }
+  .header-brand { font-size: 14px; }
+  .header-brand .sub { font-size: 10px; letter-spacing: 0.16em; }
+  .browse-lang button { padding: 5px 8px; font-size: 9px; min-height: 28px; }
+  .header-action { padding: 6px 12px; font-size: 10px; min-height: 30px; }
+
+  .modal { padding: 16px; }
+  .modal-card { padding: 26px 20px; }
+
+  .lang-grid { grid-template-columns: 1fr; gap: 10px; }
+  .lang-pick { flex-direction: row; justify-content: center; padding: 18px 14px; min-height: 64px; }
+
+  .ship-grid { grid-template-columns: repeat(2, 1fr); }
+  .ship-cell { min-height: 70px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     Header — persistent across academy + chassis
+     ═══════════════════════════════════════ -->
+<header class="header">
+  <a class="header-brand" href="#">WoGL <span class="sub" data-i18n="brandSub">academy</span></a>
+  <div class="header-spacer"></div>
+  <div class="browse-lang" id="browseLang" aria-label="Browse language">
+    <button data-lang="en" onclick="setBrowseLang('en')">EN</button>
+    <button data-lang="es" onclick="setBrowseLang('es')">ES</button>
+  </div>
+  <button class="header-action" id="headerAction" onclick="openLogin()" data-i18n="headerLogin">Log in</button>
+</header>
+
+<!-- ═══════════════════════════════════════
+     Academy shell — populated in Bloque 5-6.
+     Right now this is a placeholder so the
+     scaffolding (header + chassis modals) can
+     be validated standalone.
+     ═══════════════════════════════════════ -->
+<main class="academy-shell" id="academyShell">
+  <div class="placeholder">
+    <h1 data-i18n="placeholderTitle">A world of GL, <em>built lesson by lesson.</em></h1>
+    <p data-i18n="placeholderText">The academy lives here. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sixty interactive lessons that run real WebGL on your GPU. We are building this view next.</p>
+    <div class="build-note" data-i18n="placeholderNote">scaffolding · blocks 1–2 of 8 done</div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════
+     STEP 0 (only at login) — Account language picker
+     ═══════════════════════════════════════ -->
+<div class="modal" id="modalAccountLang">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" style="line-height:1.2;">
+      Pick your account language<br>
+      <span style="opacity:0.45;font-size:0.62em;font-style:italic;font-weight:300;">Elige el idioma de tu cuenta</span>
+    </div>
+    <div class="modal-subtitle">Your account, onboarding and Your World will live in this language. You can still switch the academy itself anytime from the header. — Tu cuenta, tu onboarding y Tu Mundo vivirán en este idioma. La academia la puedes cambiar cuando quieras desde el header.</div>
+    <div class="lang-grid">
+      <button class="lang-pick" onclick="pickAccountLang('en')">
+        <div class="flag">EN</div>
+        <div class="name">English</div>
+      </button>
+      <button class="lang-pick" onclick="pickAccountLang('es')">
+        <div class="flag">ES</div>
+        <div class="name">Español</div>
+      </button>
+    </div>
+    <div class="lang-note">a world of GL · un mundo de GL</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     AUTH modal — register / login (toggle in place)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalAuth">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalAuth')" data-i18n="authClose">close</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub" id="authSub" data-i18n="authSubRegister">your progress travels with you</div>
+
+    <div class="modal-title" id="authTitle" data-i18n="authTitleRegister">Sign up</div>
+    <div class="modal-subtitle" id="authBlurb" data-i18n="authBlurbRegister">Create your account to save your progress and unlock your ship.</div>
+
+    <input type="email" class="modal-input" id="authEmail" data-i18n-attr="placeholder:authEmailPh" placeholder="email" autocomplete="email">
+    <input type="password" class="modal-input" id="authPassword" data-i18n-attr="placeholder:authPasswordPhRegister" placeholder="password (min 8 chars)" autocomplete="current-password">
+
+    <div class="turnstile-slot"><div id="turnstileAuth"></div></div>
+    <div class="modal-error" id="authError"></div>
+
+    <button class="modal-btn" id="authSubmit" onclick="doAuth()" data-i18n="authSubmitRegister">SIGN UP</button>
+
+    <div class="modal-toggle">
+      <span id="authToggleMsg" data-i18n="authToggleToLoginMsg">Already have an account?</span>
+      <span class="link" id="authToggleBtn" onclick="toggleAuthMode()" data-i18n="authToggleToLoginBtn">Sign in</span>
+    </div>
+
+    <span class="modal-forgot" id="authForgotRow" onclick="openForgot()" data-i18n="authForgot" style="display:none;">Forgot your password?</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     GRACIAS overlay — after successful signup
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalGracias">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="graciasTitle">Thanks from the WoGL team</div>
+    <div class="modal-subtitle" data-i18n="graciasSubtitle">Your registration gives you access to:</div>
+    <div class="gracias-list">
+      <div class="item" data-i18n="graciasItem1">Progress that travels with you across sessions</div>
+      <div class="item" data-i18n="graciasItem2">Your permanent name and profile</div>
+      <div class="item" data-i18n="graciasItem3">Ship — exclusive theme for travelers</div>
+      <div class="item" data-i18n="graciasItem4">Badges every 10 lessons</div>
+      <div class="item" data-i18n="graciasItem5">Free updates and freebies as a founder</div>
+    </div>
+    <button class="modal-btn" onclick="afterGracias()" data-i18n="graciasCta">Start →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ONBOARDING · NAME (step 1 of 2)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalOnbName">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-step" data-i18n="onbStep1">step 1 of 2</div>
+    <div class="modal-title" data-i18n="onbNameTitle">Choose your name</div>
+    <div class="modal-subtitle" data-i18n="onbNameSubtitle">How fellow travelers will see you. Pick something that lasts — no one else can use it.</div>
+
+    <input type="text" class="modal-input" id="onbNameInput" data-i18n-attr="placeholder:onbNamePh" placeholder="your name" maxlength="20" autocomplete="off" style="text-align:center;">
+
+    <div class="name-feedback" id="nameFeedback"></div>
+
+    <button class="modal-btn" id="onbNameBtn" onclick="goToShip()" disabled data-i18n="onbNameNext">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ONBOARDING · SHIP (step 2 of 2)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalOnbShip">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-step" data-i18n="onbStep2">step 2 of 2</div>
+    <div class="modal-title" data-i18n="onbShipTitle">Pick your ship</div>
+    <div class="modal-subtitle" data-i18n="onbShipSubtitle">Your exclusive theme. You can change it anytime from Your World.</div>
+
+    <div class="ship-grid" id="shipGrid"></div>
+    <div class="modal-error" id="shipError"></div>
+
+    <button class="modal-btn" onclick="finishOnboarding()" data-i18n="onbShipStart">Start my journey →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     WELCOME confirmations — 4 cinematic moments
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalWelcomeSignup">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title">
+      <span class="confirm-name" id="welcomeSignupName">traveler</span>,
+    </div>
+    <div class="modal-subtitle" data-i18n="welcomeSignupText">Your world awaits.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeSignupBtn">Enter my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeBack">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title">
+      <span class="confirm-name" id="welcomeBackName">traveler</span>,
+    </div>
+    <div class="modal-subtitle" data-i18n="welcomeBackText">Your progress was waiting.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeBackBtn">Go to my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeReset">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title" data-i18n="welcomeResetTitle">Password updated.</div>
+    <div class="modal-subtitle" data-i18n="welcomeResetText">Your access is ready. Your world awaits.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeResetBtn">Enter my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeChanged">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title" data-i18n="welcomeChangedTitle">Password updated.</div>
+    <div class="modal-subtitle" data-i18n="welcomeChangedText">Your new password is active.</div>
+    <button class="modal-btn" onclick="hide('modalWelcomeChanged')" data-i18n="welcomeChangedBtn">Continue in my world →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FORGOT password · reset request (2 sub-steps)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalReset">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalReset')" data-i18n="authClose">close</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+
+    <div id="resetStep1">
+      <div class="modal-title" data-i18n="resetTitle">Reset password</div>
+      <div class="modal-subtitle" data-i18n="resetSubtitle">Enter your email and we'll send you a link to create a new password.</div>
+
+      <input type="email" class="modal-input" id="resetEmail" data-i18n-attr="placeholder:resetEmailPh" placeholder="email" autocomplete="email">
+      <div class="turnstile-slot"><div id="turnstileReset"></div></div>
+      <div class="modal-error" id="resetError"></div>
+
+      <button class="modal-btn" id="resetSubmit" onclick="doResetRequest()" data-i18n="resetSubmit">Send link</button>
+      <div class="modal-toggle">
+        <span class="link" onclick="hide('modalReset'); openAuthModal('login');" data-i18n="resetBackToLogin">Back to sign in</span>
+      </div>
+    </div>
+
+    <div id="resetStep2" style="display:none;">
+      <div class="modal-title" data-i18n="resetSentTitle">Link sent</div>
+      <div class="modal-subtitle" data-i18n="resetSentText">If your email is registered with WoGL, you'll receive a link in the next few minutes.</div>
+      <button class="modal-btn secondary" onclick="hide('modalReset')" data-i18n="resetSentClose">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NEW password (post recovery link)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalNewPwd">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="newPwdTitle">New password</div>
+    <div class="modal-subtitle" data-i18n="newPwdSubtitle">Pick a new password for your account.</div>
+
+    <input type="password" class="modal-input" id="newPwd1" data-i18n-attr="placeholder:newPwdPh" placeholder="new password" autocomplete="new-password">
+    <input type="password" class="modal-input" id="newPwd2" data-i18n-attr="placeholder:newPwdConfirmPh" placeholder="confirm password" autocomplete="new-password">
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);letter-spacing:0.06em;text-align:left;margin-top:10px;" data-i18n="newPwdMinHint">minimum 8 characters</div>
+    <div class="modal-error" id="newPwdError"></div>
+
+    <button class="modal-btn" id="newPwdSubmit" onclick="doSetNewPassword()" data-i18n="newPwdSubmit">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CHANGE password (logged in)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalChangePwd">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalChangePwd')" data-i18n="cpCancel">cancel</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="cpTitle">Change password</div>
+    <div class="modal-subtitle" data-i18n="cpSubtitle">For security, enter your current password before changing it.</div>
+
+    <input type="password" class="modal-input" id="cpCurrent" data-i18n-attr="placeholder:cpCurrentPh" placeholder="current password">
+    <input type="password" class="modal-input" id="cpNew1" data-i18n-attr="placeholder:cpNewPh" placeholder="new password">
+    <input type="password" class="modal-input" id="cpNew2" data-i18n-attr="placeholder:cpConfirmPh" placeholder="confirm new password">
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);letter-spacing:0.06em;text-align:left;margin-top:10px;" data-i18n="newPwdMinHint">minimum 8 characters</div>
+    <div class="modal-error" id="cpError"></div>
+
+    <button class="modal-btn" id="cpSubmit" onclick="doChangePassword()" data-i18n="cpSubmit">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     Supabase SDK + chassis logic
+     ═══════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- ═══════════════════════════════════════
+     i18n + chassis logic
+     ═══════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   Two language states, intentionally separate.
+
+   browseLang  — what the academy displays. User toggles
+                 from the header at any time. Default = 'en'.
+                 Stored in localStorage 'wogl-browse-lang'.
+
+   accountLang — language of the user's account: chassis,
+                 onboarding, Your World, settings, emails.
+                 Set ONCE at first Login (modalAccountLang)
+                 and can be changed later from Settings.
+                 Stored in localStorage 'wogl-account-lang'.
+
+   t(key) returns the translation for the language relevant
+   to the current surface. Academy surfaces read browseLang;
+   chassis surfaces read accountLang.
+   ═══════════════════════════════════════════════ */
+
+var I18N = {
+  en: {
+    /* Header */
+    brandSub: 'academy',
+    headerLogin: 'Log in',
+
+    /* Placeholder (will be replaced by real academy content in B5-6) */
+    placeholderTitle: 'A world of GL, <em>built lesson by lesson.</em>',
+    placeholderText: 'The academy lives here. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sixty interactive lessons that run real WebGL on your GPU. We are building this view next.',
+    placeholderNote: 'scaffolding · blocks 1–3 of 8 done',
+
+    /* Auth modal — register + login share most fields, only title/CTA flip */
+    authSubRegister: 'your progress travels with you',
+    authSubLogin: 'welcome back, traveler',
+    authTitleRegister: 'Sign up',
+    authTitleLogin: 'Sign in',
+    authBlurbRegister: 'Create your account to save your progress and unlock your ship.',
+    authBlurbLogin: 'Pick up where you left off.',
+    authEmailPh: 'email',
+    authPasswordPhRegister: 'password (min 8 chars)',
+    authPasswordPhLogin: 'password',
+    authSubmitRegister: 'SIGN UP',
+    authSubmitLogin: 'SIGN IN',
+    authToggleToLoginMsg: 'Already have an account?',
+    authToggleToLoginBtn: 'Sign in',
+    authToggleToRegisterMsg: 'New here?',
+    authToggleToRegisterBtn: 'Sign up',
+    authForgot: 'Forgot your password?',
+    authClose: 'close',
+    authErrFillBoth: 'Please fill in email and password.',
+    authErrMinChars: 'Minimum 8 characters.',
+    authErrTurnstile: 'Please wait for the security check to finish.',
+    authErrInvalid: 'Email or password is incorrect.',
+    authErrTaken: 'That email already has an account. Try signing in.',
+    authErrNetwork: 'Network error. Check your connection.',
+    authErrGeneric: 'Something went wrong. Please try again.',
+
+    /* Gracias — reward overlay after signup */
+    graciasTitle: 'Thanks from the WoGL team',
+    graciasSubtitle: 'Your registration gives you access to:',
+    graciasItem1: 'Progress that travels with you across sessions',
+    graciasItem2: 'Your permanent name and profile',
+    graciasItem3: 'Ship — exclusive theme for travelers',
+    graciasItem4: 'Badges every 10 lessons',
+    graciasItem5: 'Free updates and freebies as a founder',
+    graciasCta: 'Start →',
+
+    /* Onboarding · name */
+    onbStep1: 'step 1 of 2',
+    onbNameTitle: 'Choose your name',
+    onbNameSubtitle: 'How fellow travelers will see you. Pick something that lasts — no one else can use it.',
+    onbNamePh: 'your name',
+    onbNameNext: 'Next →',
+    onbNameErrChars: 'Letters, numbers and spaces only.',
+    onbNameErrTaken: 'That name is already taken.',
+    onbNameErrVerify: 'Verification error — reload and sign in again.',
+    onbNameAvailable: '✓ available',
+
+    /* Onboarding · ship */
+    onbStep2: 'step 2 of 2',
+    onbShipTitle: 'Pick your ship',
+    onbShipSubtitle: 'Your exclusive theme. You can change it anytime from Your World.',
+    onbShipStart: 'Start my journey →',
+    onbShipErrGeneric: 'Couldn\'t create your profile. Check your session and try again.',
+    onbShipErrFetch: 'Profile created but couldn\'t load. Please reload.',
+
+    /* Welcome confirmations */
+    welcomeSignupTitle: 'Welcome, ',
+    welcomeSignupText: 'Your world awaits.',
+    welcomeSignupBtn: 'Enter my world →',
+    welcomeBackTitle: 'Welcome back, ',
+    welcomeBackText: 'Your progress was waiting.',
+    welcomeBackBtn: 'Go to my world →',
+    welcomeResetTitle: 'Password updated.',
+    welcomeResetText: 'Your access is ready. Your world awaits.',
+    welcomeResetBtn: 'Enter my world →',
+    welcomeChangedTitle: 'Password updated.',
+    welcomeChangedText: 'Your new password is active.',
+    welcomeChangedBtn: 'Continue in my world →',
+
+    /* Forgot password / reset request */
+    resetTitle: 'Reset password',
+    resetSubtitle: 'Enter your email and we\'ll send you a link to create a new password.',
+    resetEmailPh: 'email',
+    resetSubmit: 'Send link',
+    resetSentTitle: 'Link sent',
+    resetSentText: 'If your email is registered with WoGL, you\'ll receive a link in the next few minutes. Check spam too.',
+    resetSentClose: 'Got it',
+    resetBackToLogin: 'Back to sign in',
+    resetErrFillEmail: 'Please enter your email.',
+    resetErrTurnstile: 'Please wait for the security check to finish.',
+
+    /* New password (post-recovery) */
+    newPwdTitle: 'New password',
+    newPwdSubtitle: 'Pick a new password for your account.',
+    newPwdPh: 'new password',
+    newPwdConfirmPh: 'confirm password',
+    newPwdMinHint: 'minimum 8 characters',
+    newPwdSubmit: 'Save',
+    newPwdErrFillBoth: 'Please fill in both fields.',
+    newPwdErrMin: 'Minimum 8 characters.',
+    newPwdErrMismatch: 'Passwords don\'t match.',
+    newPwdErrGeneric: 'Couldn\'t update. The link may have expired — request a new one.',
+
+    /* Change password (logged in) */
+    cpTitle: 'Change password',
+    cpSubtitle: 'For security, enter your current password before changing it.',
+    cpCurrentPh: 'current password',
+    cpNewPh: 'new password',
+    cpConfirmPh: 'confirm new password',
+    cpSubmit: 'Save',
+    cpCancel: 'cancel',
+    cpErrFillAll: 'Please fill in all three fields.',
+    cpErrMin: 'The new password must be at least 8 characters.',
+    cpErrMismatch: 'New passwords don\'t match.',
+    cpErrSame: 'The new password must be different from the current one.',
+    cpErrCurrent: 'Current password is incorrect.',
+    cpErrGeneric: 'Couldn\'t update. Please try again.'
+  },
+  es: {
+    /* Header */
+    brandSub: 'academy',
+    headerLogin: 'Entrar',
+
+    /* Placeholder */
+    placeholderTitle: 'Un mundo de GL, <em>lección por lección.</em>',
+    placeholderText: 'La academia vive aquí. Start Here, Patterns, Forces, Noise, Domain Warp, Motion — sesenta lecciones interactivas que corren WebGL real en tu GPU. Esta vista la estamos construyendo a continuación.',
+    placeholderNote: 'scaffolding · bloques 1–3 de 8 listos',
+
+    /* Auth */
+    authSubRegister: 'tu progreso viaja contigo',
+    authSubLogin: 'de vuelta, traveler',
+    authTitleRegister: 'Regístrate',
+    authTitleLogin: 'Entrar',
+    authBlurbRegister: 'Crea tu cuenta para guardar tu progreso y desbloquear tu nave.',
+    authBlurbLogin: 'Sigue donde te quedaste.',
+    authEmailPh: 'email',
+    authPasswordPhRegister: 'contraseña (mínimo 8 caracteres)',
+    authPasswordPhLogin: 'contraseña',
+    authSubmitRegister: 'REGÍSTRATE',
+    authSubmitLogin: 'ENTRAR',
+    authToggleToLoginMsg: '¿Ya tienes cuenta?',
+    authToggleToLoginBtn: 'Entrar',
+    authToggleToRegisterMsg: '¿Nuevo por aquí?',
+    authToggleToRegisterBtn: 'Regístrate',
+    authForgot: '¿Olvidaste tu contraseña?',
+    authClose: 'cerrar',
+    authErrFillBoth: 'Llena email y contraseña.',
+    authErrMinChars: 'Mínimo 8 caracteres.',
+    authErrTurnstile: 'Espera a que termine la verificación de seguridad.',
+    authErrInvalid: 'Email o contraseña incorrectos.',
+    authErrTaken: 'Ese email ya tiene cuenta. Intenta entrar.',
+    authErrNetwork: 'Error de red. Verifica tu conexión.',
+    authErrGeneric: 'Algo salió mal. Inténtalo de nuevo.',
+
+    /* Gracias */
+    graciasTitle: 'Gracias del equipo WoGL',
+    graciasSubtitle: 'Tu registro te da acceso a:',
+    graciasItem1: 'Progreso que viaja contigo entre sesiones',
+    graciasItem2: 'Tu nombre y perfil permanente',
+    graciasItem3: 'Nave — theme exclusivo para travelers',
+    graciasItem4: 'Badges por cada 10 lecciones',
+    graciasItem5: 'Free updates y freebies como founder',
+    graciasCta: 'Empezar →',
+
+    /* Onboarding · name */
+    onbStep1: 'paso 1 de 2',
+    onbNameTitle: 'Elige tu nombre',
+    onbNameSubtitle: 'Así te verán los demás travelers. Elige algo que dure — nadie más podrá usarlo.',
+    onbNamePh: 'tu nombre',
+    onbNameNext: 'Siguiente →',
+    onbNameErrChars: 'Solo letras, números y espacios.',
+    onbNameErrTaken: 'Ese nombre ya viaja con alguien más.',
+    onbNameErrVerify: 'Error verificando — recarga y vuelve a entrar.',
+    onbNameAvailable: '✓ disponible',
+
+    /* Onboarding · ship */
+    onbStep2: 'paso 2 de 2',
+    onbShipTitle: 'Elige tu nave',
+    onbShipSubtitle: 'Tu theme exclusivo. Lo puedes cambiar desde Tu Mundo cuando quieras.',
+    onbShipStart: 'Empezar mi viaje →',
+    onbShipErrGeneric: 'No se pudo crear el perfil. Verifica tu sesión y vuelve a intentar.',
+    onbShipErrFetch: 'Perfil creado pero no se pudo cargar. Recarga.',
+
+    /* Welcome confirmations */
+    welcomeSignupTitle: 'Bienvenido, ',
+    welcomeSignupText: 'Tu mundo te espera.',
+    welcomeSignupBtn: 'Entrar a mi mundo →',
+    welcomeBackTitle: 'Hola de nuevo, ',
+    welcomeBackText: 'Tu progreso te esperaba.',
+    welcomeBackBtn: 'Ir a mi mundo →',
+    welcomeResetTitle: 'Contraseña actualizada.',
+    welcomeResetText: 'Tu acceso quedó listo. Tu mundo te espera.',
+    welcomeResetBtn: 'Entrar a mi mundo →',
+    welcomeChangedTitle: 'Contraseña actualizada.',
+    welcomeChangedText: 'Tu nueva contraseña ya está activa.',
+    welcomeChangedBtn: 'Seguir en mi mundo →',
+
+    /* Forgot password / reset request */
+    resetTitle: 'Recuperar contraseña',
+    resetSubtitle: 'Escribe tu email y te enviamos un link para crear una nueva contraseña.',
+    resetEmailPh: 'email',
+    resetSubmit: 'Enviar link',
+    resetSentTitle: 'Link enviado',
+    resetSentText: 'Si tu email está registrado en WoGL, vas a recibir un link en los próximos minutos. Revisa también spam.',
+    resetSentClose: 'Listo',
+    resetBackToLogin: 'Volver a entrar',
+    resetErrFillEmail: 'Pon tu email.',
+    resetErrTurnstile: 'Espera a que termine la verificación de seguridad.',
+
+    /* New password (post-recovery) */
+    newPwdTitle: 'Nueva contraseña',
+    newPwdSubtitle: 'Elige una contraseña nueva para tu cuenta.',
+    newPwdPh: 'nueva contraseña',
+    newPwdConfirmPh: 'confirmar contraseña',
+    newPwdMinHint: 'mínimo 8 caracteres',
+    newPwdSubmit: 'Guardar',
+    newPwdErrFillBoth: 'Llena ambos campos.',
+    newPwdErrMin: 'Mínimo 8 caracteres.',
+    newPwdErrMismatch: 'Las contraseñas no coinciden.',
+    newPwdErrGeneric: 'No se pudo actualizar. El link puede haber expirado — pide uno nuevo.',
+
+    /* Change password */
+    cpTitle: 'Cambiar contraseña',
+    cpSubtitle: 'Por seguridad, escribe tu contraseña actual antes de cambiarla.',
+    cpCurrentPh: 'contraseña actual',
+    cpNewPh: 'nueva contraseña',
+    cpConfirmPh: 'confirmar nueva contraseña',
+    cpSubmit: 'Guardar',
+    cpCancel: 'cancelar',
+    cpErrFillAll: 'Llena los 3 campos.',
+    cpErrMin: 'La nueva contraseña debe tener mínimo 8 caracteres.',
+    cpErrMismatch: 'Las nuevas contraseñas no coinciden.',
+    cpErrSame: 'La nueva contraseña debe ser distinta a la actual.',
+    cpErrCurrent: 'La contraseña actual es incorrecta.',
+    cpErrGeneric: 'No se pudo actualizar. Inténtalo de nuevo.'
+  }
+};
+
+/* ─── Language state ─── */
+var browseLang  = localStorage.getItem('wogl-browse-lang')  || 'en';
+var accountLang = localStorage.getItem('wogl-account-lang') || ''; /* '' = not chosen yet */
+
+/* The surface in scope. Academy reads browseLang, chassis reads accountLang.
+   Until the user logs in, every surface reads browseLang. */
+function activeLang() {
+  return accountLang && _isChassisActive ? accountLang : browseLang;
+}
+
+/* Stub flag — chassis modals will flip this true when active.
+   Defined here so activeLang() never throws. */
+var _isChassisActive = false;
+
+function t(key, surface) {
+  var lang = (surface === 'chassis' && accountLang) ? accountLang : browseLang;
+  var dict = I18N[lang] || I18N.en;
+  return dict[key] !== undefined ? dict[key] : key;
+}
+
+function fmt(template, vars) {
+  if (!template) return '';
+  return Object.keys(vars || {}).reduce(function(s, k) {
+    return s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+  }, template);
+}
+
+/* Walk every [data-i18n] element and apply the right translation.
+   Academy elements get browseLang, chassis elements get accountLang
+   (or fall back to browseLang if account language hasn't been chosen). */
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var surface = el.closest('.chassis') ? 'chassis' : 'academy';
+    var val = t(key, surface);
+    if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+    else el.textContent = val;
+  });
+
+  /* Translatable attributes via data-i18n-attr="placeholder:key" */
+  document.querySelectorAll('[data-i18n-attr]').forEach(function(el) {
+    var surface = el.closest('.chassis') ? 'chassis' : 'academy';
+    (el.getAttribute('data-i18n-attr') || '').split(',').forEach(function(pair) {
+      var p = pair.split(':');
+      if (p.length === 2) el.setAttribute(p[0].trim(), t(p[1].trim(), surface));
+    });
+  });
+
+  /* Header toggle reflects browseLang only. */
+  document.querySelectorAll('.browse-lang button').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-lang') === browseLang);
+  });
+}
+
+function setBrowseLang(lang) {
+  if (lang !== 'en' && lang !== 'es') return;
+  browseLang = lang;
+  localStorage.setItem('wogl-browse-lang', lang);
+  document.documentElement.setAttribute('lang', lang);
+  applyLang();
+}
+
+function pickAccountLang(lang) {
+  if (lang !== 'en' && lang !== 'es') return;
+  accountLang = lang;
+  localStorage.setItem('wogl-account-lang', lang);
+  hide('modalAccountLang');
+  /* Next bloque: open the auth modal in the chosen account language. */
+  openAuthModal();
+}
+
+function openLogin() {
+  /* If the user has never set their account language, ask first.
+     Otherwise jump straight to auth. */
+  if (!accountLang) show('modalAccountLang');
+  else openAuthModal();
+}
+
+/* ═══════════════════════════════════════════════
+   Supabase client
+   ═══════════════════════════════════════════════ */
+var _sb = supabase.createClient(
+  'https://ubvtspvlrukuayucpnwl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidnRzcHZscnVrdWF5dWNwbndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzcwMTIsImV4cCI6MjA5MzY1MzAxMn0.Dav1A7ksKnnuv41Z8kGlMumbkvqF6UaXbGSEqpLtU4o'
+);
+
+/* ═══════════════════════════════════════════════
+   Auth state
+   ═══════════════════════════════════════════════ */
+var _user = null;
+var _profile = null;
+var _authMode = 'register';   /* 'register' | 'login' */
+var _onbName = '';
+var _onbShip = 'nebula';
+var _nameCheckTimeout = null;
+
+/* Ship catalog — shared by onboarding picker and Settings (in B4). */
+var SHIPS = [
+  { key:'nebula', name:'Nebula', color:'#d080ff' },
+  { key:'lava',   name:'Lava',   color:'#ffb060' },
+  { key:'aurora', name:'Aurora', color:'#40e8c8' },
+  { key:'royal',  name:'Royal',  color:'#809cff' },
+  { key:'ember',  name:'Ember',  color:'#ff6040' },
+  { key:'void',   name:'Void',   color:'#a0a0b0' },
+  { key:'solar',  name:'Solar',  color:'#ffd700' },
+  { key:'moss',   name:'Moss',   color:'#80c860' }
+];
+
+function setErr(id, msg) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg || '';
+}
+
+/* ═══════════════════════════════════════════════
+   Auth modal — open / close / mode toggle
+   ═══════════════════════════════════════════════ */
+function openAuthModal(mode) {
+  if (mode) _authMode = mode;
+  _isChassisActive = true;
+  show('modalAuth');
+  updateAuthCopy();
+  /* Reset turnstile if it had a stale token. */
+  if (window.turnstile && window._turnstileWidgets.auth) {
+    window.turnstile.reset(window._turnstileWidgets.auth);
+    window._tokenAuth = null;
+  }
+  setTimeout(function() {
+    var el = document.getElementById('authEmail');
+    if (el) el.focus();
+  }, 100);
+}
+
+function toggleAuthMode() {
+  _authMode = (_authMode === 'register') ? 'login' : 'register';
+  setErr('authError', '');
+  updateAuthCopy();
+  if (window.turnstile && window._turnstileWidgets.auth) {
+    window.turnstile.reset(window._turnstileWidgets.auth);
+    window._tokenAuth = null;
+  }
+}
+
+/* Keep auth title / blurb / button / placeholder / toggle in sync
+   with both _authMode and the account language. */
+function updateAuthCopy() {
+  var isReg = (_authMode === 'register');
+  var sfx = isReg ? 'Register' : 'Login';
+
+  var sub      = document.getElementById('authSub');
+  var title    = document.getElementById('authTitle');
+  var blurb    = document.getElementById('authBlurb');
+  var submit   = document.getElementById('authSubmit');
+  var toggleMs = document.getElementById('authToggleMsg');
+  var toggleBt = document.getElementById('authToggleBtn');
+  var pass     = document.getElementById('authPassword');
+  var forgot   = document.getElementById('authForgotRow');
+
+  if (sub)      sub.setAttribute('data-i18n', 'authSub' + sfx);
+  if (title)    title.setAttribute('data-i18n', 'authTitle' + sfx);
+  if (blurb)    blurb.setAttribute('data-i18n', 'authBlurb' + sfx);
+  if (submit)   submit.setAttribute('data-i18n', 'authSubmit' + sfx);
+  if (toggleMs) toggleMs.setAttribute('data-i18n', isReg ? 'authToggleToLoginMsg' : 'authToggleToRegisterMsg');
+  if (toggleBt) toggleBt.setAttribute('data-i18n', isReg ? 'authToggleToLoginBtn' : 'authToggleToRegisterBtn');
+  if (pass)     pass.setAttribute('data-i18n-attr', 'placeholder:' + (isReg ? 'authPasswordPhRegister' : 'authPasswordPhLogin'));
+  if (forgot)   forgot.style.display = isReg ? 'none' : 'block';
+
+  applyLang();
+}
+
+/* ═══════════════════════════════════════════════
+   doAuth — signUp or signInWithPassword + Turnstile
+   ═══════════════════════════════════════════════ */
+async function doAuth() {
+  var email = document.getElementById('authEmail').value.trim();
+  var password = document.getElementById('authPassword').value;
+  var btn = document.getElementById('authSubmit');
+
+  setErr('authError', '');
+
+  if (!email || !password) { setErr('authError', t('authErrFillBoth', 'chassis')); return; }
+  if (_authMode === 'register' && password.length < 8) { setErr('authError', t('authErrMinChars', 'chassis')); return; }
+  if (!window._tokenAuth) { setErr('authError', t('authErrTurnstile', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+
+  var result;
+  try {
+    if (_authMode === 'register') {
+      result = await _sb.auth.signUp({
+        email: email, password: password,
+        options: { captchaToken: window._tokenAuth }
+      });
+    } else {
+      result = await _sb.auth.signInWithPassword({
+        email: email, password: password,
+        options: { captchaToken: window._tokenAuth }
+      });
+    }
+  } catch (err) {
+    btn.disabled = false; btn.style.opacity = '1';
+    setErr('authError', t('authErrNetwork', 'chassis'));
+    return;
+  }
+
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (result.error) {
+    setErr('authError', parseAuthError(result.error));
+    if (window.turnstile && window._turnstileWidgets.auth) {
+      window.turnstile.reset(window._turnstileWidgets.auth);
+      window._tokenAuth = null;
+    }
+    return;
+  }
+
+  if (!result.data.session) {
+    setErr('authError', t('authErrGeneric', 'chassis'));
+    return;
+  }
+
+  _user = result.data.user;
+
+  if (_authMode === 'register') {
+    /* New account → gracias → name → ship → welcome */
+    hide('modalAuth');
+    show('modalGracias');
+  } else {
+    /* Existing account → check profile and route. */
+    hide('modalAuth');
+    await routeReturningUser();
+  }
+}
+
+function parseAuthError(error) {
+  var msg = (error && error.message ? error.message : '').toLowerCase();
+  if (msg.indexOf('already registered') !== -1 || msg.indexOf('user already registered') !== -1) {
+    return t('authErrTaken', 'chassis');
+  }
+  if (msg.indexOf('invalid login') !== -1 || msg.indexOf('invalid credentials') !== -1) {
+    return t('authErrInvalid', 'chassis');
+  }
+  return t('authErrGeneric', 'chassis');
+}
+
+/* ═══════════════════════════════════════════════
+   Returning user route — fetch profile, decide which
+   welcome confirmation to show.
+   ═══════════════════════════════════════════════ */
+async function routeReturningUser() {
+  var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+  if (pr.data) {
+    _profile = pr.data;
+    document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+    document.getElementById('welcomeBackName').textContent = _profile.display_name || 'traveler';
+    show('modalWelcomeBack');
+  } else {
+    /* User somehow has a session but no profile — resume onboarding. */
+    show('modalOnbName');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Gracias → onboarding
+   ═══════════════════════════════════════════════ */
+function afterGracias() {
+  hide('modalGracias');
+  show('modalOnbName');
+  setTimeout(function() {
+    var el = document.getElementById('onbNameInput');
+    if (el) el.focus();
+  }, 100);
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding — name (live availability check)
+   ═══════════════════════════════════════════════ */
+function wireNameCheck() {
+  var input = document.getElementById('onbNameInput');
+  var btn   = document.getElementById('onbNameBtn');
+  var fb    = document.getElementById('nameFeedback');
+  if (!input || !btn || !fb) {
+    console.warn('[wireNameCheck] elements missing — input:', !!input, 'btn:', !!btn, 'fb:', !!fb);
+    return;
+  }
+  console.log('[wireNameCheck] listener mounted');
+
+  function runCheck() {
+    var val = input.value.trim();
+    clearTimeout(_nameCheckTimeout);
+
+    /* Defensive philosophy: as soon as the format is valid we let
+       the user advance. The live RPC is feedback-only — when it
+       responds we update the feedback line, and init_profile on
+       finish acts as the authoritative server-side validator.
+       This unblocks iPhone Safari cases where the listener fires
+       but the RPC sometimes hangs silently. */
+
+    if (val.length < 2) {
+      fb.textContent = '';
+      fb.className = 'name-feedback';
+      _onbName = '';
+      btn.disabled = true;
+      return;
+    }
+    if (!/^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑüÜ ]+$/.test(val)) {
+      fb.textContent = t('onbNameErrChars', 'chassis');
+      fb.className = 'name-feedback err';
+      _onbName = '';
+      btn.disabled = true;
+      return;
+    }
+
+    /* Format is valid — user can already proceed. */
+    _onbName = val;
+    btn.disabled = false;
+    fb.textContent = (accountLang === 'es') ? 'verificando…' : 'checking…';
+    fb.className = 'name-feedback';
+
+    /* Safety net: if the RPC hangs forever and never updates this
+       feedback line, clear the "checking…" zombie after 3 seconds
+       so the user isn't staring at gray text indefinitely. The
+       button stays enabled either way. */
+    var hangGuard = setTimeout(function() {
+      if (fb.textContent === ((accountLang === 'es') ? 'verificando…' : 'checking…')) {
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+      }
+    }, 3000);
+
+    _nameCheckTimeout = setTimeout(async function() {
+      console.log('[wireNameCheck] calling check_name_available for:', val);
+      var res;
+      try {
+        res = await _sb.rpc('check_name_available', { name: val });
+      } catch (e) {
+        console.error('[wireNameCheck] RPC threw — keeping advance enabled:', e);
+        clearTimeout(hangGuard);
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+        return;
+      }
+      clearTimeout(hangGuard);
+      console.log('[wireNameCheck] RPC result:', res);
+
+      /* If the user kept typing while the RPC was in flight, the
+         response is stale — ignore it. */
+      if (input.value.trim() !== val) return;
+
+      if (res.error) {
+        console.error('[wireNameCheck] RPC error — keeping advance enabled:', res.error);
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+        return;
+      }
+      if (res.data === false) {
+        fb.textContent = t('onbNameErrTaken', 'chassis');
+        fb.className = 'name-feedback err';
+        _onbName = '';
+        btn.disabled = true;
+      } else if (res.data === true) {
+        fb.textContent = t('onbNameAvailable', 'chassis');
+        fb.className = 'name-feedback ok';
+      } else {
+        /* null / undefined — RPC didn't tell us either way. Keep advance enabled. */
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+      }
+    }, 450);
+  }
+
+  /* Hook multiple events for iOS Safari coverage:
+     - input: standard typing
+     - keyup: catches autocomplete / paste edge cases
+     - change: catches blur-triggered changes
+  */
+  input.addEventListener('input', runCheck);
+  input.addEventListener('keyup', runCheck);
+  input.addEventListener('change', runCheck);
+}
+
+function goToShip() {
+  if (!_onbName) return;
+  hide('modalOnbName');
+  renderShipGrid();
+  show('modalOnbShip');
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding — ship (theme picker + live preview)
+   ═══════════════════════════════════════════════ */
+function renderShipGrid() {
+  var grid = document.getElementById('shipGrid');
+  grid.innerHTML = '';
+  SHIPS.forEach(function(s) {
+    var cell = document.createElement('div');
+    cell.className = 'ship-cell' + (s.key === _onbShip ? ' selected' : '');
+    cell.setAttribute('data-ship', s.key);
+    cell.innerHTML = '<div class="ship-dot" style="background:' + s.color + ';"></div><div class="ship-name">' + s.name + '</div>';
+    cell.addEventListener('click', function() {
+      _onbShip = s.key;
+      document.querySelectorAll('.ship-cell').forEach(function(c) { c.classList.remove('selected'); });
+      cell.classList.add('selected');
+      document.body.setAttribute('data-theme', s.key);
+    });
+    grid.appendChild(cell);
+  });
+  document.body.setAttribute('data-theme', _onbShip);
+}
+
+async function finishOnboarding() {
+  setErr('shipError', '');
+  console.log('[finishOnboarding] init_profile', { p_name: _onbName, p_theme: _onbShip });
+
+  var r = await _sb.rpc('init_profile', { p_name: _onbName, p_theme: _onbShip });
+  if (r.error) {
+    console.error('[finishOnboarding] init_profile error:', r.error);
+    var msg = (r.error.message || '').toLowerCase();
+    /* If the server-side rejection is about the name being taken,
+       send the user back to the name step with the precise message. */
+    if (msg.indexOf('name') !== -1 && (msg.indexOf('taken') !== -1 || msg.indexOf('unique') !== -1 || msg.indexOf('duplicate') !== -1)) {
+      hide('modalOnbShip');
+      show('modalOnbName');
+      var fb = document.getElementById('nameFeedback');
+      var btn = document.getElementById('onbNameBtn');
+      if (fb) { fb.textContent = t('onbNameErrTaken', 'chassis'); fb.className = 'name-feedback err'; }
+      if (btn) btn.disabled = true;
+      _onbName = '';
+      var inp = document.getElementById('onbNameInput');
+      if (inp) inp.focus();
+      return;
+    }
+    setErr('shipError', t('onbShipErrGeneric', 'chassis'));
+    return;
+  }
+
+  var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+  if (pr.error || !pr.data) {
+    console.error('[finishOnboarding] profile fetch error:', pr.error);
+    setErr('shipError', t('onbShipErrFetch', 'chassis'));
+    return;
+  }
+  _profile = pr.data;
+  document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+  document.getElementById('welcomeSignupName').textContent = _profile.display_name || 'traveler';
+  hide('modalOnbShip');
+  show('modalWelcomeSignup');
+}
+
+/* ═══════════════════════════════════════════════
+   Enter Your World — placeholder until Bloque 4
+   ═══════════════════════════════════════════════ */
+function enterYourWorld() {
+  hide('modalWelcomeSignup');
+  hide('modalWelcomeBack');
+  hide('modalWelcomeReset');
+  _isChassisActive = false;
+  /* B4 will replace this with the real Mi Mundo panel. */
+  var name = _profile ? _profile.display_name : 'traveler';
+  console.log('[B4 pending] enter Your World for', name);
+  /* Header reflects logged-in state. */
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = name + ' →';
+    headerBtn.classList.add('logged');
+    headerBtn.onclick = function() { alert('Your World panel is built next (Bloque 4). Logged in as ' + name); };
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Forgot / reset password
+   ═══════════════════════════════════════════════ */
+function openForgot() {
+  hide('modalAuth');
+  document.getElementById('resetStep1').style.display = 'block';
+  document.getElementById('resetStep2').style.display = 'none';
+  document.getElementById('resetEmail').value = '';
+  setErr('resetError', '');
+  show('modalReset');
+  if (window.turnstile && window._turnstileWidgets.reset) {
+    window.turnstile.reset(window._turnstileWidgets.reset);
+    window._tokenReset = null;
+  }
+}
+
+async function doResetRequest() {
+  var email = document.getElementById('resetEmail').value.trim();
+  var btn = document.getElementById('resetSubmit');
+  setErr('resetError', '');
+  if (!email) { setErr('resetError', t('resetErrFillEmail', 'chassis')); return; }
+  if (!window._tokenReset) { setErr('resetError', t('resetErrTurnstile', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+  var redirectUrl = window.location.origin + window.location.pathname + '?recovery=true';
+  await _sb.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectUrl,
+    captchaToken: window._tokenReset
+  });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  document.getElementById('resetStep1').style.display = 'none';
+  document.getElementById('resetStep2').style.display = 'block';
+
+  if (window.turnstile && window._turnstileWidgets.reset) {
+    window.turnstile.reset(window._turnstileWidgets.reset);
+    window._tokenReset = null;
+  }
+}
+
+async function doSetNewPassword() {
+  var p1 = document.getElementById('newPwd1').value;
+  var p2 = document.getElementById('newPwd2').value;
+  var btn = document.getElementById('newPwdSubmit');
+  setErr('newPwdError', '');
+
+  if (!p1 || !p2)         { setErr('newPwdError', t('newPwdErrFillBoth', 'chassis')); return; }
+  if (p1.length < 8)      { setErr('newPwdError', t('newPwdErrMin', 'chassis'));      return; }
+  if (p1 !== p2)          { setErr('newPwdError', t('newPwdErrMismatch', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+  var r = await _sb.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (r.error) { setErr('newPwdError', t('newPwdErrGeneric', 'chassis')); return; }
+
+  hide('modalNewPwd');
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  if (_user) {
+    var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+    if (pr.data) _profile = pr.data;
+  }
+  show('modalWelcomeReset');
+}
+
+/* ═══════════════════════════════════════════════
+   Change password (logged-in)
+   ═══════════════════════════════════════════════ */
+function openChangePassword() {
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew1').value = '';
+  document.getElementById('cpNew2').value = '';
+  setErr('cpError', '');
+  show('modalChangePwd');
+}
+
+async function doChangePassword() {
+  var cur = document.getElementById('cpCurrent').value;
+  var p1  = document.getElementById('cpNew1').value;
+  var p2  = document.getElementById('cpNew2').value;
+  var btn = document.getElementById('cpSubmit');
+  setErr('cpError', '');
+
+  if (!cur || !p1 || !p2) { setErr('cpError', t('cpErrFillAll', 'chassis'));  return; }
+  if (p1.length < 8)      { setErr('cpError', t('cpErrMin', 'chassis'));      return; }
+  if (p1 !== p2)          { setErr('cpError', t('cpErrMismatch', 'chassis')); return; }
+  if (cur === p1)         { setErr('cpError', t('cpErrSame', 'chassis'));     return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+
+  var verify = await _sb.auth.signInWithPassword({ email: _user.email, password: cur });
+  if (verify.error) {
+    btn.disabled = false; btn.style.opacity = '1';
+    setErr('cpError', t('cpErrCurrent', 'chassis'));
+    return;
+  }
+  var upd = await _sb.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (upd.error) { setErr('cpError', t('cpErrGeneric', 'chassis')); return; }
+
+  hide('modalChangePwd');
+  show('modalWelcomeChanged');
+}
+
+/* ═══════════════════════════════════════════════
+   Logout — clears session and resets header
+   ═══════════════════════════════════════════════ */
+async function doLogout() {
+  await _sb.auth.signOut();
+  _user = null;
+  _profile = null;
+  document.body.removeAttribute('data-theme');
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = t('headerLogin', 'academy');
+    headerBtn.classList.remove('logged');
+    headerBtn.onclick = function() { openLogin(); };
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Auth state listener — handles recovery link, returning users
+   ═══════════════════════════════════════════════ */
+_sb.auth.onAuthStateChange(async function(event, session) {
+  if (event === 'PASSWORD_RECOVERY') {
+    _user = session ? session.user : null;
+    _isChassisActive = true;
+    applyLang();
+    show('modalNewPwd');
+    return;
+  }
+  if (event === 'SIGNED_IN' && session) {
+    _user = session.user;
+    /* If a modal flow is already driving this, let it finish.
+       Otherwise, this is a silent restore from a stored session. */
+    var midFlow =
+      document.getElementById('modalAuth').classList.contains('active') ||
+      document.getElementById('modalGracias').classList.contains('active') ||
+      document.getElementById('modalOnbName').classList.contains('active') ||
+      document.getElementById('modalOnbShip').classList.contains('active') ||
+      document.getElementById('modalNewPwd').classList.contains('active');
+    if (!midFlow) {
+      var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+      if (pr.data) {
+        _profile = pr.data;
+        document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+        var headerBtn = document.getElementById('headerAction');
+        if (headerBtn) {
+          headerBtn.textContent = _profile.display_name + ' →';
+          headerBtn.classList.add('logged');
+          headerBtn.onclick = function() { alert('Your World panel is built next (Bloque 4). Logged in as ' + _profile.display_name); };
+        }
+      }
+    }
+  }
+});
+
+/* Detect recovery URL parameter on first load. */
+if (new URLSearchParams(window.location.search).get('recovery') === 'true') {
+  _isChassisActive = true;
+  show('modalNewPwd');
+}
+
+/* ═══════════════════════════════════════════════
+   Mount onboarding name listener
+   Some browsers/iOS Safari may have already fired DOMContentLoaded
+   by the time we get here (this script lives at the end of body and
+   is parsed sync). Check state and call directly if so.
+   ═══════════════════════════════════════════════ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', wireNameCheck);
+} else {
+  wireNameCheck();
+}
+
+/* ─── Modal helpers ─── */
+function show(id) { var el = document.getElementById(id); if (el) el.classList.add('active'); }
+function hide(id) { var el = document.getElementById(id); if (el) el.classList.remove('active'); }
+
+/* ─── Boot ─── */
+document.documentElement.setAttribute('lang', browseLang);
+applyLang();
+
+/* Expose for console tinkering during the build. */
+window.WOGL = {
+  setBrowseLang: setBrowseLang,
+  pickAccountLang: pickAccountLang,
+  get browseLang() { return browseLang; },
+  get accountLang() { return accountLang; }
+};
+</script>
+
+</body>
+</html>
