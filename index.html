@@ -581,6 +581,461 @@ a { color: var(--accent); text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
+   Your World panel — Profile + Settings + Backpack
+   ═══════════════════════════════════════════════ */
+.world {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-overlay);
+  background:
+    radial-gradient(ellipse at top, var(--accent-soft) 0%, var(--bg-deep) 55%, var(--bg) 100%),
+    var(--bg);
+  flex-direction: column;
+  overflow: hidden;
+}
+.world.active { display: flex; }
+
+/* Your World header — distinct from the academy header,
+   shows the back button + traveler tag. */
+.world-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.world-back {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  min-height: 34px;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+.world-back:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.world-traveler {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  min-height: 28px;
+  display: flex; align-items: center;
+}
+
+.world-app {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  overflow: hidden;
+}
+
+.world-side {
+  border-right: 1px solid var(--line);
+  background: var(--bg-side);
+  padding: 22px 0 64px;
+  overflow-y: auto;
+}
+.world-side-item {
+  padding: 14px 24px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .2s var(--ease);
+}
+.world-side-item:hover:not(.disabled):not(.active) {
+  background: rgba(232,217,192,0.025);
+  border-left-color: rgba(232,217,192,0.20);
+}
+.world-side-item.active {
+  background: linear-gradient(90deg, var(--gold-soft), transparent 70%);
+  border-left-color: var(--gold);
+}
+.world-side-item.disabled { cursor: default; opacity: 0.45; }
+.world-side-item-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.world-side-item.active .world-side-item-title { color: var(--gold); }
+.world-side-item-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.world-main {
+  padding: clamp(28px, 3vw, 48px) clamp(24px, 4vw, 56px) 64px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Profile tab — greeting + stats + badges + progress */
+.world-greeting {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 30px);
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.world-greeting em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.world-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  display: block;
+  margin-bottom: 36px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 40px;
+}
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  transition: border-color .2s var(--ease);
+}
+.stat-card:hover { border-color: var(--line-strong); }
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-mute);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-value .of {
+  font-size: 16px;
+  color: var(--ink-mute);
+  font-weight: 300;
+  margin-left: 2px;
+}
+.stat-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.badge-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 40px;
+}
+.badge-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 13px;
+  border: 1px solid rgba(232,217,192,0.12);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  transition: all .2s var(--ease);
+}
+.badge-pill.locked {
+  color: var(--ink-faint);
+  opacity: 0.55;
+}
+.badge-pill.founding {
+  color: #e8c89a;
+  border-color: rgba(212,168,160,0.40);
+  background: rgba(212,165,116,0.06);
+}
+
+.progress-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.progress-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  width: 120px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(212,168,160,0.14);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s var(--ease);
+}
+.progress-pct {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  min-width: 42px;
+  text-align: right;
+  letter-spacing: 0.04em;
+}
+
+/* Settings tab */
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-section:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.settings-current {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+.settings-input {
+  width: 100%; max-width: 380px;
+  padding: 12px 16px;
+  background: rgba(212,165,116,0.06);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  letter-spacing: 0.04em;
+  transition: border-color .2s var(--ease);
+  display: block;
+  margin-bottom: 8px;
+  min-height: 44px;
+}
+.settings-input:focus { border-color: rgba(232,217,192,0.30); }
+.settings-input::placeholder { color: var(--ink-faint); }
+.settings-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity .2s var(--ease);
+  margin-top: 8px;
+  background: linear-gradient(135deg, var(--copper), var(--gold));
+  color: var(--bg-deep);
+  min-height: 44px;
+}
+.settings-btn.outline {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+.settings-btn:disabled { opacity: 0.35; cursor: default; }
+.settings-btn:not(:disabled):hover { opacity: 0.88; }
+.settings-note {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+.settings-error,
+.settings-success {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 8px;
+  min-height: 16px;
+  letter-spacing: 0.04em;
+}
+.settings-error { color: var(--red); }
+.settings-success { color: var(--green); }
+
+.world-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 380px;
+  margin-top: 8px;
+}
+.world-theme-card {
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 66px;
+}
+.world-theme-card:hover { border-color: var(--line-strong); }
+.world-theme-card.selected {
+  border-color: rgba(212,171,120,0.55);
+  background: var(--gold-soft);
+}
+.world-theme-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.world-theme-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.danger-zone {
+  display: flex; gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.logout-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  cursor: pointer;
+  letter-spacing: 0.10em;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  text-transform: uppercase;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+  min-height: 44px;
+}
+.logout-btn:hover {
+  color: var(--ink);
+  border-color: rgba(232,217,192,0.30);
+}
+.danger-btn {
+  padding: 10px 20px;
+  border: 1px solid rgba(255,107,107,0.35);
+  border-radius: var(--radius);
+  background: rgba(255,107,107,0.05);
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  min-height: 44px;
+}
+.danger-btn:disabled { opacity: 0.35; cursor: default; }
+.danger-btn:not(:disabled):hover {
+  background: rgba(255,107,107,0.12);
+  border-color: rgba(255,107,107,0.55);
+}
+
+/* Backpack tab — empty state */
+.backpack-empty {
+  text-align: center;
+  padding: 64px 24px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.backpack-empty .icon {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+.backpack-empty h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.backpack-empty p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* Delete account modal */
+.delete-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  background: rgba(2,1,10,0.78);
+  backdrop-filter: blur(10px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.delete-modal.active { display: flex; }
+.delete-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,107,107,0.30);
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 460px; width: 100%;
+  text-align: center;
+}
+.delete-card h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  color: #ff9c9c;
+  margin-bottom: 14px;
+}
+.delete-card p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+.delete-actions {
+  display: flex; gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ═══════════════════════════════════════════════
    Welcome confirmation — cinematic moments
    ═══════════════════════════════════════════════ */
 .confirm-icon {
@@ -613,6 +1068,52 @@ a { color: var(--accent); text-decoration: none; }
 
   .ship-grid { grid-template-columns: repeat(2, 1fr); }
   .ship-cell { min-height: 70px; }
+
+  /* Your World goes single column with the sidebar repurposed as a
+     horizontal tab strip on top. Mirrors the academy chassis pattern. */
+  .world-app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .world-side {
+    display: flex; flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0; overflow-x: auto; overflow-y: hidden;
+  }
+  .world-side-item {
+    flex: 1 0 auto;
+    padding: 12px 16px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    text-align: center;
+  }
+  .world-side-item:hover:not(.disabled):not(.active) {
+    border-left-color: transparent;
+    border-bottom-color: rgba(232,217,192,0.20);
+  }
+  .world-side-item.active {
+    background: linear-gradient(180deg, var(--gold-soft), transparent 70%);
+    border-left-color: transparent;
+    border-bottom-color: var(--gold);
+  }
+  .world-side-item-title { font-size: 12px; margin-bottom: 2px; }
+  .world-side-item-sub { font-size: 10px; }
+
+  .world-main { padding: 24px 18px 64px; }
+  .world-greeting { font-size: 22px; }
+  .world-sub { margin-bottom: 24px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 28px; }
+  .stat-value { font-size: 24px; }
+  .badge-pill { font-size: 10px; padding: 6px 11px; }
+  .progress-label { width: 90px; font-size: 10px; }
+  .progress-pct { font-size: 9px; min-width: 38px; }
+  .settings-section { padding-bottom: 22px; margin-bottom: 24px; }
+  .settings-input { max-width: 100%; }
+  .world-theme-grid { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
+  .world-theme-card { min-height: 60px; }
+  .backpack-empty { padding: 40px 18px; }
+  .delete-card { padding: 24px 18px; }
 }
 </style>
 </head>
@@ -797,6 +1298,51 @@ a { color: var(--accent); text-decoration: none; }
     <div class="modal-title" data-i18n="welcomeChangedTitle">Password updated.</div>
     <div class="modal-subtitle" data-i18n="welcomeChangedText">Your new password is active.</div>
     <button class="modal-btn" onclick="hide('modalWelcomeChanged')" data-i18n="welcomeChangedBtn">Continue in my world →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     YOUR WORLD panel — Profile + Settings + Backpack
+     ═══════════════════════════════════════ -->
+<div class="world chassis" id="world">
+  <header class="world-header">
+    <button class="world-back" onclick="exitYourWorld()" data-i18n="worldBack">← Academy</button>
+    <a class="header-brand" href="#">WoGL <span class="sub" data-i18n="brandSub">academy</span></a>
+    <div class="header-spacer"></div>
+    <div class="world-traveler" id="worldTraveler">T#0000</div>
+  </header>
+
+  <div class="world-app">
+    <aside class="world-side">
+      <div class="world-side-item active" data-tab="profile" onclick="worldSwitchTab('profile')">
+        <div class="world-side-item-title" data-i18n="worldProfile">Profile</div>
+        <div class="world-side-item-sub" id="worldSideProfileSub">— · T#0000</div>
+      </div>
+      <div class="world-side-item" data-tab="settings" onclick="worldSwitchTab('settings')">
+        <div class="world-side-item-title" data-i18n="worldSettings">Settings</div>
+        <div class="world-side-item-sub" data-i18n="worldSettingsSub">account & preferences</div>
+      </div>
+      <div class="world-side-item disabled" data-tab="backpack">
+        <div class="world-side-item-title" data-i18n="worldBackpack">Backpack</div>
+        <div class="world-side-item-sub" data-i18n="worldBackpackSub">coming soon</div>
+      </div>
+    </aside>
+
+    <main class="world-main" id="worldMain"></main>
+  </div>
+</div>
+
+<!-- Delete account modal -->
+<div class="delete-modal chassis" id="modalDelete">
+  <div class="delete-card">
+    <h3 data-i18n="delTitle">Delete account</h3>
+    <p data-i18n="delText">This action is permanent. Your profile, progress, badges and everything tied to your account will be erased. There is no going back.</p>
+    <input class="settings-input" id="delConfirmInput" type="text" data-i18n-attr="placeholder:delConfirmPh" placeholder="Type DELETE to confirm" style="max-width:100%;text-align:center;margin-bottom:4px;">
+    <div class="settings-error" id="delError"></div>
+    <div class="delete-actions">
+      <button class="danger-btn" id="delConfirmBtn" onclick="worldConfirmDelete()" disabled data-i18n="delConfirmBtn">Delete permanently</button>
+      <button class="logout-btn" onclick="hide('modalDelete')" data-i18n="delCancel">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -1019,7 +1565,66 @@ var I18N = {
     cpErrMismatch: 'New passwords don\'t match.',
     cpErrSame: 'The new password must be different from the current one.',
     cpErrCurrent: 'Current password is incorrect.',
-    cpErrGeneric: 'Couldn\'t update. Please try again.'
+    cpErrGeneric: 'Couldn\'t update. Please try again.',
+
+    /* Your World — sidebar */
+    worldBack: '← Academy',
+    worldProfile: 'Profile',
+    worldSettings: 'Settings',
+    worldSettingsSub: 'account & preferences',
+    worldBackpack: 'Backpack',
+    worldBackpackSub: 'coming soon',
+
+    /* Profile tab */
+    profileGreeting: 'Back, ',
+    profileStatLessons: 'Lessons',
+    profileStatLessonsSub: '{pct}% complete',
+    profileStatBadges: 'Badges',
+    profileStatBadgesSub: '{n} to unlock',
+    profileStatShip: 'Ship',
+    profileStatShipSub: 'exclusive theme',
+    profileBadgesLabel: 'Badges',
+    profileProgressLabel: 'Progress by section',
+
+    /* Settings tab */
+    settingsTitle: 'Settings',
+    settingsSubtitle: 'account & preferences',
+    settingsNameLabel: 'Name',
+    settingsNameCurrent: 'Current: ',
+    settingsNamePh: 'New name',
+    settingsNameSave: 'Save name',
+    settingsNameNote: 'Your T#{num} doesn\'t change.',
+    settingsNameErrValidate: 'Couldn\'t validate. Try again.',
+    settingsNameErrSave: 'Couldn\'t save the name.',
+    settingsNameOk: 'Name updated.',
+    settingsNameTaken: 'That name is already taken.',
+    settingsShipLabel: 'Ship',
+    settingsShipCurrent: 'Current: ',
+    settingsShipErr: 'Couldn\'t save the ship.',
+    settingsShipOk: 'Ship updated to ',
+    settingsEmailLabel: 'Email',
+    settingsEmailNote: 'To change your email, contact hello@wogl.io.',
+    settingsPasswordLabel: 'Password',
+    settingsPasswordCurrent: 'Change your password anytime.',
+    settingsPasswordBtn: 'Change password',
+    settingsDangerLabel: 'Danger zone',
+    settingsLogout: 'Sign out',
+    settingsDelete: 'Delete account',
+
+    /* Delete account modal */
+    delTitle: 'Delete account',
+    delText: 'This action is permanent. Your profile, progress, badges and everything tied to your account will be erased. There is no going back.',
+    delConfirmPh: 'Type DELETE to confirm',
+    delConfirmKeyword: 'DELETE',
+    delConfirmBtn: 'Delete permanently',
+    delCancel: 'Cancel',
+    delErrGeneric: 'Couldn\'t delete. If this keeps failing, write to hello@wogl.io.',
+
+    /* Backpack tab */
+    backpackTitle: 'Backpack',
+    backpackSubtitle: 'Coming soon',
+    backpackEmptyTitle: 'Your backpack is being built',
+    backpackEmptyText: 'This is where you\'ll collect your saved shaders, unlocked freebies and exclusive tools for travelers. Soon.'
   },
   es: {
     /* Header */
@@ -1137,7 +1742,66 @@ var I18N = {
     cpErrMismatch: 'Las nuevas contraseñas no coinciden.',
     cpErrSame: 'La nueva contraseña debe ser distinta a la actual.',
     cpErrCurrent: 'La contraseña actual es incorrecta.',
-    cpErrGeneric: 'No se pudo actualizar. Inténtalo de nuevo.'
+    cpErrGeneric: 'No se pudo actualizar. Inténtalo de nuevo.',
+
+    /* Your World — sidebar */
+    worldBack: '← Academy',
+    worldProfile: 'Perfil',
+    worldSettings: 'Ajustes',
+    worldSettingsSub: 'cuenta y preferencias',
+    worldBackpack: 'Mochila',
+    worldBackpackSub: 'próximamente',
+
+    /* Profile tab */
+    profileGreeting: 'De vuelta, ',
+    profileStatLessons: 'Lecciones',
+    profileStatLessonsSub: '{pct}% completo',
+    profileStatBadges: 'Badges',
+    profileStatBadgesSub: '{n} por desbloquear',
+    profileStatShip: 'Nave',
+    profileStatShipSub: 'theme exclusivo',
+    profileBadgesLabel: 'Badges',
+    profileProgressLabel: 'Progreso por sección',
+
+    /* Settings tab */
+    settingsTitle: 'Ajustes',
+    settingsSubtitle: 'cuenta y preferencias',
+    settingsNameLabel: 'Nombre',
+    settingsNameCurrent: 'Actual: ',
+    settingsNamePh: 'Nuevo nombre',
+    settingsNameSave: 'Guardar nombre',
+    settingsNameNote: 'Tu T#{num} no cambia.',
+    settingsNameErrValidate: 'No se pudo validar. Inténtalo de nuevo.',
+    settingsNameErrSave: 'No se pudo guardar el nombre.',
+    settingsNameOk: 'Nombre actualizado.',
+    settingsNameTaken: 'Ese nombre ya está tomado.',
+    settingsShipLabel: 'Nave',
+    settingsShipCurrent: 'Actual: ',
+    settingsShipErr: 'No se pudo guardar la nave.',
+    settingsShipOk: 'Nave actualizada a ',
+    settingsEmailLabel: 'Email',
+    settingsEmailNote: 'Para cambiar tu email contacta hola@mundogl.com.',
+    settingsPasswordLabel: 'Contraseña',
+    settingsPasswordCurrent: 'Cambia tu contraseña cuando quieras.',
+    settingsPasswordBtn: 'Cambiar contraseña',
+    settingsDangerLabel: 'Zona peligrosa',
+    settingsLogout: 'Salir de sesión',
+    settingsDelete: 'Eliminar cuenta',
+
+    /* Delete account modal */
+    delTitle: 'Eliminar cuenta',
+    delText: 'Esta acción es permanente. Se borran tu perfil, progreso, badges y todo lo asociado a tu cuenta. No hay vuelta atrás.',
+    delConfirmPh: 'Escribe ELIMINAR para confirmar',
+    delConfirmKeyword: 'ELIMINAR',
+    delConfirmBtn: 'Eliminar permanentemente',
+    delCancel: 'Cancelar',
+    delErrGeneric: 'No se pudo eliminar. Si el problema persiste, escríbenos a hola@mundogl.com.',
+
+    /* Backpack tab */
+    backpackTitle: 'Mochila',
+    backpackSubtitle: 'Próximamente',
+    backpackEmptyTitle: 'Tu mochila se está armando',
+    backpackEmptyText: 'Aquí vas a juntar tus shaders guardados, freebies desbloqueados y herramientas exclusivas para travelers. Pronto.'
   }
 };
 
@@ -1193,6 +1857,12 @@ function applyLang() {
   document.querySelectorAll('.browse-lang button').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-lang') === browseLang);
   });
+
+  /* If Your World is open, re-render so dynamically-built strings
+     (greeting, stat sublabels, etc.) reflect the current account language. */
+  if (document.getElementById('world') && document.getElementById('world').classList.contains('active')) {
+    if (typeof worldRender === 'function' && _profile) worldRender();
+  }
 }
 
 function setBrowseLang(lang) {
@@ -1591,23 +2261,369 @@ async function finishOnboarding() {
 }
 
 /* ═══════════════════════════════════════════════
-   Enter Your World — placeholder until Bloque 4
+   Your World — Profile + Settings + Backpack
    ═══════════════════════════════════════════════ */
-function enterYourWorld() {
+
+/* Catalogs — declared once at top of B4 block so render functions can read them. */
+var WORLD_SECTIONS = [
+  { num:'00', name:'Start Here',  total:10, accent:'#a8e4dc' },
+  { num:'01', name:'Patterns',    total:10, accent:'#e8a8c8' },
+  { num:'02', name:'Forces',      total:10, accent:'#a8c8e8' },
+  { num:'03', name:'Noise',       total:10, accent:'#c8e8a8' },
+  { num:'04', name:'Domain Warp', total:10, accent:'#e8d4a8' },
+  { num:'05', name:'Motion',      total:10, accent:'#d4a8e8' }
+];
+
+var WORLD_BADGES = [
+  { key:'founding_traveler', name:'Founding Traveler', icon:'★', founding:true },
+  { key:'first_lesson',      name:'First Lesson',      icon:'✦' },
+  { key:'10_lessons',        name:'10 Lessons',        icon:'◆' },
+  { key:'20_lessons',        name:'20 Lessons',        icon:'◆' },
+  { key:'30_lessons',        name:'30 Lessons',        icon:'◆' },
+  { key:'40_lessons',        name:'40 Lessons',        icon:'◆' },
+  { key:'50_lessons',        name:'50 Lessons',        icon:'◆' },
+  { key:'all_seeing',        name:'All Seeing',        icon:'◆' }
+];
+
+/* State */
+var _worldTab = 'profile';
+var _worldProgress = [];    /* rows from lesson_progress */
+var _worldBadges = [];      /* rows from badges */
+
+/* Helpers */
+function worldEsc(s) {
+  var d = document.createElement('div');
+  d.textContent = (s == null) ? '' : String(s);
+  return d.innerHTML;
+}
+function worldDoneInSection(num) {
+  return _worldProgress.filter(function(p){ return p.section === num; }).length;
+}
+function worldTotalDone() { return _worldProgress.length; }
+function worldTotalLessons() {
+  return WORLD_SECTIONS.reduce(function(a, s){ return a + s.total; }, 0);
+}
+function worldBadgesUnlocked() {
+  return _worldBadges.map(function(b){ return b.badge_key; });
+}
+
+/* Entry point — called from Welcome confirmations + the dorado header action. */
+async function enterYourWorld() {
   hide('modalWelcomeSignup');
   hide('modalWelcomeBack');
   hide('modalWelcomeReset');
-  _isChassisActive = false;
-  /* B4 will replace this with the real Mi Mundo panel. */
-  var name = _profile ? _profile.display_name : 'traveler';
-  console.log('[B4 pending] enter Your World for', name);
+  if (!_profile) return;
+
+  _isChassisActive = true;
+  document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+
   /* Header reflects logged-in state. */
   var headerBtn = document.getElementById('headerAction');
   if (headerBtn) {
-    headerBtn.textContent = name + ' →';
+    headerBtn.textContent = _profile.display_name + ' →';
     headerBtn.classList.add('logged');
-    headerBtn.onclick = function() { alert('Your World panel is built next (Bloque 4). Logged in as ' + name); };
+    headerBtn.onclick = function() { enterYourWorld(); };
   }
+
+  await worldLoadData();
+  worldRender();
+  show('world');
+  applyLang();
+}
+
+function exitYourWorld() {
+  hide('world');
+  _isChassisActive = false;
+}
+
+/* Load real data from Supabase. Defensive: never throw. */
+async function worldLoadData() {
+  if (!_user) return;
+  try {
+    var [progRes, badgeRes] = await Promise.all([
+      _sb.from('lesson_progress').select('*').eq('user_id', _user.id),
+      _sb.from('badges').select('*').eq('user_id', _user.id)
+    ]);
+    _worldProgress = progRes.data || [];
+    _worldBadges = badgeRes.data || [];
+  } catch (e) {
+    console.error('[worldLoadData] error:', e);
+    _worldProgress = [];
+    _worldBadges = [];
+  }
+}
+
+/* Render the panel chrome (header + sidebar) and delegate to tab renderer. */
+function worldRender() {
+  var tnum = 'T#' + String(_profile.traveler_num || 0).padStart(4, '0');
+  document.getElementById('worldTraveler').textContent = tnum;
+  document.getElementById('worldSideProfileSub').textContent =
+    worldEsc(_profile.display_name) + ' · ' + tnum;
+
+  document.querySelectorAll('.world-side-item').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-tab') === _worldTab);
+  });
+
+  var main = document.getElementById('worldMain');
+  if (_worldTab === 'profile')        worldRenderProfile(main);
+  else if (_worldTab === 'settings')  worldRenderSettings(main);
+  else if (_worldTab === 'backpack')  worldRenderBackpack(main);
+}
+
+function worldSwitchTab(tab) {
+  if (tab === 'backpack') return; /* disabled */
+  _worldTab = tab;
+  worldRender();
+}
+
+/* ─── Profile tab ─── */
+function worldRenderProfile(main) {
+  var done = worldTotalDone();
+  var total = worldTotalLessons();
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  var unlocked = worldBadgesUnlocked();
+  var badgeCount = unlocked.length;
+
+  var h = '';
+  h += '<h1 class="world-greeting">' + t('profileGreeting', 'chassis') + '<em>' + worldEsc(_profile.display_name) + '</em></h1>';
+  h += '<span class="world-sub">T#' + String(_profile.traveler_num || 0).padStart(4, '0') + '</span>';
+
+  h += '<div class="stats-grid">';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatLessons', 'chassis') + '</div>';
+  h += '    <div class="stat-value">' + done + '<span class="of">/' + total + '</span></div>';
+  h += '    <div class="stat-sub">' + fmt(t('profileStatLessonsSub', 'chassis'), { pct: pct }) + '</div>';
+  h += '  </div>';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatBadges', 'chassis') + '</div>';
+  h += '    <div class="stat-value">' + badgeCount + '<span class="of">/' + WORLD_BADGES.length + '</span></div>';
+  h += '    <div class="stat-sub">' + fmt(t('profileStatBadgesSub', 'chassis'), { n: Math.max(0, WORLD_BADGES.length - badgeCount) }) + '</div>';
+  h += '  </div>';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatShip', 'chassis') + '</div>';
+  h += '    <div class="stat-value" style="font-size:22px;">' + worldEsc(_profile.theme || 'nebula') + '</div>';
+  h += '    <div class="stat-sub">' + t('profileStatShipSub', 'chassis') + '</div>';
+  h += '  </div>';
+  h += '</div>';
+
+  h += '<div class="section-label">' + t('profileBadgesLabel', 'chassis') + '</div>';
+  h += '<div class="badge-grid">';
+  WORLD_BADGES.forEach(function(b){
+    var u = unlocked.indexOf(b.key) !== -1;
+    var cls = 'badge-pill' + (u ? '' : ' locked') + (b.founding && u ? ' founding' : '');
+    h += '<div class="' + cls + '">' + b.icon + ' ' + worldEsc(b.name) + '</div>';
+  });
+  h += '</div>';
+
+  h += '<div class="section-label">' + t('profileProgressLabel', 'chassis') + '</div>';
+  WORLD_SECTIONS.forEach(function(s){
+    var d = worldDoneInSection(s.num);
+    var p = s.total > 0 ? Math.round(d / s.total * 100) : 0;
+    h += '<div class="progress-row">';
+    h += '  <div class="progress-label">' + worldEsc(s.name) + '</div>';
+    h += '  <div class="progress-track"><div class="progress-fill" style="width:' + p + '%;background:' + s.accent + ';"></div></div>';
+    h += '  <div class="progress-pct">' + d + '/' + s.total + '</div>';
+    h += '</div>';
+  });
+
+  main.innerHTML = h;
+}
+
+/* ─── Settings tab ─── */
+function worldRenderSettings(main) {
+  var tnum = String(_profile.traveler_num || 0).padStart(4, '0');
+  var h = '';
+  h += '<h1 class="world-greeting">' + t('settingsTitle', 'chassis') + '</h1>';
+  h += '<span class="world-sub">' + t('settingsSubtitle', 'chassis') + '</span>';
+
+  /* Display name */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsNameLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsNameCurrent', 'chassis') + worldEsc(_profile.display_name) + '</div>';
+  h += '  <input class="settings-input" id="worldNameInput" type="text" maxlength="20" placeholder="' + worldEsc(t('settingsNamePh', 'chassis')) + '">';
+  h += '  <div class="settings-error" id="worldNameError"></div>';
+  h += '  <div class="settings-success" id="worldNameSuccess"></div>';
+  h += '  <button class="settings-btn" id="worldNameBtn" onclick="worldSaveName()" disabled>' + t('settingsNameSave', 'chassis') + '</button>';
+  h += '  <div class="settings-note">' + fmt(t('settingsNameNote', 'chassis'), { num: tnum }) + '</div>';
+  h += '</div>';
+
+  /* Ship */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsShipLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsShipCurrent', 'chassis') + worldEsc(_profile.theme || 'nebula') + '</div>';
+  h += '  <div class="world-theme-grid">';
+  SHIPS.forEach(function(s){
+    var sel = (_profile.theme === s.key) ? ' selected' : '';
+    h += '    <div class="world-theme-card' + sel + '" data-theme="' + s.key + '" onclick="worldSelectTheme(\'' + s.key + '\')">';
+    h += '      <div class="world-theme-dot" style="background:' + s.color + ';"></div>';
+    h += '      <div class="world-theme-name">' + s.name + '</div>';
+    h += '    </div>';
+  });
+  h += '  </div>';
+  h += '  <div class="settings-error" id="worldShipError"></div>';
+  h += '  <div class="settings-success" id="worldShipSuccess"></div>';
+  h += '</div>';
+
+  /* Email */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsEmailLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + worldEsc((_user && _user.email) || '—') + '</div>';
+  h += '  <div class="settings-note">' + t('settingsEmailNote', 'chassis') + '</div>';
+  h += '</div>';
+
+  /* Password */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsPasswordLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsPasswordCurrent', 'chassis') + '</div>';
+  h += '  <button class="settings-btn outline" onclick="openChangePassword()">' + t('settingsPasswordBtn', 'chassis') + '</button>';
+  h += '</div>';
+
+  /* Danger zone */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label" style="color:#ff9c9c;">' + t('settingsDangerLabel', 'chassis') + '</div>';
+  h += '  <div class="danger-zone">';
+  h += '    <button class="logout-btn" onclick="worldLogout()">' + t('settingsLogout', 'chassis') + '</button>';
+  h += '    <button class="danger-btn" onclick="worldOpenDelete()">' + t('settingsDelete', 'chassis') + '</button>';
+  h += '  </div>';
+  h += '</div>';
+
+  main.innerHTML = h;
+  worldWireSettings();
+}
+
+function worldWireSettings() {
+  var inp = document.getElementById('worldNameInput');
+  var btn = document.getElementById('worldNameBtn');
+  if (!inp || !btn) return;
+  inp.addEventListener('input', function(){
+    var v = (inp.value || '').trim();
+    btn.disabled = (v.length < 2 || v === _profile.display_name);
+    setErr('worldNameError', '');
+    var ok = document.getElementById('worldNameSuccess');
+    if (ok) ok.textContent = '';
+  });
+}
+
+async function worldSaveName() {
+  var inp = document.getElementById('worldNameInput');
+  var btn = document.getElementById('worldNameBtn');
+  if (!inp || !btn) return;
+  var nu = (inp.value || '').trim();
+  if (nu.length < 2 || nu === _profile.display_name) return;
+
+  btn.disabled = true;
+  setErr('worldNameError', '');
+
+  try {
+    var avail = await _sb.rpc('check_name_available', { name: nu });
+    if (avail.error) throw avail.error;
+    if (!avail.data) {
+      setErr('worldNameError', t('settingsNameTaken', 'chassis'));
+      btn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    /* RPC failed but server-side will reject if name is actually taken.
+       Defensive: keep going, let the update attempt be the authoritative gate. */
+    console.warn('[worldSaveName] availability check failed, proceeding:', e);
+  }
+
+  var r = await _sb.from('profiles').update({ display_name: nu }).eq('id', _user.id);
+  if (r.error) {
+    console.error('[worldSaveName] update error:', r.error);
+    setErr('worldNameError', t('settingsNameErrSave', 'chassis'));
+    btn.disabled = false;
+    return;
+  }
+
+  _profile.display_name = nu;
+  var ok = document.getElementById('worldNameSuccess');
+  if (ok) ok.textContent = t('settingsNameOk', 'chassis');
+  document.getElementById('worldSideProfileSub').textContent =
+    worldEsc(nu) + ' · T#' + String(_profile.traveler_num || 0).padStart(4, '0');
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) headerBtn.textContent = nu + ' →';
+}
+
+async function worldSelectTheme(key) {
+  if (!_profile) return;
+  document.querySelectorAll('.world-theme-card').forEach(function(c){
+    c.classList.toggle('selected', c.getAttribute('data-theme') === key);
+  });
+  document.body.setAttribute('data-theme', key);
+  setErr('worldShipError', '');
+
+  var r = await _sb.rpc('update_theme', { new_theme: key });
+  if (r.error) {
+    console.error('[worldSelectTheme] update_theme error:', r.error);
+    setErr('worldShipError', t('settingsShipErr', 'chassis'));
+    return;
+  }
+  _profile.theme = key;
+  var ok = document.getElementById('worldShipSuccess');
+  if (ok) ok.textContent = t('settingsShipOk', 'chassis') + key + '.';
+}
+
+function worldRenderBackpack(main) {
+  main.innerHTML =
+    '<h1 class="world-greeting">' + t('backpackTitle', 'chassis') + '</h1>' +
+    '<span class="world-sub">' + t('backpackSubtitle', 'chassis') + '</span>' +
+    '<div class="backpack-empty">' +
+    '  <div class="icon">◇</div>' +
+    '  <h2>' + t('backpackEmptyTitle', 'chassis') + '</h2>' +
+    '  <p>' + t('backpackEmptyText', 'chassis') + '</p>' +
+    '</div>';
+}
+
+/* Delete account flow */
+function worldOpenDelete() {
+  var inp = document.getElementById('delConfirmInput');
+  var btn = document.getElementById('delConfirmBtn');
+  if (inp) inp.value = '';
+  if (btn) btn.disabled = true;
+  setErr('delError', '');
+  show('modalDelete');
+  if (inp) {
+    inp.oninput = function(){
+      var v = inp.value.trim();
+      btn.disabled = (v !== t('delConfirmKeyword', 'chassis'));
+    };
+  }
+}
+
+async function worldConfirmDelete() {
+  var btn = document.getElementById('delConfirmBtn');
+  btn.disabled = true;
+  setErr('delError', '');
+
+  var r = await _sb.rpc('delete_account');
+  if (r.error) {
+    console.error('[worldConfirmDelete] delete_account error:', r.error);
+    setErr('delError', t('delErrGeneric', 'chassis'));
+    btn.disabled = false;
+    return;
+  }
+
+  await _sb.auth.signOut();
+  _user = null;
+  _profile = null;
+  document.body.removeAttribute('data-theme');
+  hide('modalDelete');
+  hide('world');
+  _isChassisActive = false;
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = t('headerLogin', 'academy');
+    headerBtn.classList.remove('logged');
+    headerBtn.onclick = function(){ openLogin(); };
+  }
+}
+
+/* Logout from Your World */
+async function worldLogout() {
+  hide('world');
+  _isChassisActive = false;
+  await doLogout();
 }
 
 /* ═══════════════════════════════════════════════
@@ -1717,13 +2733,19 @@ async function doChangePassword() {
 }
 
 /* ═══════════════════════════════════════════════
-   Logout — clears session and resets header
+   Logout — clears session, hides world panel, resets header
    ═══════════════════════════════════════════════ */
 async function doLogout() {
   await _sb.auth.signOut();
   _user = null;
   _profile = null;
+  _worldProgress = [];
+  _worldBadges = [];
+  _worldTab = 'profile';
+  _isChassisActive = false;
   document.body.removeAttribute('data-theme');
+  hide('world');
+  hide('modalDelete');
   var headerBtn = document.getElementById('headerAction');
   if (headerBtn) {
     headerBtn.textContent = t('headerLogin', 'academy');
@@ -1762,7 +2784,7 @@ _sb.auth.onAuthStateChange(async function(event, session) {
         if (headerBtn) {
           headerBtn.textContent = _profile.display_name + ' →';
           headerBtn.classList.add('logged');
-          headerBtn.onclick = function() { alert('Your World panel is built next (Bloque 4). Logged in as ' + _profile.display_name); };
+          headerBtn.onclick = function() { enterYourWorld(); };
         }
       }
     }
