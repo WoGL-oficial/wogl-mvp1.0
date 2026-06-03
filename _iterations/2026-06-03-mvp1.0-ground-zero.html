@@ -1,0 +1,4163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
+<title>WoGL Academy — Learn GLSL from zero</title>
+
+<!-- ═══════════════════════════════════════
+     WoGL — World of GL
+     wogl.io | worldofgl.com | mundogl.com
+     hello@wogl.io | hola@mundogl.com
+
+     Proprietary. All rights reserved.
+
+     WoGL Academy MVP 1.0
+     Full user experience: open academy → login → onboarding →
+     personalized world. Browse language (header toggle) and
+     account language (set at login) are two separate states.
+
+     This file is written from scratch — no patches from prior
+     iterations. Approved tier S content from the v1 academy is
+     referenced; structure, hierarchy and tokens are audited and
+     unified here.
+     ═══════════════════════════════════════ -->
+
+<!-- ─── SEO (deliberately preserved from indexed canonical) ─── -->
+<meta name="description" content="WoGL Academy — interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+<meta name="keywords" content="GLSL tutorial, WebGL shaders, learn GLSL, shader tutorial, fragment shader, creative coding, generative art, noise tutorial, SDF tutorial, Voronoi shader, GPU programming, interactive shaders, bilingual shader course, WoGL Academy">
+<meta name="author" content="WoGL — World of GL">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WoGL — World of GL">
+<meta property="og:title" content="WoGL Academy — Learn GLSL from zero">
+<meta property="og:description" content="Interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WoGL Academy — Learn GLSL from zero">
+<meta name="twitter:description" content="Interactive GLSL shader lessons from zero. Patterns, noise, domain warp, SDF, light. Real-time WebGL on your GPU. Bilingual EN/ES, free.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&family=Allura&display=swap" rel="stylesheet">
+
+<!-- ─── Cloudflare Turnstile — env-aware sitekey ─── -->
+<script>
+  /* Local dev gets the always-pass test sitekey so we can iterate without
+     hitting the real verifier. Anything else uses the prod sitekey that's
+     already whitelisted in the Cloudflare dashboard for wogl.io / staging
+     / GitHub Pages preview. */
+  window.TURNSTILE_SITEKEY = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '1x00000000000000000000AA'
+    : '0x4AAAAAADbetMk8Z4E1X0nP';
+  window._turnstileWidgets = {};
+  window.onTurnstileLoad = function() {
+    if (!window.turnstile) return;
+    if (document.getElementById('turnstileAuth')) {
+      window._turnstileWidgets.auth = turnstile.render('#turnstileAuth', {
+        sitekey: window.TURNSTILE_SITEKEY, theme: 'dark',
+        callback: function(token) { window._tokenAuth = token; }
+      });
+    }
+    if (document.getElementById('turnstileReset')) {
+      window._turnstileWidgets.reset = turnstile.render('#turnstileReset', {
+        sitekey: window.TURNSTILE_SITEKEY, theme: 'dark',
+        callback: function(token) { window._tokenReset = token; }
+      });
+    }
+  };
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   Design tokens — single source of truth.
+   Every magic number lives here.
+   ═══════════════════════════════════════════════ */
+:root {
+  /* Backgrounds */
+  --bg: #06030f;
+  --bg-deep: #02010a;
+  --bg-card: rgba(255,255,255,0.025);
+  --bg-side: rgba(0,0,0,0.18);
+  --bg-header: rgba(0,0,0,0.30);
+  --bg-lift: rgba(255,255,255,0.018);   /* subtle lift for glossary / ref-block cards */
+
+  /* Ink (text) — every value above 0.55 contrast (WoGL ≥0.75 rule respected via solid colors). */
+  --ink: #f8f0e8;          /* headlines, primary text */
+  --ink-soft: #c0bcc0;     /* body text */
+  --ink-mute: #8a8690;     /* tertiary, labels */
+  --ink-faint: #5e5868;    /* disabled, hints */
+
+  /* Brand */
+  --gold: #d4ab78;
+  --gold-soft: rgba(212,171,120,0.18);
+  --copper: #a86458;
+
+  /* Accent — driven by chosen ship/theme; defaults to gold. */
+  --accent: var(--gold);
+  --accent-soft: rgba(212,171,120,0.15);
+
+  /* States */
+  --green: #8acc8a;
+  --red: #ff8585;
+
+  /* Lines / dividers */
+  --line: rgba(232,217,192,0.08);
+  --line-strong: rgba(232,217,192,0.18);
+
+  /* Fonts */
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-script: 'Allura', cursive;
+
+  /* Geometry */
+  --radius: 4px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* z layers — explicit hierarchy. */
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+}
+
+/* ─── Ship/theme palettes — applied via [data-theme="key"] ─── */
+[data-theme="nebula"] { --accent: #d080ff; --accent-soft: rgba(208,128,255,0.16); }
+[data-theme="lava"]   { --accent: #ffb060; --accent-soft: rgba(255,176,96,0.16); }
+[data-theme="aurora"] { --accent: #40e8c8; --accent-soft: rgba(64,232,200,0.16); }
+[data-theme="royal"]  { --accent: #809cff; --accent-soft: rgba(128,156,255,0.16); }
+[data-theme="ember"]  { --accent: #ff6040; --accent-soft: rgba(255,96,64,0.16); }
+[data-theme="void"]   { --accent: #a0a0b0; --accent-soft: rgba(160,160,176,0.16); }
+[data-theme="solar"]  { --accent: #ffd700; --accent-soft: rgba(255,215,0,0.16); }
+[data-theme="moss"]   { --accent: #80c860; --accent-soft: rgba(128,200,96,0.16); }
+
+/* ═══════════════════════════════════════════════
+   Reset + base
+   ═══════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse at top, var(--accent-soft) 0%, var(--bg-deep) 60%, var(--bg) 100%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ═══════════════════════════════════════════════
+   Header — persistent across academy + chassis.
+   Three regions: brand · browse-lang toggle · auth/profile action
+   ═══════════════════════════════════════════════ */
+.header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: var(--z-header);
+}
+.header-brand {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-display); font-weight: 300;
+  color: var(--ink); letter-spacing: 0.06em;
+  font-size: 16px;
+  text-decoration: none;
+}
+.header-brand .sub {
+  font-family: var(--font-mono);
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  font-weight: 400;
+}
+.header-spacer { flex: 1; }
+
+/* Browse-language toggle — quick access, always present. */
+.browse-lang {
+  display: flex; gap: 4px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.browse-lang button {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 6px 10px;
+  text-transform: uppercase;
+  transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 30px;
+}
+.browse-lang button.active {
+  color: var(--gold);
+  border-color: rgba(212,171,120,0.45);
+  background: var(--gold-soft);
+}
+.browse-lang button:hover:not(.active) {
+  color: var(--ink-soft);
+  border-color: rgba(232,217,192,0.30);
+}
+
+/* Auth action (Log in / user name) — same shape as browse-lang for visual cohesion. */
+.header-action {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  min-height: 34px;
+  transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+}
+.header-action:hover {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.header-action.logged {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.header-action.logged:hover {
+  background: var(--accent-soft);
+}
+
+/* ═══════════════════════════════════════════════
+   Main academy region (placeholder for Bloque 5-6)
+   ═══════════════════════════════════════════════ */
+.academy-shell {
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - 65px);
+  padding: clamp(28px, 4vw, 56px) clamp(20px, 4vw, 64px);
+}
+.academy-shell .placeholder {
+  margin: auto;
+  max-width: 580px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.academy-shell .placeholder h1 {
+  font-family: var(--font-display); font-weight: 300;
+  font-size: clamp(34px, 5vw, 52px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.academy-shell .placeholder h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.academy-shell .placeholder p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 28px;
+  max-width: 480px;
+  margin-left: auto; margin-right: auto;
+}
+.academy-shell .placeholder .build-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* ═══════════════════════════════════════════════
+   Academy real layout — Bloque 5
+   Two-column shell: section drawers + lesson stage.
+   ═══════════════════════════════════════════════ */
+.academy-shell.live {
+  flex-direction: row;
+  padding: 0;
+  min-height: calc(100vh - 65px);
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  overflow: hidden;
+}
+
+.academy-side {
+  border-right: 1px solid var(--line);
+  background: var(--bg-side);
+  padding: 18px 0 64px;
+  overflow-y: auto;
+}
+
+.drawer {
+  border-bottom: 1px solid var(--line);
+}
+.drawer:last-child { border-bottom: none; }
+
+.drawer-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 22px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background .2s var(--ease);
+  user-select: none;
+}
+.drawer-head:hover { background: rgba(232,217,192,0.025); }
+.drawer.open .drawer-head { background: linear-gradient(90deg, rgba(232,217,192,0.04), transparent 70%); }
+
+.drawer-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--section-accent, var(--ink-mute));
+  letter-spacing: 0.14em;
+  min-width: 22px;
+}
+.drawer-name {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  flex: 1;
+}
+.drawer-progress {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-mute);
+  letter-spacing: 0.10em;
+}
+.drawer-chevron {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  transition: transform .25s var(--ease);
+  display: inline-block;
+  margin-left: 4px;
+}
+.drawer.open .drawer-chevron { transform: rotate(90deg); }
+
+.drawer-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s var(--ease);
+}
+.drawer.open .drawer-body { max-height: 720px; }
+
+.lesson-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 22px 11px 56px;
+  cursor: pointer;
+  min-height: 44px;
+  border-left: 3px solid transparent;
+  transition: background .15s var(--ease), border-left-color .15s var(--ease);
+}
+.lesson-item:hover:not(.active) {
+  background: rgba(232,217,192,0.020);
+  border-left-color: rgba(232,217,192,0.18);
+}
+.lesson-item.active {
+  background: linear-gradient(90deg, var(--section-accent-soft, var(--gold-soft)), transparent 70%);
+  border-left-color: var(--section-accent, var(--gold));
+}
+
+.lesson-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  min-width: 22px;
+}
+.lesson-name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-soft);
+  flex: 1;
+  line-height: 1.4;
+}
+.lesson-item:hover .lesson-name,
+.lesson-item.active .lesson-name { color: var(--ink); }
+.lesson-check {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green);
+  opacity: 0.85;
+}
+
+.academy-main {
+  padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px) 80px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Mobile-only second-tier strip: shows the open section's lessons
+   inside the main area, since the sidebar's drawer-body is hidden
+   on small screens. Desktop hides this strip. */
+.lesson-strip-mobile { display: none; }
+
+.academy-welcome {
+  max-width: 620px;
+}
+.academy-welcome-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.academy-welcome h1 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(32px, 4.5vw, 46px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  margin-bottom: 18px;
+}
+.academy-welcome h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.academy-welcome p {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  max-width: 540px;
+}
+.academy-welcome .cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 22px;
+  border: 1px solid var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+  min-height: 44px;
+}
+.academy-welcome .cta:hover { background: var(--gold); color: var(--bg-deep); }
+
+.lesson-placeholder {
+  max-width: 620px;
+}
+.lesson-placeholder-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--section-accent, var(--gold));
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.lesson-placeholder h1 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(28px, 3.8vw, 38px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+.lesson-placeholder p {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 14px;
+  color: var(--ink-mute);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.lesson-placeholder .build-note {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+/* ═══════════════════════════════════════════════
+   Lesson stage — Bloque 6
+   Header + sandbox (canvas + editor) + explain + nav.
+   Ported from _sites/wogl-academy/index.html with audit
+   pass: clamp() everywhere, opacity floor 0.75, ≥44px taps.
+   ═══════════════════════════════════════════════ */
+.lesson-stage { max-width: 920px; }
+
+.lesson-header { margin-bottom: clamp(20px, 2.5vw, 32px); }
+.lesson-step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--section-accent, var(--gold));
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.lesson-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(28px, 3.8vw, 40px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.lesson-title em { font-style: italic; color: var(--gold); font-weight: 400; }
+.lesson-desc {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: clamp(14px, 1.2vw, 17px);
+  color: var(--ink-soft);
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+/* Sandbox — canvas + editor side-by-side on desktop, stacked on mobile */
+.sandbox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(14px, 1.6vw, 22px);
+  margin: clamp(20px, 2.5vw, 32px) 0;
+}
+.sandbox > * { min-width: 0; overflow: hidden; }
+@media (max-width: 1100px) { .sandbox { grid-template-columns: 1fr; } }
+
+.canvas-wrap {
+  background: #000;
+  border: 1px solid var(--line);
+  aspect-ratio: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+  max-height: clamp(280px, 25vw, 500px);
+  border-radius: var(--radius);
+}
+.canvas-wrap canvas {
+  width: 100%; height: 100%;
+  display: block;
+  opacity: 0.92;
+}
+.canvas-wrap .badge {
+  position: absolute; bottom: 12px; right: 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(232,217,192,0.42);
+  pointer-events: none;
+}
+.canvas-wrap .err {
+  position: absolute; top: 14px; left: 14px; right: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #ff8585;
+  background: rgba(0,0,0,0.85);
+  padding: 10px 14px;
+  border-left: 2px solid #ff8585;
+  border-radius: var(--radius);
+  display: none;
+  max-height: 60%;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+.canvas-wrap .err.show { display: block; }
+
+.editor {
+  display: flex; flex-direction: column;
+  background: var(--bg-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  position: relative;
+}
+.editor textarea {
+  width: 100%;
+  min-height: 220px;
+  max-height: clamp(280px, 25vw, 500px);
+  background: transparent;
+  border: 0; outline: 0;
+  resize: vertical;
+  padding: clamp(12px, 1vw, 16px) clamp(14px, 1.1vw, 18px);
+  margin: 0;
+  color: var(--ink);
+  caret-color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 0.9vw, 14px);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  tab-size: 2; -moz-tab-size: 2;
+}
+.editor-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-top: 1px solid var(--line);
+  opacity: 0.78;
+}
+.editor-status.error { color: var(--red); opacity: 0.92; }
+
+/* Explain — bilingual rich copy block (glossary / ref / try-it / pulse) */
+.lesson-explain {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: clamp(14px, 1.1vw, 16px);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 720px;
+}
+.lesson-explain p { margin: 0 0 18px; }
+.lesson-explain p em { font-style: italic; color: var(--gold); font-weight: 400; }
+.lesson-explain strong { color: var(--ink); font-weight: 500; }
+.lesson-explain code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-deep);
+  color: var(--gold);
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  margin: 0 2px;
+}
+.lesson-explain ul { padding-left: 20px; margin: 14px 0; }
+.lesson-explain li { padding: 4px 0; color: var(--ink-soft); }
+
+/* Glossary card — gold accent line */
+.glossary {
+  background: var(--bg-lift);
+  border-left: 2px solid rgba(212,171,120,0.45);
+  padding: clamp(16px, 1.8vw, 24px) clamp(18px, 2vw, 28px);
+  margin: clamp(14px, 1.4vw, 20px) 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.glossary-label {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.75vw, 11px);
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+.glossary .gold { color: var(--gold); font-weight: 400; }
+.glossary code {
+  background: var(--bg-deep);
+  color: var(--gold);
+}
+
+/* Statement hero — the emotional hook */
+.statement-hero {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1.45;
+  color: var(--gold);
+  margin: clamp(20px, 2vw, 30px) 0;
+  letter-spacing: 0.01em;
+}
+
+/* Reference block — copper accent line, line-by-line code reading */
+.ref-block {
+  background: var(--bg-lift);
+  border-left: 2px solid var(--copper);
+  padding: clamp(14px, 1.5vw, 20px) clamp(16px, 1.6vw, 24px);
+  margin: clamp(14px, 1.4vw, 20px) 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.ref-block-label {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.75vw, 11px);
+  letter-spacing: 0.18em;
+  color: var(--copper);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Try-it prompt — green accent, action invitation */
+.try-it {
+  background: rgba(138,204,138,0.04);
+  border-left: 2px solid rgba(138,204,138,0.42);
+  padding: clamp(14px, 1.4vw, 20px) clamp(16px, 1.6vw, 24px);
+  margin: clamp(14px, 1.4vw, 20px) 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  display: flex;
+  gap: clamp(10px, 1.2vw, 18px);
+  align-items: flex-start;
+}
+.try-it-icon {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.75vw, 11px);
+  letter-spacing: 0.18em;
+  color: var(--green);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.92;
+}
+.try-it code { color: var(--green); }
+.try-it em { font-family: var(--font-display); font-style: normal; font-weight: 500; color: var(--gold); }
+
+/* Pulse / freebie block — lavender accent, copy-and-paste shader */
+.pulse-block {
+  background: rgba(200,160,255,0.035);
+  border-left: 2px solid rgba(200,160,255,0.42);
+  padding: clamp(14px, 1.4vw, 20px) clamp(16px, 1.6vw, 24px);
+  margin: clamp(14px, 1.4vw, 20px) 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.pulse-label {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.75vw, 11px);
+  letter-spacing: 0.18em;
+  color: rgba(200,160,255,0.92);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+.pulse-block pre {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 0.95vw, 14px);
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(12px, 1.2vw, 16px) clamp(14px, 1.4vw, 18px);
+  margin: 10px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-user-select: all;
+  user-select: all;
+  cursor: copy;
+}
+.pulse-block code { color: rgba(200,160,255,0.95); }
+.pulse-hint {
+  font-size: clamp(12px, 0.95vw, 14px);
+  color: var(--ink-mute);
+  margin-top: 8px;
+}
+
+/* Supernova divider — biolum line breath */
+.supernova {
+  position: relative;
+  height: 1px;
+  margin: clamp(22px, 2.4vw, 36px) 0;
+  background: linear-gradient(90deg, transparent, rgba(60,100,180,0.10) 20%, rgba(60,100,180,0.10) 80%, transparent);
+}
+.supernova::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px; height: 1px;
+  background: radial-gradient(ellipse at center, rgba(100,180,220,0.7) 0%, rgba(60,120,200,0.3) 40%, transparent 70%);
+  box-shadow: 0 0 15px rgba(80,150,220,0.3), 0 0 45px rgba(60,120,200,0.12);
+  animation: supernova-breathe 6s ease-in-out infinite;
+}
+@keyframes supernova-breathe {
+  0%, 100% { width: 80px; opacity: 0.78; }
+  30% { width: 140px; opacity: 0.92; }
+  70% { width: 100px; opacity: 0.78; }
+}
+
+/* Lesson nav — previous / mark complete / next */
+.lesson-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 24px);
+  padding-top: clamp(28px, 3vw, 44px);
+  margin-top: clamp(28px, 3vw, 44px);
+  border-top: 1px solid var(--line);
+}
+.lesson-nav-arrow {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 10px 0;
+  min-height: 44px;
+  transition: opacity .2s var(--ease);
+  font-family: var(--font-body);
+  background: transparent; border: none;
+  text-align: left;
+}
+.lesson-nav-arrow:hover { opacity: 0.78; }
+.lesson-nav-arrow.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.lesson-nav-arrow.next { text-align: right; margin-left: auto; }
+.lesson-nav-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.lesson-nav-name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(13px, 1.2vw, 16px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.lesson-mark-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.lesson-mark-btn:hover { background: var(--gold-soft); }
+.lesson-mark-btn.done {
+  color: var(--green);
+  border-color: var(--green);
+  background: rgba(138,204,138,0.08);
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .lesson-nav { flex-wrap: wrap; gap: 14px; }
+  .lesson-mark-btn { order: 3; width: 100%; }
+}
+
+/* Intro alive — line-by-line CPU/GPU/shader/GLSL reveal.
+   Ported from academy live (.intro-alive). Plays once per session
+   on Start Here · 01 only (controlled by _introShownA flag in JS). */
+.intro-alive {
+  position: relative;
+  padding: clamp(28px, 4vw, 56px) 0 clamp(32px, 4vw, 64px);
+  margin: 0 0 clamp(28px, 3.5vw, 48px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+.intro-alive-line {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(20px, 3.4vw, 36px);
+  color: var(--ink);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transition: clip-path 1s cubic-bezier(0.22, 1, 0.36, 1), opacity .4s ease;
+}
+.intro-alive-line.visible {
+  clip-path: inset(0 0% 0 0);
+  opacity: 1;
+}
+.intro-alive-line .intro-glow {
+  color: #e8c89a;
+  text-shadow: 0 0 40px rgba(232,200,154,0.55);
+}
+.intro-alive-sub {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(20px, 3.4vw, 36px);
+  letter-spacing: -0.01em;
+  margin-top: clamp(22px, 2.5vw, 32px);
+  line-height: 1.4;
+  background: linear-gradient(90deg, #fff8ee, #e8c89a, #d4a876, #e8c89a, #fff8ee);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-sweep 3s linear infinite, sub-glow 4s ease-in-out infinite;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transition: clip-path 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity .5s ease;
+}
+.intro-alive-sub.visible {
+  clip-path: inset(0 0% 0 0);
+  opacity: 1;
+}
+@keyframes gradient-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+@keyframes sub-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 8px rgba(232,200,154,0)); }
+  50%      { filter: brightness(1.6) drop-shadow(0 0 30px rgba(232,200,154,0.6)); }
+}
+
+/* Card 3D tilt — desktop mouse follow, mobile auto-float.
+   Applied at runtime by initCardTilt() to glossary / try-it /
+   pulse-block / ref-block elements after the lesson DOM mounts. */
+.tilt-card {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+.tilt-card .tilt-shine {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.tilt-card:hover .tilt-shine { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   Modal scaffolding — shared by all modals.
+   ═══════════════════════════════════════════════ */
+.modal {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(2,1,10,0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.modal.active { display: flex; }
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(28px, 4vw, 44px);
+  max-width: 460px; width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 60px rgba(0,0,0,0.45);
+}
+.modal-logo {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: 26px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.modal-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 28px);
+  color: var(--ink);
+  line-height: 1.2;
+  margin-top: 22px;
+}
+.modal-subtitle {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-top: 10px;
+  max-width: 360px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ═══════════════════════════════════════════════
+   Account-language picker — appears after Log in click,
+   if the user hasn't yet decided which language they want
+   their account / chassis in. Browse language stays as
+   chosen in the header toggle.
+   ═══════════════════════════════════════════════ */
+.lang-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 28px;
+}
+.lang-pick {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 24px 14px;
+  color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 90px;
+}
+.lang-pick:hover {
+  border-color: rgba(212,171,120,0.45);
+  background: var(--gold-soft);
+}
+.lang-pick .flag {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+}
+.lang-pick .name {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+.lang-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 18px;
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════════
+   Form primitives — inputs, buttons, toggles, errors.
+   Shared across auth, onboarding, settings.
+   ═══════════════════════════════════════════════ */
+.modal-input {
+  width: 100%;
+  padding: 13px 16px;
+  margin-top: 14px;
+  background: rgba(212,165,116,0.06);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  outline: none;
+  transition: border-color .2s var(--ease);
+}
+.modal-input:focus { border-color: rgba(232,217,192,0.30); }
+.modal-input::placeholder { color: var(--ink-faint); }
+
+.modal-btn {
+  width: 100%;
+  padding: 14px 24px;
+  margin-top: 22px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--copper), var(--gold));
+  color: var(--bg-deep);
+  transition: opacity .2s var(--ease), transform .1s var(--ease);
+  min-height: 48px;
+}
+.modal-btn:hover { opacity: 0.88; }
+.modal-btn:active { transform: scale(0.98); }
+.modal-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+.modal-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+
+.modal-error, .modal-success {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 12px;
+  min-height: 16px;
+  line-height: 1.5;
+}
+.modal-error { color: var(--red); }
+.modal-success { color: var(--green); }
+
+.modal-toggle {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 18px;
+}
+.modal-toggle .link {
+  color: var(--gold);
+  cursor: pointer;
+  margin-left: 6px;
+  transition: opacity .2s;
+}
+.modal-toggle .link:hover { opacity: 0.85; text-decoration: underline; }
+
+.modal-forgot {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color .2s;
+}
+.modal-forgot:hover { color: var(--ink-mute); }
+
+.modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: none; border: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color .2s;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-step {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 20px;
+}
+
+.turnstile-slot {
+  display: flex; justify-content: center;
+  margin-top: 16px;
+  min-height: 65px;
+}
+
+/* ═══════════════════════════════════════════════
+   Gracias overlay — reward moment after signup
+   ═══════════════════════════════════════════════ */
+.gracias-list {
+  margin: 28px auto 0;
+  max-width: 360px;
+  text-align: left;
+}
+.gracias-list .item {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  padding: 6px 0 6px 24px;
+  position: relative;
+}
+.gracias-list .item::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding name — live availability feedback
+   ═══════════════════════════════════════════════ */
+.name-feedback {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 8px;
+  min-height: 16px;
+  line-height: 1.5;
+}
+.name-feedback.ok  { color: var(--green); }
+.name-feedback.err { color: var(--red); }
+
+/* ═══════════════════════════════════════════════
+   Onboarding ship — 4×2 grid of theme swatches
+   ═══════════════════════════════════════════════ */
+.ship-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+.ship-cell {
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 76px;
+}
+.ship-cell:hover { border-color: var(--line-strong); }
+.ship-cell.selected {
+  border-color: rgba(212,171,120,0.55);
+  background: var(--gold-soft);
+}
+.ship-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.ship-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════
+   Your World panel — Profile + Settings + Backpack
+   ═══════════════════════════════════════════════ */
+.world {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-overlay);
+  background:
+    radial-gradient(ellipse at top, var(--accent-soft) 0%, var(--bg-deep) 55%, var(--bg) 100%),
+    var(--bg);
+  flex-direction: column;
+  overflow: hidden;
+}
+.world.active { display: flex; }
+
+/* Your World header — distinct from the academy header,
+   shows the back button + traveler tag. */
+.world-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.world-back {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  min-height: 34px;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+.world-back:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.world-traveler {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  min-height: 28px;
+  display: flex; align-items: center;
+}
+
+.world-app {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  overflow: hidden;
+}
+
+.world-side {
+  border-right: 1px solid var(--line);
+  background: var(--bg-side);
+  padding: 22px 0 64px;
+  overflow-y: auto;
+}
+.world-side-item {
+  padding: 14px 24px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .2s var(--ease);
+}
+.world-side-item:hover:not(.disabled):not(.active) {
+  background: rgba(232,217,192,0.025);
+  border-left-color: rgba(232,217,192,0.20);
+}
+.world-side-item.active {
+  background: linear-gradient(90deg, var(--gold-soft), transparent 70%);
+  border-left-color: var(--gold);
+}
+.world-side-item.disabled { cursor: default; opacity: 0.45; }
+.world-side-item-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.world-side-item.active .world-side-item-title { color: var(--gold); }
+.world-side-item-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.world-main {
+  padding: clamp(28px, 3vw, 48px) clamp(24px, 4vw, 56px) 64px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Profile tab — greeting + stats + badges + progress */
+.world-greeting {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 30px);
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.world-greeting em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.world-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  display: block;
+  margin-bottom: 36px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 40px;
+}
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  transition: border-color .2s var(--ease);
+}
+.stat-card:hover { border-color: var(--line-strong); }
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-mute);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-value .of {
+  font-size: 16px;
+  color: var(--ink-mute);
+  font-weight: 300;
+  margin-left: 2px;
+}
+.stat-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.badge-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 40px;
+}
+.badge-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 13px;
+  border: 1px solid rgba(232,217,192,0.12);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  transition: all .2s var(--ease);
+}
+.badge-pill.locked {
+  color: var(--ink-faint);
+  opacity: 0.55;
+}
+.badge-pill.founding {
+  color: #e8c89a;
+  border-color: rgba(212,168,160,0.40);
+  background: rgba(212,165,116,0.06);
+}
+
+.progress-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.progress-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  width: 120px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(212,168,160,0.14);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s var(--ease);
+}
+.progress-pct {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  min-width: 42px;
+  text-align: right;
+  letter-spacing: 0.04em;
+}
+
+/* Settings tab */
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-section:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.settings-current {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+.settings-input {
+  width: 100%; max-width: 380px;
+  padding: 12px 16px;
+  background: rgba(212,165,116,0.06);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  letter-spacing: 0.04em;
+  transition: border-color .2s var(--ease);
+  display: block;
+  margin-bottom: 8px;
+  min-height: 44px;
+}
+.settings-input:focus { border-color: rgba(232,217,192,0.30); }
+.settings-input::placeholder { color: var(--ink-faint); }
+.settings-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity .2s var(--ease);
+  margin-top: 8px;
+  background: linear-gradient(135deg, var(--copper), var(--gold));
+  color: var(--bg-deep);
+  min-height: 44px;
+}
+.settings-btn.outline {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+.settings-btn:disabled { opacity: 0.35; cursor: default; }
+.settings-btn:not(:disabled):hover { opacity: 0.88; }
+.settings-note {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+.settings-error,
+.settings-success {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 8px;
+  min-height: 16px;
+  letter-spacing: 0.04em;
+}
+.settings-error { color: var(--red); }
+.settings-success { color: var(--green); }
+
+.world-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 380px;
+  margin-top: 8px;
+}
+.world-theme-card {
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  min-height: 66px;
+}
+.world-theme-card:hover { border-color: var(--line-strong); }
+.world-theme-card.selected {
+  border-color: rgba(212,171,120,0.55);
+  background: var(--gold-soft);
+}
+.world-theme-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.world-theme-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.danger-zone {
+  display: flex; gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.logout-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  cursor: pointer;
+  letter-spacing: 0.10em;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  text-transform: uppercase;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+  min-height: 44px;
+}
+.logout-btn:hover {
+  color: var(--ink);
+  border-color: rgba(232,217,192,0.30);
+}
+.danger-btn {
+  padding: 10px 20px;
+  border: 1px solid rgba(255,107,107,0.35);
+  border-radius: var(--radius);
+  background: rgba(255,107,107,0.05);
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  min-height: 44px;
+}
+.danger-btn:disabled { opacity: 0.35; cursor: default; }
+.danger-btn:not(:disabled):hover {
+  background: rgba(255,107,107,0.12);
+  border-color: rgba(255,107,107,0.55);
+}
+
+/* Backpack tab — empty state */
+.backpack-empty {
+  text-align: center;
+  padding: 64px 24px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.backpack-empty .icon {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+.backpack-empty h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.backpack-empty p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* Delete account modal */
+.delete-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  background: rgba(2,1,10,0.78);
+  backdrop-filter: blur(10px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.delete-modal.active { display: flex; }
+.delete-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,107,107,0.30);
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 460px; width: 100%;
+  text-align: center;
+}
+.delete-card h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  color: #ff9c9c;
+  margin-bottom: 14px;
+}
+.delete-card p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+.delete-actions {
+  display: flex; gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ═══════════════════════════════════════════════
+   Welcome confirmation — cinematic moments
+   ═══════════════════════════════════════════════ */
+.confirm-icon {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  margin-top: 8px;
+}
+.confirm-name {
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive — iPhone first, no fluff.
+   ═══════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .header { padding: 14px 16px; gap: 10px; }
+  .header-brand { font-size: 14px; }
+  .header-brand .sub { font-size: 10px; letter-spacing: 0.16em; }
+  .browse-lang button { padding: 5px 8px; font-size: 9px; min-height: 28px; }
+  .header-action { padding: 6px 12px; font-size: 10px; min-height: 30px; }
+
+  .modal { padding: 16px; }
+  .modal-card { padding: 26px 20px; }
+
+  .lang-grid { grid-template-columns: 1fr; gap: 10px; }
+  .lang-pick { flex-direction: row; justify-content: center; padding: 18px 14px; min-height: 64px; }
+
+  .ship-grid { grid-template-columns: repeat(2, 1fr); }
+  .ship-cell { min-height: 70px; }
+
+  /* Your World goes single column with the sidebar repurposed as a
+     horizontal tab strip on top. Mirrors the academy chassis pattern. */
+  .world-app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .world-side {
+    display: flex; flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0; overflow-x: auto; overflow-y: hidden;
+  }
+  .world-side-item {
+    flex: 1 0 auto;
+    padding: 12px 16px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    text-align: center;
+  }
+  .world-side-item:hover:not(.disabled):not(.active) {
+    border-left-color: transparent;
+    border-bottom-color: rgba(232,217,192,0.20);
+  }
+  .world-side-item.active {
+    background: linear-gradient(180deg, var(--gold-soft), transparent 70%);
+    border-left-color: transparent;
+    border-bottom-color: var(--gold);
+  }
+  .world-side-item-title { font-size: 12px; margin-bottom: 2px; }
+  .world-side-item-sub { font-size: 10px; }
+
+  .world-main { padding: 24px 18px 64px; }
+  .world-greeting { font-size: 22px; }
+  .world-sub { margin-bottom: 24px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 28px; }
+  .stat-value { font-size: 24px; }
+  .badge-pill { font-size: 10px; padding: 6px 11px; }
+  .progress-label { width: 90px; font-size: 10px; }
+  .progress-pct { font-size: 9px; min-width: 38px; }
+  .settings-section { padding-bottom: 22px; margin-bottom: 24px; }
+  .settings-input { max-width: 100%; }
+  .world-theme-grid { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
+  .world-theme-card { min-height: 60px; }
+  .backpack-empty { padding: 40px 18px; }
+  .delete-card { padding: 24px 18px; }
+
+  /* Academy live layout: sidebar becomes a top horizontal strip,
+     mirrors world-side mobile pattern. Drawers expand inline below. */
+  .academy-shell.live {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .academy-side {
+    display: flex; flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .drawer {
+    flex: 0 0 auto;
+    border-bottom: none;
+    border-right: 1px solid var(--line);
+    min-width: 140px;
+  }
+  .drawer:last-child { border-right: none; }
+  .drawer-head {
+    padding: 12px 16px;
+    min-height: 56px;
+    flex-wrap: wrap;
+  }
+  .drawer-name { font-size: 12px; flex: 1 1 100%; }
+  .drawer-num { font-size: 10px; }
+  .drawer-progress { font-size: 9px; }
+  .drawer-chevron { display: none; }
+  /* On mobile, body opens as a horizontal pop-out under the strip when active;
+     simpler: hide body in the strip, and render the active drawer's lessons
+     inside the main area at the top instead. */
+  .drawer-body { display: none; }
+
+  .academy-main { padding: 20px 18px 80px; }
+  .academy-welcome h1 { font-size: 28px; }
+  .academy-welcome p { font-size: 14px; }
+  .lesson-placeholder h1 { font-size: 24px; }
+
+  /* Mobile lesson strip — horizontal scroll under the section strip,
+     rendered inside academy-main so it stays close to the lesson. */
+  .lesson-strip-mobile {
+    display: flex; flex-direction: row;
+    gap: 8px;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 2px 16px;
+    margin: -4px -18px 22px;
+    padding-left: 18px; padding-right: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .lesson-chip {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 14px;
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .lesson-chip.active {
+    border-color: var(--section-accent, var(--gold));
+    background: var(--section-accent-soft, var(--gold-soft));
+  }
+  .lesson-chip-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.12em;
+  }
+  .lesson-chip.active .lesson-chip-num { color: var(--ink); }
+  .lesson-chip-check {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--green);
+    opacity: 0.85;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     Header — persistent across academy + chassis
+     ═══════════════════════════════════════ -->
+<header class="header">
+  <a class="header-brand" href="#">WoGL <span class="sub" data-i18n="brandSub">academy</span></a>
+  <div class="header-spacer"></div>
+  <div class="browse-lang" id="browseLang" aria-label="Browse language">
+    <button data-lang="en" onclick="setBrowseLang('en')">EN</button>
+    <button data-lang="es" onclick="setBrowseLang('es')">ES</button>
+  </div>
+  <button class="header-action" id="headerAction" onclick="openLogin()" data-i18n="headerLogin">Log in</button>
+</header>
+
+<!-- ═══════════════════════════════════════
+     Academy shell — Bloque 5 live layout.
+     Sidebar with 6 collapsible section drawers
+     on the left, lesson stage on the right.
+     Populated by academyRender() at boot.
+     ═══════════════════════════════════════ -->
+<main class="academy-shell live" id="academyShell">
+  <aside class="academy-side" id="academySide"></aside>
+  <section class="academy-main" id="academyMain"></section>
+</main>
+
+<!-- ═══════════════════════════════════════
+     STEP 0 (only at login) — Account language picker
+     ═══════════════════════════════════════ -->
+<div class="modal" id="modalAccountLang">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" style="line-height:1.2;">
+      Pick your account language<br>
+      <span style="opacity:0.45;font-size:0.62em;font-style:italic;font-weight:300;">Elige el idioma de tu cuenta</span>
+    </div>
+    <div class="modal-subtitle">Your account, onboarding and Your World will live in this language. You can still switch the academy itself anytime from the header. — Tu cuenta, tu onboarding y Tu Mundo vivirán en este idioma. La academia la puedes cambiar cuando quieras desde el header.</div>
+    <div class="lang-grid">
+      <button class="lang-pick" onclick="pickAccountLang('en')">
+        <div class="flag">EN</div>
+        <div class="name">English</div>
+      </button>
+      <button class="lang-pick" onclick="pickAccountLang('es')">
+        <div class="flag">ES</div>
+        <div class="name">Español</div>
+      </button>
+    </div>
+    <div class="lang-note">a world of GL · un mundo de GL</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     AUTH modal — register / login (toggle in place)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalAuth">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalAuth')" data-i18n="authClose">close</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub" id="authSub" data-i18n="authSubRegister">your progress travels with you</div>
+
+    <div class="modal-title" id="authTitle" data-i18n="authTitleRegister">Sign up</div>
+    <div class="modal-subtitle" id="authBlurb" data-i18n="authBlurbRegister">Create your account to save your progress and unlock your ship.</div>
+
+    <input type="email" class="modal-input" id="authEmail" data-i18n-attr="placeholder:authEmailPh" placeholder="email" autocomplete="email">
+    <input type="password" class="modal-input" id="authPassword" data-i18n-attr="placeholder:authPasswordPhRegister" placeholder="password (min 8 chars)" autocomplete="current-password">
+
+    <div class="turnstile-slot"><div id="turnstileAuth"></div></div>
+    <div class="modal-error" id="authError"></div>
+
+    <button class="modal-btn" id="authSubmit" onclick="doAuth()" data-i18n="authSubmitRegister">SIGN UP</button>
+
+    <div class="modal-toggle">
+      <span id="authToggleMsg" data-i18n="authToggleToLoginMsg">Already have an account?</span>
+      <span class="link" id="authToggleBtn" onclick="toggleAuthMode()" data-i18n="authToggleToLoginBtn">Sign in</span>
+    </div>
+
+    <span class="modal-forgot" id="authForgotRow" onclick="openForgot()" data-i18n="authForgot" style="display:none;">Forgot your password?</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     GRACIAS overlay — after successful signup
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalGracias">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="graciasTitle">Thanks from the WoGL team</div>
+    <div class="modal-subtitle" data-i18n="graciasSubtitle">Your registration gives you access to:</div>
+    <div class="gracias-list">
+      <div class="item" data-i18n="graciasItem1">Progress that travels with you across sessions</div>
+      <div class="item" data-i18n="graciasItem2">Your permanent name and profile</div>
+      <div class="item" data-i18n="graciasItem3">Ship — exclusive theme for travelers</div>
+      <div class="item" data-i18n="graciasItem4">Badges every 10 lessons</div>
+      <div class="item" data-i18n="graciasItem5">Free updates and freebies as a founder</div>
+    </div>
+    <button class="modal-btn" onclick="afterGracias()" data-i18n="graciasCta">Start →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ONBOARDING · NAME (step 1 of 2)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalOnbName">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-step" data-i18n="onbStep1">step 1 of 2</div>
+    <div class="modal-title" data-i18n="onbNameTitle">Choose your name</div>
+    <div class="modal-subtitle" data-i18n="onbNameSubtitle">How fellow travelers will see you. Pick something that lasts — no one else can use it.</div>
+
+    <input type="text" class="modal-input" id="onbNameInput" data-i18n-attr="placeholder:onbNamePh" placeholder="your name" maxlength="20" autocomplete="off" style="text-align:center;">
+
+    <div class="name-feedback" id="nameFeedback"></div>
+
+    <button class="modal-btn" id="onbNameBtn" onclick="goToShip()" disabled data-i18n="onbNameNext">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ONBOARDING · SHIP (step 2 of 2)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalOnbShip">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-step" data-i18n="onbStep2">step 2 of 2</div>
+    <div class="modal-title" data-i18n="onbShipTitle">Pick your ship</div>
+    <div class="modal-subtitle" data-i18n="onbShipSubtitle">Your exclusive theme. You can change it anytime from Your World.</div>
+
+    <div class="ship-grid" id="shipGrid"></div>
+    <div class="modal-error" id="shipError"></div>
+
+    <button class="modal-btn" onclick="finishOnboarding()" data-i18n="onbShipStart">Start my journey →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     WELCOME confirmations — 4 cinematic moments
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalWelcomeSignup">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title">
+      <span class="confirm-name" id="welcomeSignupName">traveler</span>,
+    </div>
+    <div class="modal-subtitle" data-i18n="welcomeSignupText">Your world awaits.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeSignupBtn">Enter my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeBack">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title">
+      <span class="confirm-name" id="welcomeBackName">traveler</span>,
+    </div>
+    <div class="modal-subtitle" data-i18n="welcomeBackText">Your progress was waiting.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeBackBtn">Go to my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeReset">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title" data-i18n="welcomeResetTitle">Password updated.</div>
+    <div class="modal-subtitle" data-i18n="welcomeResetText">Your access is ready. Your world awaits.</div>
+    <button class="modal-btn" onclick="enterYourWorld()" data-i18n="welcomeResetBtn">Enter my world →</button>
+  </div>
+</div>
+
+<div class="modal chassis" id="modalWelcomeChanged">
+  <div class="modal-card">
+    <div class="confirm-icon">✦</div>
+    <div class="modal-title" data-i18n="welcomeChangedTitle">Password updated.</div>
+    <div class="modal-subtitle" data-i18n="welcomeChangedText">Your new password is active.</div>
+    <button class="modal-btn" onclick="hide('modalWelcomeChanged')" data-i18n="welcomeChangedBtn">Continue in my world →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     YOUR WORLD panel — Profile + Settings + Backpack
+     ═══════════════════════════════════════ -->
+<div class="world chassis" id="world">
+  <header class="world-header">
+    <button class="world-back" onclick="exitYourWorld()" data-i18n="worldBack">← Academy</button>
+    <a class="header-brand" href="#">WoGL <span class="sub" data-i18n="brandSub">academy</span></a>
+    <div class="header-spacer"></div>
+    <div class="world-traveler" id="worldTraveler">T#0000</div>
+  </header>
+
+  <div class="world-app">
+    <aside class="world-side">
+      <div class="world-side-item active" data-tab="profile" onclick="worldSwitchTab('profile')">
+        <div class="world-side-item-title" data-i18n="worldProfile">Profile</div>
+        <div class="world-side-item-sub" id="worldSideProfileSub">— · T#0000</div>
+      </div>
+      <div class="world-side-item" data-tab="settings" onclick="worldSwitchTab('settings')">
+        <div class="world-side-item-title" data-i18n="worldSettings">Settings</div>
+        <div class="world-side-item-sub" data-i18n="worldSettingsSub">account & preferences</div>
+      </div>
+      <div class="world-side-item disabled" data-tab="backpack">
+        <div class="world-side-item-title" data-i18n="worldBackpack">Backpack</div>
+        <div class="world-side-item-sub" data-i18n="worldBackpackSub">coming soon</div>
+      </div>
+    </aside>
+
+    <main class="world-main" id="worldMain"></main>
+  </div>
+</div>
+
+<!-- Delete account modal -->
+<div class="delete-modal chassis" id="modalDelete">
+  <div class="delete-card">
+    <h3 data-i18n="delTitle">Delete account</h3>
+    <p data-i18n="delText">This action is permanent. Your profile, progress, badges and everything tied to your account will be erased. There is no going back.</p>
+    <input class="settings-input" id="delConfirmInput" type="text" data-i18n-attr="placeholder:delConfirmPh" placeholder="Type DELETE to confirm" style="max-width:100%;text-align:center;margin-bottom:4px;">
+    <div class="settings-error" id="delError"></div>
+    <div class="delete-actions">
+      <button class="danger-btn" id="delConfirmBtn" onclick="worldConfirmDelete()" disabled data-i18n="delConfirmBtn">Delete permanently</button>
+      <button class="logout-btn" onclick="hide('modalDelete')" data-i18n="delCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FORGOT password · reset request (2 sub-steps)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalReset">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalReset')" data-i18n="authClose">close</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+
+    <div id="resetStep1">
+      <div class="modal-title" data-i18n="resetTitle">Reset password</div>
+      <div class="modal-subtitle" data-i18n="resetSubtitle">Enter your email and we'll send you a link to create a new password.</div>
+
+      <input type="email" class="modal-input" id="resetEmail" data-i18n-attr="placeholder:resetEmailPh" placeholder="email" autocomplete="email">
+      <div class="turnstile-slot"><div id="turnstileReset"></div></div>
+      <div class="modal-error" id="resetError"></div>
+
+      <button class="modal-btn" id="resetSubmit" onclick="doResetRequest()" data-i18n="resetSubmit">Send link</button>
+      <div class="modal-toggle">
+        <span class="link" onclick="hide('modalReset'); openAuthModal('login');" data-i18n="resetBackToLogin">Back to sign in</span>
+      </div>
+    </div>
+
+    <div id="resetStep2" style="display:none;">
+      <div class="modal-title" data-i18n="resetSentTitle">Link sent</div>
+      <div class="modal-subtitle" data-i18n="resetSentText">If your email is registered with WoGL, you'll receive a link in the next few minutes.</div>
+      <button class="modal-btn secondary" onclick="hide('modalReset')" data-i18n="resetSentClose">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NEW password (post recovery link)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalNewPwd">
+  <div class="modal-card">
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="newPwdTitle">New password</div>
+    <div class="modal-subtitle" data-i18n="newPwdSubtitle">Pick a new password for your account.</div>
+
+    <input type="password" class="modal-input" id="newPwd1" data-i18n-attr="placeholder:newPwdPh" placeholder="new password" autocomplete="new-password">
+    <input type="password" class="modal-input" id="newPwd2" data-i18n-attr="placeholder:newPwdConfirmPh" placeholder="confirm password" autocomplete="new-password">
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);letter-spacing:0.06em;text-align:left;margin-top:10px;" data-i18n="newPwdMinHint">minimum 8 characters</div>
+    <div class="modal-error" id="newPwdError"></div>
+
+    <button class="modal-btn" id="newPwdSubmit" onclick="doSetNewPassword()" data-i18n="newPwdSubmit">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CHANGE password (logged in)
+     ═══════════════════════════════════════ -->
+<div class="modal chassis" id="modalChangePwd">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hide('modalChangePwd')" data-i18n="cpCancel">cancel</button>
+    <div class="modal-logo">WoGL</div>
+    <div class="modal-sub">academy</div>
+    <div class="modal-title" data-i18n="cpTitle">Change password</div>
+    <div class="modal-subtitle" data-i18n="cpSubtitle">For security, enter your current password before changing it.</div>
+
+    <input type="password" class="modal-input" id="cpCurrent" data-i18n-attr="placeholder:cpCurrentPh" placeholder="current password">
+    <input type="password" class="modal-input" id="cpNew1" data-i18n-attr="placeholder:cpNewPh" placeholder="new password">
+    <input type="password" class="modal-input" id="cpNew2" data-i18n-attr="placeholder:cpConfirmPh" placeholder="confirm new password">
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);letter-spacing:0.06em;text-align:left;margin-top:10px;" data-i18n="newPwdMinHint">minimum 8 characters</div>
+    <div class="modal-error" id="cpError"></div>
+
+    <button class="modal-btn" id="cpSubmit" onclick="doChangePassword()" data-i18n="cpSubmit">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     Supabase SDK + chassis logic
+     ═══════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"
+        integrity="sha384-o+Hkm/usHFhCEWo1Ae1cLsOLiQQNrD2UfI424QDAaiZR7URnC8v35ey7s2sbGZHB"
+        crossorigin="anonymous"></script>
+
+<!-- ═══════════════════════════════════════
+     i18n + chassis logic
+     ═══════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   Two language states, intentionally separate.
+
+   browseLang  — what the academy displays. User toggles
+                 from the header at any time. Default = 'en'.
+                 Stored in localStorage 'wogl-browse-lang'.
+
+   accountLang — language of the user's account: chassis,
+                 onboarding, Your World, settings, emails.
+                 Set ONCE at first Login (modalAccountLang)
+                 and can be changed later from Settings.
+                 Stored in localStorage 'wogl-account-lang'.
+
+   t(key) returns the translation for the language relevant
+   to the current surface. Academy surfaces read browseLang;
+   chassis surfaces read accountLang.
+   ═══════════════════════════════════════════════ */
+
+var I18N = {
+  en: {
+    /* Header */
+    brandSub: 'academy',
+    headerLogin: 'Log in',
+
+    /* Academy chrome — Bloque 5 */
+    academyWelcomeEyebrow: 'Start Here · Empieza aquí',
+    academyWelcomeTitle: 'Sixty lessons. <em>One world of GL.</em>',
+    academyWelcomeText: 'Six sections, sixty interactive lessons that run real WebGL on your GPU. Patterns, forces, noise, domain warp, motion — built lesson by lesson. Pick a section on the left to begin.',
+    academyWelcomeCta: 'Start with 00 · 01 →',
+    academyLessonsCount: '{done}/{total}',
+    academyLessonPh: 'Lesson',
+    academyLessonPlaceholderEyebrow: '{section} · {num}',
+    academyLessonPlaceholderTitle: 'Lesson coming online',
+    academyLessonPlaceholderText: 'This lesson loads next — sandbox, shader and explain block ship in the next sprint. The chassis around it is live.',
+    academyLessonPlaceholderNote: 'b5 · structure live · b6 · content next',
+
+    /* Auth modal — register + login share most fields, only title/CTA flip */
+    authSubRegister: 'your progress travels with you',
+    authSubLogin: 'welcome back, traveler',
+    authTitleRegister: 'Sign up',
+    authTitleLogin: 'Sign in',
+    authBlurbRegister: 'Create your account to save your progress and unlock your ship.',
+    authBlurbLogin: 'Pick up where you left off.',
+    authEmailPh: 'email',
+    authPasswordPhRegister: 'password (min 8 chars)',
+    authPasswordPhLogin: 'password',
+    authSubmitRegister: 'SIGN UP',
+    authSubmitLogin: 'SIGN IN',
+    authToggleToLoginMsg: 'Already have an account?',
+    authToggleToLoginBtn: 'Sign in',
+    authToggleToRegisterMsg: 'New here?',
+    authToggleToRegisterBtn: 'Sign up',
+    authForgot: 'Forgot your password?',
+    authClose: 'close',
+    authErrFillBoth: 'Please fill in email and password.',
+    authErrMinChars: 'Minimum 8 characters.',
+    authErrTurnstile: 'Please wait for the security check to finish.',
+    authErrInvalid: 'Email or password is incorrect.',
+    authErrTaken: 'That email already has an account. Try signing in.',
+    authErrNetwork: 'Network error. Check your connection.',
+    authErrGeneric: 'Something went wrong. Please try again.',
+
+    /* Gracias — reward overlay after signup */
+    graciasTitle: 'Thanks from the WoGL team',
+    graciasSubtitle: 'Your registration gives you access to:',
+    graciasItem1: 'Progress that travels with you across sessions',
+    graciasItem2: 'Your permanent name and profile',
+    graciasItem3: 'Ship — exclusive theme for travelers',
+    graciasItem4: 'Badges every 10 lessons',
+    graciasItem5: 'Free updates and freebies as a founder',
+    graciasCta: 'Start →',
+
+    /* Onboarding · name */
+    onbStep1: 'step 1 of 2',
+    onbNameTitle: 'Choose your name',
+    onbNameSubtitle: 'How fellow travelers will see you. Pick something that lasts — no one else can use it.',
+    onbNamePh: 'your name',
+    onbNameNext: 'Next →',
+    onbNameErrChars: 'Letters, numbers and spaces only.',
+    onbNameErrTaken: 'That name is already taken.',
+    onbNameErrVerify: 'Verification error — reload and sign in again.',
+    onbNameAvailable: '✓ available',
+
+    /* Onboarding · ship */
+    onbStep2: 'step 2 of 2',
+    onbShipTitle: 'Pick your ship',
+    onbShipSubtitle: 'Your exclusive theme. You can change it anytime from Your World.',
+    onbShipStart: 'Start my journey →',
+    onbShipErrGeneric: 'Couldn\'t create your profile. Check your session and try again.',
+    onbShipErrFetch: 'Profile created but couldn\'t load. Please reload.',
+
+    /* Welcome confirmations */
+    welcomeSignupTitle: 'Welcome, ',
+    welcomeSignupText: 'Your world awaits.',
+    welcomeSignupBtn: 'Enter my world →',
+    welcomeBackTitle: 'Welcome back, ',
+    welcomeBackText: 'Your progress was waiting.',
+    welcomeBackBtn: 'Go to my world →',
+    welcomeResetTitle: 'Password updated.',
+    welcomeResetText: 'Your access is ready. Your world awaits.',
+    welcomeResetBtn: 'Enter my world →',
+    welcomeChangedTitle: 'Password updated.',
+    welcomeChangedText: 'Your new password is active.',
+    welcomeChangedBtn: 'Continue in my world →',
+
+    /* Forgot password / reset request */
+    resetTitle: 'Reset password',
+    resetSubtitle: 'Enter your email and we\'ll send you a link to create a new password.',
+    resetEmailPh: 'email',
+    resetSubmit: 'Send link',
+    resetSentTitle: 'Link sent',
+    resetSentText: 'If your email is registered with WoGL, you\'ll receive a link in the next few minutes. Check spam too.',
+    resetSentClose: 'Got it',
+    resetBackToLogin: 'Back to sign in',
+    resetErrFillEmail: 'Please enter your email.',
+    resetErrTurnstile: 'Please wait for the security check to finish.',
+
+    /* New password (post-recovery) */
+    newPwdTitle: 'New password',
+    newPwdSubtitle: 'Pick a new password for your account.',
+    newPwdPh: 'new password',
+    newPwdConfirmPh: 'confirm password',
+    newPwdMinHint: 'minimum 8 characters',
+    newPwdSubmit: 'Save',
+    newPwdErrFillBoth: 'Please fill in both fields.',
+    newPwdErrMin: 'Minimum 8 characters.',
+    newPwdErrMismatch: 'Passwords don\'t match.',
+    newPwdErrGeneric: 'Couldn\'t update. The link may have expired — request a new one.',
+
+    /* Change password (logged in) */
+    cpTitle: 'Change password',
+    cpSubtitle: 'For security, enter your current password before changing it.',
+    cpCurrentPh: 'current password',
+    cpNewPh: 'new password',
+    cpConfirmPh: 'confirm new password',
+    cpSubmit: 'Save',
+    cpCancel: 'cancel',
+    cpErrFillAll: 'Please fill in all three fields.',
+    cpErrMin: 'The new password must be at least 8 characters.',
+    cpErrMismatch: 'New passwords don\'t match.',
+    cpErrSame: 'The new password must be different from the current one.',
+    cpErrCurrent: 'Current password is incorrect.',
+    cpErrGeneric: 'Couldn\'t update. Please try again.',
+
+    /* Your World — sidebar */
+    worldBack: '← Academy',
+    worldProfile: 'Profile',
+    worldSettings: 'Settings',
+    worldSettingsSub: 'account & preferences',
+    worldBackpack: 'Backpack',
+    worldBackpackSub: 'coming soon',
+
+    /* Profile tab */
+    profileGreeting: 'Back, ',
+    profileStatLessons: 'Lessons',
+    profileStatLessonsSub: '{pct}% complete',
+    profileStatBadges: 'Badges',
+    profileStatBadgesSub: '{n} to unlock',
+    profileStatShip: 'Ship',
+    profileStatShipSub: 'exclusive theme',
+    profileBadgesLabel: 'Badges',
+    profileProgressLabel: 'Progress by section',
+
+    /* Settings tab */
+    settingsTitle: 'Settings',
+    settingsSubtitle: 'account & preferences',
+    settingsNameLabel: 'Name',
+    settingsNameCurrent: 'Current: ',
+    settingsNamePh: 'New name',
+    settingsNameSave: 'Save name',
+    settingsNameNote: 'Your T#{num} doesn\'t change.',
+    settingsNameErrValidate: 'Couldn\'t validate. Try again.',
+    settingsNameErrSave: 'Couldn\'t save the name.',
+    settingsNameOk: 'Name updated.',
+    settingsNameTaken: 'That name is already taken.',
+    settingsShipLabel: 'Ship',
+    settingsShipCurrent: 'Current: ',
+    settingsShipErr: 'Couldn\'t save the ship.',
+    settingsShipOk: 'Ship updated to ',
+    settingsEmailLabel: 'Email',
+    settingsEmailNote: 'To change your email, contact hello@wogl.io.',
+    settingsPasswordLabel: 'Password',
+    settingsPasswordCurrent: 'Change your password anytime.',
+    settingsPasswordBtn: 'Change password',
+    settingsDangerLabel: 'Danger zone',
+    settingsLogout: 'Sign out',
+    settingsDelete: 'Delete account',
+
+    /* Delete account modal */
+    delTitle: 'Delete account',
+    delText: 'This action is permanent. Your profile, progress, badges and everything tied to your account will be erased. There is no going back.',
+    delConfirmPh: 'Type DELETE to confirm',
+    delConfirmKeyword: 'DELETE',
+    delConfirmBtn: 'Delete permanently',
+    delCancel: 'Cancel',
+    delErrGeneric: 'Couldn\'t delete. If this keeps failing, write to hello@wogl.io.',
+
+    /* Backpack tab */
+    backpackTitle: 'Backpack',
+    backpackSubtitle: 'Coming soon',
+    backpackEmptyTitle: 'Your backpack is being built',
+    backpackEmptyText: 'This is where you\'ll collect your saved shaders, unlocked freebies and exclusive tools for travelers. Soon.'
+  },
+  es: {
+    /* Header */
+    brandSub: 'academy',
+    headerLogin: 'Entrar',
+
+    /* Academy chrome — Bloque 5 */
+    academyWelcomeEyebrow: 'Start Here · Empieza aquí',
+    academyWelcomeTitle: 'Sesenta lecciones. <em>Un mundo de GL.</em>',
+    academyWelcomeText: 'Seis secciones, sesenta lecciones interactivas que corren WebGL real en tu GPU. Patterns, forces, noise, domain warp, motion — lección por lección. Elige una sección a la izquierda para empezar.',
+    academyWelcomeCta: 'Empieza con 00 · 01 →',
+    academyLessonsCount: '{done}/{total}',
+    academyLessonPh: 'Lección',
+    academyLessonPlaceholderEyebrow: '{section} · {num}',
+    academyLessonPlaceholderTitle: 'Lección encendiéndose',
+    academyLessonPlaceholderText: 'La lección carga a continuación — sandbox, shader y bloque de explicación llegan en el siguiente sprint. El chassis alrededor ya está vivo.',
+    academyLessonPlaceholderNote: 'b5 · estructura viva · b6 · contenido a continuación',
+
+    /* Auth */
+    authSubRegister: 'tu progreso viaja contigo',
+    authSubLogin: 'de vuelta, traveler',
+    authTitleRegister: 'Regístrate',
+    authTitleLogin: 'Entrar',
+    authBlurbRegister: 'Crea tu cuenta para guardar tu progreso y desbloquear tu nave.',
+    authBlurbLogin: 'Sigue donde te quedaste.',
+    authEmailPh: 'email',
+    authPasswordPhRegister: 'contraseña (mínimo 8 caracteres)',
+    authPasswordPhLogin: 'contraseña',
+    authSubmitRegister: 'REGÍSTRATE',
+    authSubmitLogin: 'ENTRAR',
+    authToggleToLoginMsg: '¿Ya tienes cuenta?',
+    authToggleToLoginBtn: 'Entrar',
+    authToggleToRegisterMsg: '¿Nuevo por aquí?',
+    authToggleToRegisterBtn: 'Regístrate',
+    authForgot: '¿Olvidaste tu contraseña?',
+    authClose: 'cerrar',
+    authErrFillBoth: 'Llena email y contraseña.',
+    authErrMinChars: 'Mínimo 8 caracteres.',
+    authErrTurnstile: 'Espera a que termine la verificación de seguridad.',
+    authErrInvalid: 'Email o contraseña incorrectos.',
+    authErrTaken: 'Ese email ya tiene cuenta. Intenta entrar.',
+    authErrNetwork: 'Error de red. Verifica tu conexión.',
+    authErrGeneric: 'Algo salió mal. Inténtalo de nuevo.',
+
+    /* Gracias */
+    graciasTitle: 'Gracias del equipo WoGL',
+    graciasSubtitle: 'Tu registro te da acceso a:',
+    graciasItem1: 'Progreso que viaja contigo entre sesiones',
+    graciasItem2: 'Tu nombre y perfil permanente',
+    graciasItem3: 'Nave — theme exclusivo para travelers',
+    graciasItem4: 'Badges por cada 10 lecciones',
+    graciasItem5: 'Free updates y freebies como founder',
+    graciasCta: 'Empezar →',
+
+    /* Onboarding · name */
+    onbStep1: 'paso 1 de 2',
+    onbNameTitle: 'Elige tu nombre',
+    onbNameSubtitle: 'Así te verán los demás travelers. Elige algo que dure — nadie más podrá usarlo.',
+    onbNamePh: 'tu nombre',
+    onbNameNext: 'Siguiente →',
+    onbNameErrChars: 'Solo letras, números y espacios.',
+    onbNameErrTaken: 'Ese nombre ya viaja con alguien más.',
+    onbNameErrVerify: 'Error verificando — recarga y vuelve a entrar.',
+    onbNameAvailable: '✓ disponible',
+
+    /* Onboarding · ship */
+    onbStep2: 'paso 2 de 2',
+    onbShipTitle: 'Elige tu nave',
+    onbShipSubtitle: 'Tu theme exclusivo. Lo puedes cambiar desde Tu Mundo cuando quieras.',
+    onbShipStart: 'Empezar mi viaje →',
+    onbShipErrGeneric: 'No se pudo crear el perfil. Verifica tu sesión y vuelve a intentar.',
+    onbShipErrFetch: 'Perfil creado pero no se pudo cargar. Recarga.',
+
+    /* Welcome confirmations */
+    welcomeSignupTitle: 'Bienvenido, ',
+    welcomeSignupText: 'Tu mundo te espera.',
+    welcomeSignupBtn: 'Entrar a mi mundo →',
+    welcomeBackTitle: 'Hola de nuevo, ',
+    welcomeBackText: 'Tu progreso te esperaba.',
+    welcomeBackBtn: 'Ir a mi mundo →',
+    welcomeResetTitle: 'Contraseña actualizada.',
+    welcomeResetText: 'Tu acceso quedó listo. Tu mundo te espera.',
+    welcomeResetBtn: 'Entrar a mi mundo →',
+    welcomeChangedTitle: 'Contraseña actualizada.',
+    welcomeChangedText: 'Tu nueva contraseña ya está activa.',
+    welcomeChangedBtn: 'Seguir en mi mundo →',
+
+    /* Forgot password / reset request */
+    resetTitle: 'Recuperar contraseña',
+    resetSubtitle: 'Escribe tu email y te enviamos un link para crear una nueva contraseña.',
+    resetEmailPh: 'email',
+    resetSubmit: 'Enviar link',
+    resetSentTitle: 'Link enviado',
+    resetSentText: 'Si tu email está registrado en WoGL, vas a recibir un link en los próximos minutos. Revisa también spam.',
+    resetSentClose: 'Listo',
+    resetBackToLogin: 'Volver a entrar',
+    resetErrFillEmail: 'Pon tu email.',
+    resetErrTurnstile: 'Espera a que termine la verificación de seguridad.',
+
+    /* New password (post-recovery) */
+    newPwdTitle: 'Nueva contraseña',
+    newPwdSubtitle: 'Elige una contraseña nueva para tu cuenta.',
+    newPwdPh: 'nueva contraseña',
+    newPwdConfirmPh: 'confirmar contraseña',
+    newPwdMinHint: 'mínimo 8 caracteres',
+    newPwdSubmit: 'Guardar',
+    newPwdErrFillBoth: 'Llena ambos campos.',
+    newPwdErrMin: 'Mínimo 8 caracteres.',
+    newPwdErrMismatch: 'Las contraseñas no coinciden.',
+    newPwdErrGeneric: 'No se pudo actualizar. El link puede haber expirado — pide uno nuevo.',
+
+    /* Change password */
+    cpTitle: 'Cambiar contraseña',
+    cpSubtitle: 'Por seguridad, escribe tu contraseña actual antes de cambiarla.',
+    cpCurrentPh: 'contraseña actual',
+    cpNewPh: 'nueva contraseña',
+    cpConfirmPh: 'confirmar nueva contraseña',
+    cpSubmit: 'Guardar',
+    cpCancel: 'cancelar',
+    cpErrFillAll: 'Llena los 3 campos.',
+    cpErrMin: 'La nueva contraseña debe tener mínimo 8 caracteres.',
+    cpErrMismatch: 'Las nuevas contraseñas no coinciden.',
+    cpErrSame: 'La nueva contraseña debe ser distinta a la actual.',
+    cpErrCurrent: 'La contraseña actual es incorrecta.',
+    cpErrGeneric: 'No se pudo actualizar. Inténtalo de nuevo.',
+
+    /* Your World — sidebar */
+    worldBack: '← Academy',
+    worldProfile: 'Perfil',
+    worldSettings: 'Ajustes',
+    worldSettingsSub: 'cuenta y preferencias',
+    worldBackpack: 'Mochila',
+    worldBackpackSub: 'próximamente',
+
+    /* Profile tab */
+    profileGreeting: 'De vuelta, ',
+    profileStatLessons: 'Lecciones',
+    profileStatLessonsSub: '{pct}% completo',
+    profileStatBadges: 'Badges',
+    profileStatBadgesSub: '{n} por desbloquear',
+    profileStatShip: 'Nave',
+    profileStatShipSub: 'theme exclusivo',
+    profileBadgesLabel: 'Badges',
+    profileProgressLabel: 'Progreso por sección',
+
+    /* Settings tab */
+    settingsTitle: 'Ajustes',
+    settingsSubtitle: 'cuenta y preferencias',
+    settingsNameLabel: 'Nombre',
+    settingsNameCurrent: 'Actual: ',
+    settingsNamePh: 'Nuevo nombre',
+    settingsNameSave: 'Guardar nombre',
+    settingsNameNote: 'Tu T#{num} no cambia.',
+    settingsNameErrValidate: 'No se pudo validar. Inténtalo de nuevo.',
+    settingsNameErrSave: 'No se pudo guardar el nombre.',
+    settingsNameOk: 'Nombre actualizado.',
+    settingsNameTaken: 'Ese nombre ya está tomado.',
+    settingsShipLabel: 'Nave',
+    settingsShipCurrent: 'Actual: ',
+    settingsShipErr: 'No se pudo guardar la nave.',
+    settingsShipOk: 'Nave actualizada a ',
+    settingsEmailLabel: 'Email',
+    settingsEmailNote: 'Para cambiar tu email contacta hola@mundogl.com.',
+    settingsPasswordLabel: 'Contraseña',
+    settingsPasswordCurrent: 'Cambia tu contraseña cuando quieras.',
+    settingsPasswordBtn: 'Cambiar contraseña',
+    settingsDangerLabel: 'Zona peligrosa',
+    settingsLogout: 'Salir de sesión',
+    settingsDelete: 'Eliminar cuenta',
+
+    /* Delete account modal */
+    delTitle: 'Eliminar cuenta',
+    delText: 'Esta acción es permanente. Se borran tu perfil, progreso, badges y todo lo asociado a tu cuenta. No hay vuelta atrás.',
+    delConfirmPh: 'Escribe ELIMINAR para confirmar',
+    delConfirmKeyword: 'ELIMINAR',
+    delConfirmBtn: 'Eliminar permanentemente',
+    delCancel: 'Cancelar',
+    delErrGeneric: 'No se pudo eliminar. Si el problema persiste, escríbenos a hola@mundogl.com.',
+
+    /* Backpack tab */
+    backpackTitle: 'Mochila',
+    backpackSubtitle: 'Próximamente',
+    backpackEmptyTitle: 'Tu mochila se está armando',
+    backpackEmptyText: 'Aquí vas a juntar tus shaders guardados, freebies desbloqueados y herramientas exclusivas para travelers. Pronto.'
+  }
+};
+
+/* ─── Language state ─── */
+var browseLang  = localStorage.getItem('wogl-browse-lang')  || 'en';
+var accountLang = localStorage.getItem('wogl-account-lang') || ''; /* '' = not chosen yet */
+
+/* The surface in scope. Academy reads browseLang, chassis reads accountLang.
+   Until the user logs in, every surface reads browseLang. */
+function activeLang() {
+  return accountLang && _isChassisActive ? accountLang : browseLang;
+}
+
+/* Stub flag — chassis modals will flip this true when active.
+   Defined here so activeLang() never throws. */
+var _isChassisActive = false;
+
+function t(key, surface) {
+  var lang = (surface === 'chassis' && accountLang) ? accountLang : browseLang;
+  var dict = I18N[lang] || I18N.en;
+  return dict[key] !== undefined ? dict[key] : key;
+}
+
+function fmt(template, vars) {
+  if (!template) return '';
+  return Object.keys(vars || {}).reduce(function(s, k) {
+    return s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+  }, template);
+}
+
+/* Walk every [data-i18n] element and apply the right translation.
+   Academy elements get browseLang, chassis elements get accountLang
+   (or fall back to browseLang if account language hasn't been chosen). */
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var surface = el.closest('.chassis') ? 'chassis' : 'academy';
+    var val = t(key, surface);
+    if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+    else el.textContent = val;
+  });
+
+  /* Translatable attributes via data-i18n-attr="placeholder:key" */
+  document.querySelectorAll('[data-i18n-attr]').forEach(function(el) {
+    var surface = el.closest('.chassis') ? 'chassis' : 'academy';
+    (el.getAttribute('data-i18n-attr') || '').split(',').forEach(function(pair) {
+      var p = pair.split(':');
+      if (p.length === 2) el.setAttribute(p[0].trim(), t(p[1].trim(), surface));
+    });
+  });
+
+  /* Header toggle reflects browseLang only. */
+  document.querySelectorAll('.browse-lang button').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-lang') === browseLang);
+  });
+
+  /* If Your World is open, re-render so dynamically-built strings
+     (greeting, stat sublabels, etc.) reflect the current account language. */
+  if (document.getElementById('world') && document.getElementById('world').classList.contains('active')) {
+    if (typeof worldRender === 'function' && _profile) worldRender();
+  }
+}
+
+function setBrowseLang(lang) {
+  if (lang !== 'en' && lang !== 'es') return;
+  browseLang = lang;
+  localStorage.setItem('wogl-browse-lang', lang);
+  document.documentElement.setAttribute('lang', lang);
+  /* academyRender() rewrites lesson titles that aren't data-i18n
+     (they come from academyLessonTitle()) and also calls applyLang
+     so chrome translations refresh in the same pass. */
+  if (typeof academyRender === 'function') academyRender();
+  else applyLang();
+}
+
+function pickAccountLang(lang) {
+  if (lang !== 'en' && lang !== 'es') return;
+  accountLang = lang;
+  localStorage.setItem('wogl-account-lang', lang);
+  hide('modalAccountLang');
+  /* Next bloque: open the auth modal in the chosen account language. */
+  openAuthModal();
+}
+
+function openLogin() {
+  /* If the user has never set their account language, ask first.
+     Otherwise jump straight to auth. */
+  if (!accountLang) show('modalAccountLang');
+  else openAuthModal();
+}
+
+/* ═══════════════════════════════════════════════
+   Supabase client
+   ═══════════════════════════════════════════════ */
+var _sb = supabase.createClient(
+  'https://ubvtspvlrukuayucpnwl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidnRzcHZscnVrdWF5dWNwbndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzcwMTIsImV4cCI6MjA5MzY1MzAxMn0.Dav1A7ksKnnuv41Z8kGlMumbkvqF6UaXbGSEqpLtU4o'
+);
+
+/* ═══════════════════════════════════════════════
+   Auth state
+   ═══════════════════════════════════════════════ */
+var _user = null;
+var _profile = null;
+var _authMode = 'register';   /* 'register' | 'login' */
+var _onbName = '';
+var _onbShip = 'nebula';
+var _nameCheckTimeout = null;
+
+/* Ship catalog — shared by onboarding picker and Settings (in B4). */
+var SHIPS = [
+  { key:'nebula', name:'Nebula', color:'#d080ff' },
+  { key:'lava',   name:'Lava',   color:'#ffb060' },
+  { key:'aurora', name:'Aurora', color:'#40e8c8' },
+  { key:'royal',  name:'Royal',  color:'#809cff' },
+  { key:'ember',  name:'Ember',  color:'#ff6040' },
+  { key:'void',   name:'Void',   color:'#a0a0b0' },
+  { key:'solar',  name:'Solar',  color:'#ffd700' },
+  { key:'moss',   name:'Moss',   color:'#80c860' }
+];
+
+function setErr(id, msg) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg || '';
+}
+
+/* ═══════════════════════════════════════════════
+   Auth modal — open / close / mode toggle
+   ═══════════════════════════════════════════════ */
+function openAuthModal(mode) {
+  if (mode) _authMode = mode;
+  _isChassisActive = true;
+  show('modalAuth');
+  updateAuthCopy();
+  /* Reset turnstile if it had a stale token. */
+  if (window.turnstile && window._turnstileWidgets.auth) {
+    window.turnstile.reset(window._turnstileWidgets.auth);
+    window._tokenAuth = null;
+  }
+  setTimeout(function() {
+    var el = document.getElementById('authEmail');
+    if (el) el.focus();
+  }, 100);
+}
+
+function toggleAuthMode() {
+  _authMode = (_authMode === 'register') ? 'login' : 'register';
+  setErr('authError', '');
+  updateAuthCopy();
+  if (window.turnstile && window._turnstileWidgets.auth) {
+    window.turnstile.reset(window._turnstileWidgets.auth);
+    window._tokenAuth = null;
+  }
+}
+
+/* Keep auth title / blurb / button / placeholder / toggle in sync
+   with both _authMode and the account language. */
+function updateAuthCopy() {
+  var isReg = (_authMode === 'register');
+  var sfx = isReg ? 'Register' : 'Login';
+
+  var sub      = document.getElementById('authSub');
+  var title    = document.getElementById('authTitle');
+  var blurb    = document.getElementById('authBlurb');
+  var submit   = document.getElementById('authSubmit');
+  var toggleMs = document.getElementById('authToggleMsg');
+  var toggleBt = document.getElementById('authToggleBtn');
+  var pass     = document.getElementById('authPassword');
+  var forgot   = document.getElementById('authForgotRow');
+
+  if (sub)      sub.setAttribute('data-i18n', 'authSub' + sfx);
+  if (title)    title.setAttribute('data-i18n', 'authTitle' + sfx);
+  if (blurb)    blurb.setAttribute('data-i18n', 'authBlurb' + sfx);
+  if (submit)   submit.setAttribute('data-i18n', 'authSubmit' + sfx);
+  if (toggleMs) toggleMs.setAttribute('data-i18n', isReg ? 'authToggleToLoginMsg' : 'authToggleToRegisterMsg');
+  if (toggleBt) toggleBt.setAttribute('data-i18n', isReg ? 'authToggleToLoginBtn' : 'authToggleToRegisterBtn');
+  if (pass)     pass.setAttribute('data-i18n-attr', 'placeholder:' + (isReg ? 'authPasswordPhRegister' : 'authPasswordPhLogin'));
+  if (forgot)   forgot.style.display = isReg ? 'none' : 'block';
+
+  applyLang();
+}
+
+/* ═══════════════════════════════════════════════
+   doAuth — signUp or signInWithPassword + Turnstile
+   ═══════════════════════════════════════════════ */
+async function doAuth() {
+  var email = document.getElementById('authEmail').value.trim();
+  var password = document.getElementById('authPassword').value;
+  var btn = document.getElementById('authSubmit');
+
+  setErr('authError', '');
+
+  if (!email || !password) { setErr('authError', t('authErrFillBoth', 'chassis')); return; }
+  if (_authMode === 'register' && password.length < 8) { setErr('authError', t('authErrMinChars', 'chassis')); return; }
+  if (!window._tokenAuth) { setErr('authError', t('authErrTurnstile', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+
+  var result;
+  try {
+    if (_authMode === 'register') {
+      result = await _sb.auth.signUp({
+        email: email, password: password,
+        options: { captchaToken: window._tokenAuth }
+      });
+    } else {
+      result = await _sb.auth.signInWithPassword({
+        email: email, password: password,
+        options: { captchaToken: window._tokenAuth }
+      });
+    }
+  } catch (err) {
+    btn.disabled = false; btn.style.opacity = '1';
+    setErr('authError', t('authErrNetwork', 'chassis'));
+    return;
+  }
+
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (result.error) {
+    setErr('authError', parseAuthError(result.error));
+    if (window.turnstile && window._turnstileWidgets.auth) {
+      window.turnstile.reset(window._turnstileWidgets.auth);
+      window._tokenAuth = null;
+    }
+    return;
+  }
+
+  if (!result.data.session) {
+    setErr('authError', t('authErrGeneric', 'chassis'));
+    return;
+  }
+
+  _user = result.data.user;
+
+  if (_authMode === 'register') {
+    /* New account → gracias → name → ship → welcome */
+    hide('modalAuth');
+    show('modalGracias');
+  } else {
+    /* Existing account → check profile and route. */
+    hide('modalAuth');
+    await routeReturningUser();
+  }
+}
+
+function parseAuthError(error) {
+  var msg = (error && error.message ? error.message : '').toLowerCase();
+  if (msg.indexOf('already registered') !== -1 || msg.indexOf('user already registered') !== -1) {
+    return t('authErrTaken', 'chassis');
+  }
+  if (msg.indexOf('invalid login') !== -1 || msg.indexOf('invalid credentials') !== -1) {
+    return t('authErrInvalid', 'chassis');
+  }
+  return t('authErrGeneric', 'chassis');
+}
+
+/* ═══════════════════════════════════════════════
+   Returning user route — fetch profile, decide which
+   welcome confirmation to show.
+   ═══════════════════════════════════════════════ */
+async function routeReturningUser() {
+  var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+  if (pr.data) {
+    _profile = pr.data;
+    document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+    document.getElementById('welcomeBackName').textContent = _profile.display_name || 'traveler';
+    show('modalWelcomeBack');
+  } else {
+    /* User somehow has a session but no profile — resume onboarding. */
+    show('modalOnbName');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Gracias → onboarding
+   ═══════════════════════════════════════════════ */
+function afterGracias() {
+  hide('modalGracias');
+  show('modalOnbName');
+  setTimeout(function() {
+    var el = document.getElementById('onbNameInput');
+    if (el) el.focus();
+  }, 100);
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding — name (live availability check)
+   ═══════════════════════════════════════════════ */
+function wireNameCheck() {
+  var input = document.getElementById('onbNameInput');
+  var btn   = document.getElementById('onbNameBtn');
+  var fb    = document.getElementById('nameFeedback');
+  if (!input || !btn || !fb) {
+    console.warn('[wireNameCheck] elements missing — input:', !!input, 'btn:', !!btn, 'fb:', !!fb);
+    return;
+  }
+  console.log('[wireNameCheck] listener mounted');
+
+  function runCheck() {
+    var val = input.value.trim();
+    clearTimeout(_nameCheckTimeout);
+
+    /* Defensive philosophy: as soon as the format is valid we let
+       the user advance. The live RPC is feedback-only — when it
+       responds we update the feedback line, and init_profile on
+       finish acts as the authoritative server-side validator.
+       This unblocks iPhone Safari cases where the listener fires
+       but the RPC sometimes hangs silently. */
+
+    if (val.length < 2) {
+      fb.textContent = '';
+      fb.className = 'name-feedback';
+      _onbName = '';
+      btn.disabled = true;
+      return;
+    }
+    if (!/^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑüÜ ]+$/.test(val)) {
+      fb.textContent = t('onbNameErrChars', 'chassis');
+      fb.className = 'name-feedback err';
+      _onbName = '';
+      btn.disabled = true;
+      return;
+    }
+
+    /* Format is valid — user can already proceed. */
+    _onbName = val;
+    btn.disabled = false;
+    fb.textContent = (accountLang === 'es') ? 'verificando…' : 'checking…';
+    fb.className = 'name-feedback';
+
+    /* Safety net: if the RPC hangs forever and never updates this
+       feedback line, clear the "checking…" zombie after 3 seconds
+       so the user isn't staring at gray text indefinitely. The
+       button stays enabled either way. */
+    var hangGuard = setTimeout(function() {
+      if (fb.textContent === ((accountLang === 'es') ? 'verificando…' : 'checking…')) {
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+      }
+    }, 3000);
+
+    _nameCheckTimeout = setTimeout(async function() {
+      console.log('[wireNameCheck] calling check_name_available for:', val);
+      var res;
+      try {
+        res = await _sb.rpc('check_name_available', { name: val });
+      } catch (e) {
+        console.error('[wireNameCheck] RPC threw — keeping advance enabled:', e);
+        clearTimeout(hangGuard);
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+        return;
+      }
+      clearTimeout(hangGuard);
+      console.log('[wireNameCheck] RPC result:', res);
+
+      /* If the user kept typing while the RPC was in flight, the
+         response is stale — ignore it. */
+      if (input.value.trim() !== val) return;
+
+      if (res.error) {
+        console.error('[wireNameCheck] RPC error — keeping advance enabled:', res.error);
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+        return;
+      }
+      if (res.data === false) {
+        fb.textContent = t('onbNameErrTaken', 'chassis');
+        fb.className = 'name-feedback err';
+        _onbName = '';
+        btn.disabled = true;
+      } else if (res.data === true) {
+        fb.textContent = t('onbNameAvailable', 'chassis');
+        fb.className = 'name-feedback ok';
+      } else {
+        /* null / undefined — RPC didn't tell us either way. Keep advance enabled. */
+        fb.textContent = '';
+        fb.className = 'name-feedback';
+      }
+    }, 450);
+  }
+
+  /* Hook multiple events for iOS Safari coverage:
+     - input: standard typing
+     - keyup: catches autocomplete / paste edge cases
+     - change: catches blur-triggered changes
+  */
+  input.addEventListener('input', runCheck);
+  input.addEventListener('keyup', runCheck);
+  input.addEventListener('change', runCheck);
+}
+
+function goToShip() {
+  if (!_onbName) return;
+  hide('modalOnbName');
+  renderShipGrid();
+  show('modalOnbShip');
+}
+
+/* ═══════════════════════════════════════════════
+   Onboarding — ship (theme picker + live preview)
+   ═══════════════════════════════════════════════ */
+function renderShipGrid() {
+  var grid = document.getElementById('shipGrid');
+  grid.innerHTML = '';
+  SHIPS.forEach(function(s) {
+    var cell = document.createElement('div');
+    cell.className = 'ship-cell' + (s.key === _onbShip ? ' selected' : '');
+    cell.setAttribute('data-ship', s.key);
+    cell.innerHTML = '<div class="ship-dot" style="background:' + s.color + ';"></div><div class="ship-name">' + s.name + '</div>';
+    cell.addEventListener('click', function() {
+      _onbShip = s.key;
+      document.querySelectorAll('.ship-cell').forEach(function(c) { c.classList.remove('selected'); });
+      cell.classList.add('selected');
+      document.body.setAttribute('data-theme', s.key);
+    });
+    grid.appendChild(cell);
+  });
+  document.body.setAttribute('data-theme', _onbShip);
+}
+
+async function finishOnboarding() {
+  setErr('shipError', '');
+  console.log('[finishOnboarding] init_profile', { p_name: _onbName, p_theme: _onbShip });
+
+  var r = await _sb.rpc('init_profile', { p_name: _onbName, p_theme: _onbShip });
+  if (r.error) {
+    console.error('[finishOnboarding] init_profile error:', r.error);
+    var msg = (r.error.message || '').toLowerCase();
+    /* If the server-side rejection is about the name being taken,
+       send the user back to the name step with the precise message. */
+    if (msg.indexOf('name') !== -1 && (msg.indexOf('taken') !== -1 || msg.indexOf('unique') !== -1 || msg.indexOf('duplicate') !== -1)) {
+      hide('modalOnbShip');
+      show('modalOnbName');
+      var fb = document.getElementById('nameFeedback');
+      var btn = document.getElementById('onbNameBtn');
+      if (fb) { fb.textContent = t('onbNameErrTaken', 'chassis'); fb.className = 'name-feedback err'; }
+      if (btn) btn.disabled = true;
+      _onbName = '';
+      var inp = document.getElementById('onbNameInput');
+      if (inp) inp.focus();
+      return;
+    }
+    setErr('shipError', t('onbShipErrGeneric', 'chassis'));
+    return;
+  }
+
+  var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+  if (pr.error || !pr.data) {
+    console.error('[finishOnboarding] profile fetch error:', pr.error);
+    setErr('shipError', t('onbShipErrFetch', 'chassis'));
+    return;
+  }
+  _profile = pr.data;
+  document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+  document.getElementById('welcomeSignupName').textContent = _profile.display_name || 'traveler';
+  hide('modalOnbShip');
+  show('modalWelcomeSignup');
+}
+
+/* ═══════════════════════════════════════════════
+   Your World — Profile + Settings + Backpack
+   ═══════════════════════════════════════════════ */
+
+/* Catalogs — declared once at top of B4 block so render functions can read them. */
+var WORLD_SECTIONS = [
+  { num:'00', name:'Start Here',  total:10, accent:'#a8e4dc' },
+  { num:'01', name:'Patterns',    total:10, accent:'#e8a8c8' },
+  { num:'02', name:'Forces',      total:10, accent:'#a8c8e8' },
+  { num:'03', name:'Noise',       total:10, accent:'#c8e8a8' },
+  { num:'04', name:'Domain Warp', total:10, accent:'#e8d4a8' },
+  { num:'05', name:'Motion',      total:10, accent:'#d4a8e8' }
+];
+
+var WORLD_BADGES = [
+  { key:'founding_traveler', name:'Founding Traveler', icon:'★', founding:true },
+  { key:'first_lesson',      name:'First Lesson',      icon:'✦' },
+  { key:'10_lessons',        name:'10 Lessons',        icon:'◆' },
+  { key:'20_lessons',        name:'20 Lessons',        icon:'◆' },
+  { key:'30_lessons',        name:'30 Lessons',        icon:'◆' },
+  { key:'40_lessons',        name:'40 Lessons',        icon:'◆' },
+  { key:'50_lessons',        name:'50 Lessons',        icon:'◆' },
+  { key:'all_seeing',        name:'All Seeing',        icon:'◆' }
+];
+
+/* State */
+var _worldTab = 'profile';
+var _worldProgress = [];    /* rows from lesson_progress */
+var _worldBadges = [];      /* rows from badges */
+
+/* Helpers */
+function worldEsc(s) {
+  var d = document.createElement('div');
+  d.textContent = (s == null) ? '' : String(s);
+  return d.innerHTML;
+}
+function worldDoneInSection(num) {
+  return _worldProgress.filter(function(p){ return p.section === num; }).length;
+}
+function worldTotalDone() { return _worldProgress.length; }
+function worldTotalLessons() {
+  return WORLD_SECTIONS.reduce(function(a, s){ return a + s.total; }, 0);
+}
+function worldBadgesUnlocked() {
+  return _worldBadges.map(function(b){ return b.badge_key; });
+}
+
+/* Entry point — called from Welcome confirmations + the dorado header action. */
+async function enterYourWorld() {
+  hide('modalWelcomeSignup');
+  hide('modalWelcomeBack');
+  hide('modalWelcomeReset');
+  if (!_profile) return;
+
+  _isChassisActive = true;
+  document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+
+  /* Header reflects logged-in state. */
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = _profile.display_name + ' →';
+    headerBtn.classList.add('logged');
+    headerBtn.onclick = function() { enterYourWorld(); };
+  }
+
+  await worldLoadData();
+  worldRender();
+  show('world');
+  applyLang();
+}
+
+function exitYourWorld() {
+  hide('world');
+  _isChassisActive = false;
+}
+
+/* Load real data from Supabase. Defensive: never throw. */
+async function worldLoadData() {
+  if (!_user) return;
+  try {
+    var [progRes, badgeRes] = await Promise.all([
+      _sb.from('lesson_progress').select('*').eq('user_id', _user.id),
+      _sb.from('badges').select('*').eq('user_id', _user.id)
+    ]);
+    _worldProgress = progRes.data || [];
+    _worldBadges = badgeRes.data || [];
+  } catch (e) {
+    console.error('[worldLoadData] error:', e);
+    _worldProgress = [];
+    _worldBadges = [];
+  }
+}
+
+/* Render the panel chrome (header + sidebar) and delegate to tab renderer. */
+function worldRender() {
+  var tnum = 'T#' + String(_profile.traveler_num || 0).padStart(4, '0');
+  document.getElementById('worldTraveler').textContent = tnum;
+  document.getElementById('worldSideProfileSub').textContent =
+    worldEsc(_profile.display_name) + ' · ' + tnum;
+
+  document.querySelectorAll('.world-side-item').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-tab') === _worldTab);
+  });
+
+  var main = document.getElementById('worldMain');
+  if (_worldTab === 'profile')        worldRenderProfile(main);
+  else if (_worldTab === 'settings')  worldRenderSettings(main);
+  else if (_worldTab === 'backpack')  worldRenderBackpack(main);
+}
+
+function worldSwitchTab(tab) {
+  if (tab === 'backpack') return; /* disabled */
+  _worldTab = tab;
+  worldRender();
+}
+
+/* ─── Profile tab ─── */
+function worldRenderProfile(main) {
+  var done = worldTotalDone();
+  var total = worldTotalLessons();
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  var unlocked = worldBadgesUnlocked();
+  var badgeCount = unlocked.length;
+
+  var h = '';
+  h += '<h1 class="world-greeting">' + t('profileGreeting', 'chassis') + '<em>' + worldEsc(_profile.display_name) + '</em></h1>';
+  h += '<span class="world-sub">T#' + String(_profile.traveler_num || 0).padStart(4, '0') + '</span>';
+
+  h += '<div class="stats-grid">';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatLessons', 'chassis') + '</div>';
+  h += '    <div class="stat-value">' + done + '<span class="of">/' + total + '</span></div>';
+  h += '    <div class="stat-sub">' + fmt(t('profileStatLessonsSub', 'chassis'), { pct: pct }) + '</div>';
+  h += '  </div>';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatBadges', 'chassis') + '</div>';
+  h += '    <div class="stat-value">' + badgeCount + '<span class="of">/' + WORLD_BADGES.length + '</span></div>';
+  h += '    <div class="stat-sub">' + fmt(t('profileStatBadgesSub', 'chassis'), { n: Math.max(0, WORLD_BADGES.length - badgeCount) }) + '</div>';
+  h += '  </div>';
+  h += '  <div class="stat-card">';
+  h += '    <div class="stat-label">' + t('profileStatShip', 'chassis') + '</div>';
+  h += '    <div class="stat-value" style="font-size:22px;">' + worldEsc(_profile.theme || 'nebula') + '</div>';
+  h += '    <div class="stat-sub">' + t('profileStatShipSub', 'chassis') + '</div>';
+  h += '  </div>';
+  h += '</div>';
+
+  h += '<div class="section-label">' + t('profileBadgesLabel', 'chassis') + '</div>';
+  h += '<div class="badge-grid">';
+  WORLD_BADGES.forEach(function(b){
+    var u = unlocked.indexOf(b.key) !== -1;
+    var cls = 'badge-pill' + (u ? '' : ' locked') + (b.founding && u ? ' founding' : '');
+    h += '<div class="' + cls + '">' + b.icon + ' ' + worldEsc(b.name) + '</div>';
+  });
+  h += '</div>';
+
+  h += '<div class="section-label">' + t('profileProgressLabel', 'chassis') + '</div>';
+  WORLD_SECTIONS.forEach(function(s){
+    var d = worldDoneInSection(s.num);
+    var p = s.total > 0 ? Math.round(d / s.total * 100) : 0;
+    h += '<div class="progress-row">';
+    h += '  <div class="progress-label">' + worldEsc(s.name) + '</div>';
+    h += '  <div class="progress-track"><div class="progress-fill" style="width:' + p + '%;background:' + s.accent + ';"></div></div>';
+    h += '  <div class="progress-pct">' + d + '/' + s.total + '</div>';
+    h += '</div>';
+  });
+
+  main.innerHTML = h;
+}
+
+/* ─── Settings tab ─── */
+function worldRenderSettings(main) {
+  var tnum = String(_profile.traveler_num || 0).padStart(4, '0');
+  var h = '';
+  h += '<h1 class="world-greeting">' + t('settingsTitle', 'chassis') + '</h1>';
+  h += '<span class="world-sub">' + t('settingsSubtitle', 'chassis') + '</span>';
+
+  /* Display name */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsNameLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsNameCurrent', 'chassis') + worldEsc(_profile.display_name) + '</div>';
+  h += '  <input class="settings-input" id="worldNameInput" type="text" maxlength="20" placeholder="' + worldEsc(t('settingsNamePh', 'chassis')) + '">';
+  h += '  <div class="settings-error" id="worldNameError"></div>';
+  h += '  <div class="settings-success" id="worldNameSuccess"></div>';
+  h += '  <button class="settings-btn" id="worldNameBtn" onclick="worldSaveName()" disabled>' + t('settingsNameSave', 'chassis') + '</button>';
+  h += '  <div class="settings-note">' + fmt(t('settingsNameNote', 'chassis'), { num: tnum }) + '</div>';
+  h += '</div>';
+
+  /* Ship */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsShipLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsShipCurrent', 'chassis') + worldEsc(_profile.theme || 'nebula') + '</div>';
+  h += '  <div class="world-theme-grid">';
+  SHIPS.forEach(function(s){
+    var sel = (_profile.theme === s.key) ? ' selected' : '';
+    h += '    <div class="world-theme-card' + sel + '" data-theme="' + s.key + '" onclick="worldSelectTheme(\'' + s.key + '\')">';
+    h += '      <div class="world-theme-dot" style="background:' + s.color + ';"></div>';
+    h += '      <div class="world-theme-name">' + s.name + '</div>';
+    h += '    </div>';
+  });
+  h += '  </div>';
+  h += '  <div class="settings-error" id="worldShipError"></div>';
+  h += '  <div class="settings-success" id="worldShipSuccess"></div>';
+  h += '</div>';
+
+  /* Email */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsEmailLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + worldEsc((_user && _user.email) || '—') + '</div>';
+  h += '  <div class="settings-note">' + t('settingsEmailNote', 'chassis') + '</div>';
+  h += '</div>';
+
+  /* Password */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label">' + t('settingsPasswordLabel', 'chassis') + '</div>';
+  h += '  <div class="settings-current">' + t('settingsPasswordCurrent', 'chassis') + '</div>';
+  h += '  <button class="settings-btn outline" onclick="openChangePassword()">' + t('settingsPasswordBtn', 'chassis') + '</button>';
+  h += '</div>';
+
+  /* Danger zone */
+  h += '<div class="settings-section">';
+  h += '  <div class="settings-label" style="color:#ff9c9c;">' + t('settingsDangerLabel', 'chassis') + '</div>';
+  h += '  <div class="danger-zone">';
+  h += '    <button class="logout-btn" onclick="worldLogout()">' + t('settingsLogout', 'chassis') + '</button>';
+  h += '    <button class="danger-btn" onclick="worldOpenDelete()">' + t('settingsDelete', 'chassis') + '</button>';
+  h += '  </div>';
+  h += '</div>';
+
+  main.innerHTML = h;
+  worldWireSettings();
+}
+
+function worldWireSettings() {
+  var inp = document.getElementById('worldNameInput');
+  var btn = document.getElementById('worldNameBtn');
+  if (!inp || !btn) return;
+  inp.addEventListener('input', function(){
+    var v = (inp.value || '').trim();
+    btn.disabled = (v.length < 2 || v === _profile.display_name);
+    setErr('worldNameError', '');
+    var ok = document.getElementById('worldNameSuccess');
+    if (ok) ok.textContent = '';
+  });
+}
+
+async function worldSaveName() {
+  var inp = document.getElementById('worldNameInput');
+  var btn = document.getElementById('worldNameBtn');
+  if (!inp || !btn) return;
+  var nu = (inp.value || '').trim();
+  if (nu.length < 2 || nu === _profile.display_name) return;
+
+  btn.disabled = true;
+  setErr('worldNameError', '');
+
+  try {
+    var avail = await _sb.rpc('check_name_available', { name: nu });
+    if (avail.error) throw avail.error;
+    if (!avail.data) {
+      setErr('worldNameError', t('settingsNameTaken', 'chassis'));
+      btn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    /* RPC failed but server-side will reject if name is actually taken.
+       Defensive: keep going, let the update attempt be the authoritative gate. */
+    console.warn('[worldSaveName] availability check failed, proceeding:', e);
+  }
+
+  var r = await _sb.from('profiles').update({ display_name: nu }).eq('id', _user.id);
+  if (r.error) {
+    console.error('[worldSaveName] update error:', r.error);
+    setErr('worldNameError', t('settingsNameErrSave', 'chassis'));
+    btn.disabled = false;
+    return;
+  }
+
+  _profile.display_name = nu;
+  var ok = document.getElementById('worldNameSuccess');
+  if (ok) ok.textContent = t('settingsNameOk', 'chassis');
+  document.getElementById('worldSideProfileSub').textContent =
+    worldEsc(nu) + ' · T#' + String(_profile.traveler_num || 0).padStart(4, '0');
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) headerBtn.textContent = nu + ' →';
+}
+
+async function worldSelectTheme(key) {
+  if (!_profile) return;
+  document.querySelectorAll('.world-theme-card').forEach(function(c){
+    c.classList.toggle('selected', c.getAttribute('data-theme') === key);
+  });
+  document.body.setAttribute('data-theme', key);
+  setErr('worldShipError', '');
+
+  var r = await _sb.rpc('update_theme', { new_theme: key });
+  if (r.error) {
+    console.error('[worldSelectTheme] update_theme error:', r.error);
+    setErr('worldShipError', t('settingsShipErr', 'chassis'));
+    return;
+  }
+  _profile.theme = key;
+  var ok = document.getElementById('worldShipSuccess');
+  if (ok) ok.textContent = t('settingsShipOk', 'chassis') + key + '.';
+}
+
+function worldRenderBackpack(main) {
+  main.innerHTML =
+    '<h1 class="world-greeting">' + t('backpackTitle', 'chassis') + '</h1>' +
+    '<span class="world-sub">' + t('backpackSubtitle', 'chassis') + '</span>' +
+    '<div class="backpack-empty">' +
+    '  <div class="icon">◇</div>' +
+    '  <h2>' + t('backpackEmptyTitle', 'chassis') + '</h2>' +
+    '  <p>' + t('backpackEmptyText', 'chassis') + '</p>' +
+    '</div>';
+}
+
+/* Delete account flow */
+function worldOpenDelete() {
+  var inp = document.getElementById('delConfirmInput');
+  var btn = document.getElementById('delConfirmBtn');
+  if (inp) inp.value = '';
+  if (btn) btn.disabled = true;
+  setErr('delError', '');
+  show('modalDelete');
+  if (inp) {
+    inp.oninput = function(){
+      var v = inp.value.trim();
+      btn.disabled = (v !== t('delConfirmKeyword', 'chassis'));
+    };
+  }
+}
+
+async function worldConfirmDelete() {
+  var btn = document.getElementById('delConfirmBtn');
+  btn.disabled = true;
+  setErr('delError', '');
+
+  var r = await _sb.rpc('delete_account');
+  if (r.error) {
+    console.error('[worldConfirmDelete] delete_account error:', r.error);
+    setErr('delError', t('delErrGeneric', 'chassis'));
+    btn.disabled = false;
+    return;
+  }
+
+  await _sb.auth.signOut();
+  _user = null;
+  _profile = null;
+  document.body.removeAttribute('data-theme');
+  hide('modalDelete');
+  hide('world');
+  _isChassisActive = false;
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = t('headerLogin', 'academy');
+    headerBtn.classList.remove('logged');
+    headerBtn.onclick = function(){ openLogin(); };
+  }
+}
+
+/* Logout from Your World */
+async function worldLogout() {
+  hide('world');
+  _isChassisActive = false;
+  await doLogout();
+}
+
+/* ═══════════════════════════════════════════════
+   Forgot / reset password
+   ═══════════════════════════════════════════════ */
+function openForgot() {
+  hide('modalAuth');
+  document.getElementById('resetStep1').style.display = 'block';
+  document.getElementById('resetStep2').style.display = 'none';
+  document.getElementById('resetEmail').value = '';
+  setErr('resetError', '');
+  show('modalReset');
+  if (window.turnstile && window._turnstileWidgets.reset) {
+    window.turnstile.reset(window._turnstileWidgets.reset);
+    window._tokenReset = null;
+  }
+}
+
+async function doResetRequest() {
+  var email = document.getElementById('resetEmail').value.trim();
+  var btn = document.getElementById('resetSubmit');
+  setErr('resetError', '');
+  if (!email) { setErr('resetError', t('resetErrFillEmail', 'chassis')); return; }
+  if (!window._tokenReset) { setErr('resetError', t('resetErrTurnstile', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+  var redirectUrl = window.location.origin + window.location.pathname + '?recovery=true';
+  await _sb.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectUrl,
+    captchaToken: window._tokenReset
+  });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  document.getElementById('resetStep1').style.display = 'none';
+  document.getElementById('resetStep2').style.display = 'block';
+
+  if (window.turnstile && window._turnstileWidgets.reset) {
+    window.turnstile.reset(window._turnstileWidgets.reset);
+    window._tokenReset = null;
+  }
+}
+
+async function doSetNewPassword() {
+  var p1 = document.getElementById('newPwd1').value;
+  var p2 = document.getElementById('newPwd2').value;
+  var btn = document.getElementById('newPwdSubmit');
+  setErr('newPwdError', '');
+
+  if (!p1 || !p2)         { setErr('newPwdError', t('newPwdErrFillBoth', 'chassis')); return; }
+  if (p1.length < 8)      { setErr('newPwdError', t('newPwdErrMin', 'chassis'));      return; }
+  if (p1 !== p2)          { setErr('newPwdError', t('newPwdErrMismatch', 'chassis')); return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+  var r = await _sb.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (r.error) { setErr('newPwdError', t('newPwdErrGeneric', 'chassis')); return; }
+
+  hide('modalNewPwd');
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  if (_user) {
+    var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+    if (pr.data) _profile = pr.data;
+  }
+  show('modalWelcomeReset');
+}
+
+/* ═══════════════════════════════════════════════
+   Change password (logged-in)
+   ═══════════════════════════════════════════════ */
+function openChangePassword() {
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew1').value = '';
+  document.getElementById('cpNew2').value = '';
+  setErr('cpError', '');
+  show('modalChangePwd');
+}
+
+async function doChangePassword() {
+  var cur = document.getElementById('cpCurrent').value;
+  var p1  = document.getElementById('cpNew1').value;
+  var p2  = document.getElementById('cpNew2').value;
+  var btn = document.getElementById('cpSubmit');
+  setErr('cpError', '');
+
+  if (!cur || !p1 || !p2) { setErr('cpError', t('cpErrFillAll', 'chassis'));  return; }
+  if (p1.length < 8)      { setErr('cpError', t('cpErrMin', 'chassis'));      return; }
+  if (p1 !== p2)          { setErr('cpError', t('cpErrMismatch', 'chassis')); return; }
+  if (cur === p1)         { setErr('cpError', t('cpErrSame', 'chassis'));     return; }
+
+  btn.disabled = true; btn.style.opacity = '0.5';
+
+  var verify = await _sb.auth.signInWithPassword({ email: _user.email, password: cur });
+  if (verify.error) {
+    btn.disabled = false; btn.style.opacity = '1';
+    setErr('cpError', t('cpErrCurrent', 'chassis'));
+    return;
+  }
+  var upd = await _sb.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.style.opacity = '1';
+
+  if (upd.error) { setErr('cpError', t('cpErrGeneric', 'chassis')); return; }
+
+  hide('modalChangePwd');
+  show('modalWelcomeChanged');
+}
+
+/* ═══════════════════════════════════════════════
+   Logout — clears session, hides world panel, resets header
+   ═══════════════════════════════════════════════ */
+async function doLogout() {
+  await _sb.auth.signOut();
+  _user = null;
+  _profile = null;
+  _worldProgress = [];
+  _worldBadges = [];
+  _worldTab = 'profile';
+  _isChassisActive = false;
+  document.body.removeAttribute('data-theme');
+  hide('world');
+  hide('modalDelete');
+  var headerBtn = document.getElementById('headerAction');
+  if (headerBtn) {
+    headerBtn.textContent = t('headerLogin', 'academy');
+    headerBtn.classList.remove('logged');
+    headerBtn.onclick = function() { openLogin(); };
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Auth state listener — handles recovery link, returning users
+   ═══════════════════════════════════════════════ */
+_sb.auth.onAuthStateChange(async function(event, session) {
+  if (event === 'PASSWORD_RECOVERY') {
+    _user = session ? session.user : null;
+    _isChassisActive = true;
+    applyLang();
+    show('modalNewPwd');
+    return;
+  }
+  if (event === 'SIGNED_IN' && session) {
+    _user = session.user;
+    /* If a modal flow is already driving this, let it finish.
+       Otherwise, this is a silent restore from a stored session. */
+    var midFlow =
+      document.getElementById('modalAuth').classList.contains('active') ||
+      document.getElementById('modalGracias').classList.contains('active') ||
+      document.getElementById('modalOnbName').classList.contains('active') ||
+      document.getElementById('modalOnbShip').classList.contains('active') ||
+      document.getElementById('modalNewPwd').classList.contains('active');
+    if (!midFlow) {
+      var pr = await _sb.from('profiles').select('*').eq('id', _user.id).maybeSingle();
+      if (pr.data) {
+        _profile = pr.data;
+        document.body.setAttribute('data-theme', _profile.theme || 'nebula');
+        var headerBtn = document.getElementById('headerAction');
+        if (headerBtn) {
+          headerBtn.textContent = _profile.display_name + ' →';
+          headerBtn.classList.add('logged');
+          headerBtn.onclick = function() { enterYourWorld(); };
+        }
+      }
+    }
+  }
+});
+
+/* Detect recovery URL parameter on first load. */
+if (new URLSearchParams(window.location.search).get('recovery') === 'true') {
+  _isChassisActive = true;
+  show('modalNewPwd');
+}
+
+/* ═══════════════════════════════════════════════
+   Mount onboarding name listener
+   Some browsers/iOS Safari may have already fired DOMContentLoaded
+   by the time we get here (this script lives at the end of body and
+   is parsed sync). Check state and call directly if so.
+   ═══════════════════════════════════════════════ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', wireNameCheck);
+} else {
+  wireNameCheck();
+}
+
+/* ═══════════════════════════════════════════════
+   Academy — Bloque 5 structure render
+   Reads WORLD_SECTIONS (declared in B4), renders 6
+   collapsible drawers in the sidebar and a welcome /
+   lesson placeholder in the main area. Progress checks
+   come from _worldProgress (loaded by worldLoadData
+   when logged in; empty array otherwise).
+   ═══════════════════════════════════════════════ */
+var _currentSection = null;     /* null = show welcome banner */
+var _currentLessonIdx = null;
+var _drawerOpen = {};
+WORLD_SECTIONS.forEach(function(s, i){ _drawerOpen[s.num] = (i === 0); });
+
+/* Lesson titles — placeholder for B5. B6 will overwrite with real titles
+   from the LESSONS_XX catalogs. Bilingual neutral here on purpose. */
+function academyLessonTitle(section, lessonIdx) {
+  var num = String(lessonIdx + 1).padStart(2, '0');
+  return t('academyLessonPh', 'academy') + ' ' + num;
+}
+
+function academyDoneInSection(num) {
+  if (!_worldProgress || !_worldProgress.length) return 0;
+  return _worldProgress.filter(function(p){ return p.section === num; }).length;
+}
+
+function academyIsDone(section, lessonIdx) {
+  if (!_worldProgress || !_worldProgress.length) return false;
+  return _worldProgress.some(function(p){
+    return p.section === section && p.lesson_idx === lessonIdx;
+  });
+}
+
+function academyEsc(s) {
+  var d = document.createElement('div');
+  d.textContent = (s == null) ? '' : String(s);
+  return d.innerHTML;
+}
+
+function academyRender() {
+  var side = document.getElementById('academySide');
+  var main = document.getElementById('academyMain');
+  if (!side || !main) return;
+
+  /* Sidebar — 6 drawers */
+  side.innerHTML = WORLD_SECTIONS.map(function(s){
+    return academyRenderDrawer(s);
+  }).join('');
+
+  /* Main area */
+  if (_currentSection === null || _currentLessonIdx === null) {
+    main.innerHTML = academyRenderWelcome();
+  } else {
+    main.innerHTML = academyRenderLesson(_currentSection, _currentLessonIdx);
+  }
+
+  applyLang();
+  academyMountSandbox();
+}
+
+function academyRenderDrawer(s) {
+  var open = _drawerOpen[s.num];
+  var done = academyDoneInSection(s.num);
+  var countTpl = t('academyLessonsCount', 'academy');
+  var countStr = fmt(countTpl, { done: done, total: s.total });
+  var items = '';
+  for (var i = 0; i < s.total; i++) {
+    items += academyRenderLessonItem(s, i);
+  }
+  return ''
+    + '<div class="drawer ' + (open ? 'open' : '') + '" data-section="' + s.num + '"'
+    +      ' style="--section-accent:' + s.accent + ';--section-accent-soft:' + s.accent + '22;">'
+    +   '<div class="drawer-head" onclick="academyToggleDrawer(\'' + s.num + '\')">'
+    +     '<span class="drawer-num">' + s.num + '</span>'
+    +     '<span class="drawer-name">' + academyEsc(s.name) + '</span>'
+    +     '<span class="drawer-progress">' + countStr + '</span>'
+    +     '<span class="drawer-chevron">›</span>'
+    +   '</div>'
+    +   '<div class="drawer-body">' + items + '</div>'
+    + '</div>';
+}
+
+function academyRenderLessonItem(s, lessonIdx) {
+  var num = String(lessonIdx + 1).padStart(2, '0');
+  var active = (_currentSection === s.num && _currentLessonIdx === lessonIdx);
+  var done = academyIsDone(s.num, lessonIdx);
+  return ''
+    + '<div class="lesson-item ' + (active ? 'active' : '') + '"'
+    +      ' onclick="academyOpenLesson(\'' + s.num + '\',' + lessonIdx + ')">'
+    +   '<span class="lesson-num">' + num + '</span>'
+    +   '<span class="lesson-name">' + academyEsc(academyLessonTitle(s.num, lessonIdx)) + '</span>'
+    +   (done ? '<span class="lesson-check">✓</span>' : '')
+    + '</div>';
+}
+
+/* Mobile strip — horizontal chips of the currently-open section's
+   lessons. Hidden on desktop via CSS. */
+function academyRenderMobileStrip() {
+  var openSection = Object.keys(_drawerOpen).find(function(k){ return _drawerOpen[k]; });
+  if (!openSection) return '';
+  var s = WORLD_SECTIONS.find(function(x){ return x.num === openSection; });
+  if (!s) return '';
+  var chips = '';
+  for (var i = 0; i < s.total; i++) {
+    var num = String(i + 1).padStart(2, '0');
+    var active = (_currentSection === s.num && _currentLessonIdx === i);
+    var done = academyIsDone(s.num, i);
+    chips += ''
+      + '<button class="lesson-chip ' + (active ? 'active' : '') + '"'
+      +        ' onclick="academyOpenLesson(\'' + s.num + '\',' + i + ')">'
+      +   '<span class="lesson-chip-num">' + s.num + '·' + num + '</span>'
+      +   (done ? '<span class="lesson-chip-check">✓</span>' : '')
+      + '</button>';
+  }
+  return '<div class="lesson-strip-mobile" style="--section-accent:' + s.accent
+       + ';--section-accent-soft:' + s.accent + '22;">' + chips + '</div>';
+}
+
+function academyRenderWelcome() {
+  return ''
+    + academyRenderMobileStrip()
+    + '<div class="academy-welcome">'
+    +   '<div class="academy-welcome-eyebrow" data-i18n="academyWelcomeEyebrow"></div>'
+    +   '<h1 data-i18n="academyWelcomeTitle" data-i18n-html></h1>'
+    +   '<p data-i18n="academyWelcomeText"></p>'
+    +   '<button class="cta" data-i18n="academyWelcomeCta"'
+    +          ' onclick="academyOpenLesson(\'00\',0)"></button>'
+    + '</div>';
+}
+
+function academyRenderLessonPlaceholder(section, lessonIdx) {
+  var s = WORLD_SECTIONS.find(function(x){ return x.num === section; });
+  if (!s) return '';
+  var num = String(lessonIdx + 1).padStart(2, '0');
+  var eyebrowTpl = t('academyLessonPlaceholderEyebrow', 'academy');
+  var eyebrow = fmt(eyebrowTpl, { section: s.name, num: num });
+  return ''
+    + academyRenderMobileStrip()
+    + '<div class="lesson-placeholder" style="--section-accent:' + s.accent + ';">'
+    +   '<div class="lesson-placeholder-eyebrow">' + academyEsc(eyebrow) + '</div>'
+    +   '<h1 data-i18n="academyLessonPlaceholderTitle"></h1>'
+    +   '<p data-i18n="academyLessonPlaceholderText"></p>'
+    +   '<div class="build-note" data-i18n="academyLessonPlaceholderNote"></div>'
+    + '</div>';
+}
+
+function academyToggleDrawer(section) {
+  /* One-at-a-time: opening a drawer closes the others. */
+  var wasOpen = _drawerOpen[section];
+  Object.keys(_drawerOpen).forEach(function(k){ _drawerOpen[k] = false; });
+  _drawerOpen[section] = !wasOpen;
+  academyRender();
+}
+
+function academyOpenLesson(section, lessonIdx) {
+  _currentSection = section;
+  _currentLessonIdx = lessonIdx;
+  /* Make sure the drawer holding this lesson is open. */
+  Object.keys(_drawerOpen).forEach(function(k){ _drawerOpen[k] = (k === section); });
+  academyRender();
+  /* Scroll main area to top so the new lesson is in view on mobile. */
+  var main = document.getElementById('academyMain');
+  if (main) main.scrollTop = 0;
+}
+
+/* ═══════════════════════════════════════════════
+   Lesson sandbox — Bloque 6
+   WebGL harness ported from _sites/wogl-academy/index.html
+   (createRenderer). HEAD block exposes T/R/M uniforms plus
+   the iri/h2/n2/fb helpers every lesson can call by name.
+   ═══════════════════════════════════════════════ */
+var VERT = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+var HEAD = [
+  'precision mediump float;',
+  'uniform float T;',          /* seconds since page load */
+  'uniform vec2 R;',           /* canvas resolution in pixels */
+  'uniform vec2 M;',           /* mouse 0..1 (y flipped) */
+  '',
+  '// Iridescent — 7 spectral anchors, smooth cycle',
+  'vec3 iri(float t){',
+  '  vec3 d=vec3(.83,.65,.30),me=vec3(.97,.78,.55),pe=vec3(.95,.70,.60),',
+  '       la=vec3(.77,.63,1.),ro=vec3(.95,.78,.88),ve=vec3(.65,.85,.72),mo=vec3(.55,.45,.80);',
+  '  t=fract(t);float s=t*7.;int i=int(floor(s));float f=fract(s);f=f*f*(3.-2.*f);',
+  '  vec3 a,b;',
+  '  if(i==0){a=d;b=me;}else if(i==1){a=me;b=pe;}else if(i==2){a=pe;b=la;}',
+  '  else if(i==3){a=la;b=ro;}else if(i==4){a=ro;b=ve;}else if(i==5){a=ve;b=mo;}',
+  '  else{a=mo;b=d;}',
+  '  return mix(a,b,f);',
+  '}',
+  '',
+  '// Hash — pseudo-random from 2D',
+  'float h2(vec2 p){',
+  '  vec3 p3=fract(vec3(p.xyx)*0.1031);',
+  '  p3+=dot(p3,p3.yzx+33.33);',
+  '  return fract((p3.x+p3.y)*p3.z);',
+  '}',
+  '',
+  '// Value noise — smooth random',
+  'float n2(vec2 p){',
+  '  vec2 i=floor(p),f=fract(p);',
+  '  f=f*f*f*(f*(f*6.-15.)+10.);',
+  '  return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),',
+  '             mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x),f.y);',
+  '}',
+  '',
+  '// FBM — layered noise',
+  'float fb(vec2 p){',
+  '  float v=0.,a=.5;',
+  '  mat2 r=mat2(.8,.6,-.6,.8);',
+  '  for(int i=0;i<4;i++){v+=a*n2(p);p=r*p*2.07;a*=.5;}',
+  '  return v;',
+  '}',
+].join('\n');
+
+/* Holds the active sandbox so we can dispose before mounting the next. */
+var _renderer = null;
+
+function createLessonRenderer(canvas, code, statusEl, errEl) {
+  var gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+  if (!gl) {
+    if (errEl) { errEl.textContent = 'WebGL unavailable in this browser.'; errEl.classList.add('show'); }
+    return null;
+  }
+  var prog = null, uT, uR, uM;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  var mouseX = 0.5, mouseY = 0.5;
+  var paused = false, isVisible = true, isInViewport = true;
+  var startTime = performance.now();
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+  function recompile(src) {
+    var fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, HEAD + '\n' + src);
+    gl.compileShader(fs);
+    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+      var err = gl.getShaderInfoLog(fs); gl.deleteShader(fs);
+      if (statusEl) { statusEl.textContent = 'error'; statusEl.classList.add('error'); }
+      if (errEl) { errEl.textContent = err; errEl.classList.add('show'); }
+      return false;
+    }
+    var vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, VERT); gl.compileShader(vs);
+    var newProg = gl.createProgram();
+    gl.attachShader(newProg, vs); gl.attachShader(newProg, fs);
+    gl.bindAttribLocation(newProg, 0, 'a');
+    gl.linkProgram(newProg);
+    if (prog) gl.deleteProgram(prog);
+    prog = newProg;
+    gl.useProgram(prog);
+    uT = gl.getUniformLocation(prog, 'T');
+    uR = gl.getUniformLocation(prog, 'R');
+    uM = gl.getUniformLocation(prog, 'M');
+    if (statusEl) { statusEl.textContent = 'compiled'; statusEl.classList.remove('error'); }
+    if (errEl) errEl.classList.remove('show');
+    return true;
+  }
+  recompile(code);
+
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function onMove(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX);
+    var y = (e.touches ? e.touches[0].clientY : e.clientY);
+    mouseX = (x - rect.left) / rect.width;
+    mouseY = 1 - (y - rect.top) / rect.height;
+  }
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('touchmove', onMove, { passive: true });
+
+  function onVis() { isVisible = !document.hidden; }
+  document.addEventListener('visibilitychange', onVis);
+
+  var obs = null;
+  if ('IntersectionObserver' in window) {
+    obs = new IntersectionObserver(function(es){ isInViewport = es[0].isIntersecting; }, { threshold: 0.01 });
+    obs.observe(canvas);
+  }
+
+  var rafId;
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+    if (paused || !isVisible || !isInViewport || !prog) return;
+    gl.uniform1f(uT, (now - startTime) * 0.001);
+    gl.uniform2f(uR, canvas.width, canvas.height);
+    gl.uniform2f(uM, mouseX, mouseY);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  return {
+    recompile: recompile,
+    destroy: function() {
+      paused = true;
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVis);
+      canvas.removeEventListener('mousemove', onMove);
+      canvas.removeEventListener('touchmove', onMove);
+      if (obs) obs.disconnect();
+      if (prog) { gl.deleteProgram(prog); prog = null; }
+      var ext = gl.getExtension('WEBGL_lose_context');
+      if (ext) ext.loseContext();
+    }
+  };
+}
+
+/* ═══════════════════════════════════════════════
+   Lesson catalogs — Bloque 6 tanda 1
+   Start Here 01 ported verbatim from the live academy
+   (approved tier S copy). Tandas 2-3 fill 02-10.
+   ═══════════════════════════════════════════════ */
+var LESSONS_00 = [
+  /* ===== 01 ===== */
+  {
+    num: '01',
+    title: { es: 'Hola, luz', en: 'Hello, light' },
+    desc:  { es: 'Tu primera pieza. Un color. Millones de puntos de luz.',
+             en: 'One fragment. Millions of colors. Your first piece.' },
+    explain: {
+      es: '<p><em>Tu primer pixel encendido. La GPU esperando instrucciones.</em></p>'
+        + '<div class="glossary"><span class="glossary-label">¿Qué es un shader?</span>'
+        + 'Un <em>shader</em> es un programa que corre en tu GPU — el chip gráfico de tu computadora. Tu pantalla está hecha de millones de puntos de luz. El shader decide de qué color se enciende <em>cada uno</em>. Esos puntos se llaman <em>frags</em>. <span class="gold">Tu pantalla tiene millones.</span> Eso es lo que vas a escribir aquí.</div>'
+        + '<p class="statement-hero">Lo que ves arriba es un <em>fragment shader</em>. El código decide el color — y la última línea, <code>gl_FragColor</code>, es la que lo enciende.</p>'
+        + '<div class="supernova"></div>'
+        + '<div class="ref-block"><span class="ref-block-label">Leyendo el código</span>'
+        + '<code>void main()</code> — el punto de inicio. Todo shader arranca aquí.<br>'
+        + '<code>vec3 col</code> — una variable que guarda 3 números: rojo, verde, azul.<br>'
+        + '<code>iri()</code> — la fórmula de color. Cicla entre 7 colores.<br>'
+        + '<code>T</code> — el tiempo en segundos. Sigue creciendo, así que el color sigue cambiando.<br>'
+        + '<code>0.05</code> — qué tan rápido cambia el color. Más grande = más rápido.<br>'
+        + '<code>0.42</code> — el punto de inicio en el ciclo de color.<br>'
+        + '<code>gl_FragColor</code> — la salida final. Esto es lo que pinta el frag.</div>'
+        + '<div class="supernova"></div>'
+        + '<div class="try-it"><span class="try-it-icon">Prueba</span>'
+        + '<span>Cambia el <code>0.42</code> a cualquier número — prueba <code>0.1</code>, <code>0.5</code>, <code>0.9</code>. Cada número cambia el color. Después cambia el <code>0.05</code> a <code>0.2</code> para que se mueva más rápido.</span></div>'
+        + '<div class="supernova"></div>'
+        + '<div class="pulse-block"><span class="pulse-label">Pulse</span>'
+        + 'Reemplaza todo el código con esto — ve cómo pulsa.'
+        + '<pre>void main(){\n  vec3 col = iri(T * 0.05 + 0.42);\n  col *= .5 + .5 * sin(T);\n  gl_FragColor = vec4(col, 1.);\n}</pre>'
+        + '<p class="pulse-hint">¿Quieres que pulse más rápido? Cambia <code>T</code> por <code>T * 3.</code> — el punto después del 3 es importante. En shaders, los números siempre llevan punto: <code>3.</code> no <code>3</code>.</p></div>',
+      en: '<p><em>Your first pixel lit. The GPU waiting for instructions.</em></p>'
+        + '<div class="glossary"><span class="glossary-label">What is a shader?</span>'
+        + 'A <em>shader</em> is a program that runs on your GPU — the graphics chip in your computer. Your screen is made of millions of points of light. The shader decides what color <em>each one</em> lights up. Those points are called <em>frags</em>. <span class="gold">Your screen has millions.</span> That is what you are going to write here.</div>'
+        + '<p class="statement-hero">What you see above is a <em>fragment shader</em>. The code decides the color — and the last line, <code>gl_FragColor</code>, is what lights it up.</p>'
+        + '<div class="supernova"></div>'
+        + '<div class="ref-block"><span class="ref-block-label">Reading the code</span>'
+        + '<code>void main()</code> — the starting point. Every shader begins here.<br>'
+        + '<code>vec3 col</code> — a variable that holds 3 numbers: red, green, blue.<br>'
+        + '<code>iri()</code> — the color formula. It cycles through 7 colors.<br>'
+        + '<code>T</code> — time in seconds. It keeps growing, so the color keeps changing.<br>'
+        + '<code>0.05</code> — how fast the color shifts. Bigger = faster.<br>'
+        + '<code>0.42</code> — the starting point in the color cycle.<br>'
+        + '<code>gl_FragColor</code> — the final output. This is what paints the frag.</div>'
+        + '<div class="supernova"></div>'
+        + '<div class="try-it"><span class="try-it-icon">Try</span>'
+        + '<span>Change <code>0.42</code> to any number — try <code>0.1</code>, <code>0.5</code>, <code>0.9</code>. Each number shifts the color. Then change <code>0.05</code> to <code>0.2</code> to make it move faster.</span></div>'
+        + '<div class="supernova"></div>'
+        + '<div class="pulse-block"><span class="pulse-label">Pulse</span>'
+        + 'Replace all the code with this — watch it pulse.'
+        + '<pre>void main(){\n  vec3 col = iri(T * 0.05 + 0.42);\n  col *= .5 + .5 * sin(T);\n  gl_FragColor = vec4(col, 1.);\n}</pre>'
+        + '<p class="pulse-hint">Want it faster? Change <code>T</code> to <code>T * 3.</code> — the dot after the 3 matters. In shaders, numbers always need a dot: <code>3.</code> not <code>3</code>.</p></div>'
+    },
+    code: 'void main(){\n  vec3 col = iri(T * 0.05 + 0.42);\n  col *= 0.85 + 0.15 * sin(T * 0.618);\n  gl_FragColor = vec4(col, 1.);\n}'
+  }
+];
+var LESSONS_BY_SECTION = { '00': LESSONS_00 };
+
+function academyGetLesson(section, lessonIdx) {
+  var list = LESSONS_BY_SECTION[section];
+  if (!list) return null;
+  return list[lessonIdx] || null;
+}
+
+/* Render the real lesson stage. Falls back to placeholder if catalog has no entry. */
+function academyRenderLesson(section, lessonIdx) {
+  var lesson = academyGetLesson(section, lessonIdx);
+  if (!lesson) return academyRenderLessonPlaceholder(section, lessonIdx);
+
+  var s = WORLD_SECTIONS.find(function(x){ return x.num === section; });
+  var num = lesson.num;
+  var lang = browseLang;
+  var title = (lesson.title && lesson.title[lang]) || (lesson.title && lesson.title.en) || '';
+  var desc  = (lesson.desc  && lesson.desc[lang])  || (lesson.desc  && lesson.desc.en)  || '';
+  var explain = (lesson.explain && lesson.explain[lang]) || (lesson.explain && lesson.explain.en) || '';
+  var done = academyIsDone(section, lessonIdx);
+  var prevDisabled = (lessonIdx <= 0);
+  var nextDisabled = (lessonIdx >= s.total - 1);
+
+  return ''
+    + '<div class="lesson-stage" style="--section-accent:' + s.accent + ';">'
+    +   '<div class="lesson-header">'
+    +     '<div class="lesson-step">' + academyEsc(s.name) + ' · ' + num + '</div>'
+    +     '<h1 class="lesson-title">' + academyEsc(title) + '</h1>'
+    +     '<p class="lesson-desc">' + academyEsc(desc) + '</p>'
+    +   '</div>'
+    +   (section === '00' && lessonIdx === 0 ? '<div id="introAlive"></div>' : '')
+    +   '<div class="sandbox">'
+    +     '<div class="canvas-wrap">'
+    +       '<canvas id="lessonCanvas"></canvas>'
+    +       '<div class="err" id="lessonErr"></div>'
+    +       '<div class="badge">' + s.num + ' · ' + num + '</div>'
+    +     '</div>'
+    +     '<div class="editor">'
+    +       '<textarea id="lessonEditor" spellcheck="false" autocapitalize="off" autocorrect="off">' + academyEsc(lesson.code) + '</textarea>'
+    +       '<div class="editor-status" id="lessonStatus">ready</div>'
+    +     '</div>'
+    +   '</div>'
+    +   '<div class="lesson-explain">' + explain + '</div>'
+    +   '<div class="lesson-nav">'
+    +     '<button class="lesson-nav-arrow' + (prevDisabled ? ' disabled' : '') + '"'
+    +            ' onclick="academyOpenLesson(\'' + section + '\',' + (lessonIdx - 1) + ')">'
+    +       '<span class="lesson-nav-label">← ' + (lang === 'es' ? 'Anterior' : 'Previous') + '</span>'
+    +     '</button>'
+    +     '<button class="lesson-mark-btn' + (done ? ' done' : '') + '"'
+    +            ' onclick="academyMarkComplete()">'
+    +       (done
+              ? '✓ ' + (lang === 'es' ? 'Lección completa' : 'Lesson complete')
+              : (lang === 'es' ? 'Marcar lección completa' : 'Mark lesson complete'))
+    +     '</button>'
+    +     '<button class="lesson-nav-arrow next' + (nextDisabled ? ' disabled' : '') + '"'
+    +            ' onclick="academyOpenLesson(\'' + section + '\',' + (lessonIdx + 1) + ')">'
+    +       '<span class="lesson-nav-label">' + (lang === 'es' ? 'Siguiente' : 'Next') + ' →</span>'
+    +     '</button>'
+    +   '</div>'
+    + '</div>';
+}
+
+/* Placeholder for B7. The button works visually now; the Supabase
+   write happens in the next bloque. */
+function academyMarkComplete() {
+  if (_currentSection == null) return;
+  /* Visual-only: flip the button to "done" state in place.
+     Real completion + badge logic lands in B7 with Supabase RPC. */
+  var btn = document.querySelector('.lesson-mark-btn');
+  if (btn && !btn.classList.contains('done')) {
+    btn.classList.add('done');
+    btn.textContent = (browseLang === 'es' ? '✓ Lección completa' : '✓ Lesson complete');
+  }
+}
+
+/* Mount sandbox after the lesson DOM is in place. Called from
+   academyRender right after innerHTML assignment. */
+function academyMountSandbox() {
+  if (_renderer) { _renderer.destroy(); _renderer = null; }
+  if (_currentSection == null) return;
+  var lesson = academyGetLesson(_currentSection, _currentLessonIdx);
+  if (!lesson) return;
+  var canvas = document.getElementById('lessonCanvas');
+  var status = document.getElementById('lessonStatus');
+  var errEl  = document.getElementById('lessonErr');
+  var editor = document.getElementById('lessonEditor');
+  if (!canvas || !editor) return;
+
+  _renderer = createLessonRenderer(canvas, lesson.code, status, errEl);
+
+  /* Debounced live recompile while the student edits. */
+  var debounceId = null;
+  editor.addEventListener('input', function() {
+    if (debounceId) clearTimeout(debounceId);
+    debounceId = setTimeout(function() {
+      if (_renderer) _renderer.recompile(editor.value);
+    }, 400);
+  });
+
+  /* Apply 3D tilt to copy blocks (glossary, try-it, pulse, ref-block). */
+  initCardTilt();
+
+  /* Intro alive — line-by-line CPU/GPU/shader/GLSL reveal.
+     Plays once per session on Start Here · 01 only. */
+  mountIntroAlive();
+}
+
+var _introShown = false;
+function mountIntroAlive() {
+  var anchor = document.getElementById('introAlive');
+  if (!anchor) return;
+  if (_introShown) { anchor.style.display = 'none'; return; }
+  _introShown = true;
+  var lang = browseLang;
+  var lines = (lang === 'es')
+    ? [
+        'Tu computadora tiene dos motores.',
+        '<span class="intro-glow">CPU</span> corre tus apps — navegador, música, archivos.',
+        '<span class="intro-glow">GPU</span> corre los gráficos — cada pixel que ves en pantalla.',
+        'Un <span class="intro-glow">shader</span> es un programa que corre en la GPU. Decide el color de cada pixel.',
+        '<span class="intro-glow">GLSL</span> — el lenguaje en el que escribes shaders. WebGL lo manda a la GPU.'
+      ]
+    : [
+        'Your computer has two engines.',
+        '<span class="intro-glow">CPU</span> runs your apps — browser, music, files.',
+        '<span class="intro-glow">GPU</span> runs graphics — every pixel you see on screen.',
+        'A <span class="intro-glow">shader</span> is a program that runs on the GPU. It decides the color of every pixel.',
+        '<span class="intro-glow">GLSL</span> — the language you write shaders in. WebGL sends it to the GPU.'
+      ];
+  var subText = (lang === 'es')
+    ? 'Y aquí vas a aprender a construirlos todos.'
+    : 'And you will learn how to build them all here.';
+
+  var wrap = document.createElement('div');
+  wrap.className = 'intro-alive';
+  var lineEls = lines.map(function(html) {
+    var d = document.createElement('div');
+    d.className = 'intro-alive-line';
+    d.innerHTML = html;
+    wrap.appendChild(d);
+    return d;
+  });
+  var sub = document.createElement('div');
+  sub.className = 'intro-alive-sub';
+  sub.textContent = subText;
+  wrap.appendChild(sub);
+  anchor.appendChild(wrap);
+
+  lineEls.forEach(function(line, i) {
+    setTimeout(function(){ line.classList.add('visible'); }, 400 + i * 1800);
+  });
+  setTimeout(function(){ sub.classList.add('visible'); }, 400 + lineEls.length * 1800 + 600);
+}
+
+/* Card 3D tilt — desktop mouse follow, mobile auto-float.
+   Ported from academy live (subtle, 6deg max rotation). */
+var _tiltRaf = null;
+function initCardTilt() {
+  var selectors = '.glossary, .try-it, .pulse-block, .ref-block';
+  var targets = document.querySelectorAll(selectors);
+  var isMobile = 'ontouchstart' in window;
+
+  targets.forEach(function(card) {
+    if (card._tiltBound) return;
+    card._tiltBound = true;
+    card.classList.add('tilt-card');
+
+    var shine = document.createElement('div');
+    shine.className = 'tilt-shine';
+    card.appendChild(shine);
+
+    if (!isMobile) {
+      card.addEventListener('mousemove', function(e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = 'rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 6) + 'deg)';
+        card.style.boxShadow = (-x * 6) + 'px ' + (y * 6) + 'px 20px rgba(0,0,0,0.25)';
+        shine.style.background = 'radial-gradient(circle 200px at ' + (e.clientX - r.left) + 'px ' + (e.clientY - r.top) + 'px, rgba(244,241,234,0.07), transparent)';
+      });
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = '';
+        card.style.boxShadow = '';
+      });
+    }
+  });
+
+  if (isMobile && targets.length) {
+    if (_tiltRaf) cancelAnimationFrame(_tiltRaf);
+    var allCards = document.querySelectorAll('.tilt-card');
+    function floatLoop(t) {
+      var ts = t * 0.001;
+      allCards.forEach(function(card, i) {
+        var shine = card.querySelector('.tilt-shine');
+        var p = (i * 2.1) % 6.28;
+        var s = 0.7 + (i % 3) * 0.1;
+        var rx = Math.sin(ts * s + p) * 1.2;
+        var ry = Math.cos(ts * s * 0.7 + p * 1.3) * 0.8;
+        card.style.transform = 'rotateY(' + ry + 'deg) rotateX(' + rx + 'deg)';
+        card.style.boxShadow = (-ry * 1.5) + 'px ' + (rx * 1.5) + 'px 16px rgba(0,0,0,0.2)';
+        var sx = 0.5 + Math.sin(ts * s * 0.5 + p) * 0.45;
+        var sy = 0.5 + Math.cos(ts * s * 0.35 + p * 1.3) * 0.45;
+        if (shine) {
+          shine.style.opacity = '1';
+          shine.style.background = 'radial-gradient(ellipse 140% 140% at ' + (sx * 100) + '% ' + (sy * 100) + '%, rgba(244,241,234,0.08), rgba(212,165,116,0.03) 45%, transparent 85%)';
+        }
+      });
+      _tiltRaf = requestAnimationFrame(floatLoop);
+    }
+    _tiltRaf = requestAnimationFrame(floatLoop);
+  }
+}
+
+/* ─── Modal helpers ─── */
+function show(id) { var el = document.getElementById(id); if (el) el.classList.add('active'); }
+function hide(id) { var el = document.getElementById(id); if (el) el.classList.remove('active'); }
+
+/* ─── Boot ─── */
+document.documentElement.setAttribute('lang', browseLang);
+academyRender();  /* renders the academy and calls applyLang() internally */
+
+/* Expose for console tinkering during the build. */
+window.WOGL = {
+  setBrowseLang: setBrowseLang,
+  pickAccountLang: pickAccountLang,
+  get browseLang() { return browseLang; },
+  get accountLang() { return accountLang; }
+};
+</script>
+
+</body>
+</html>
