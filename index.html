@@ -849,6 +849,66 @@ a { color: var(--accent); text-decoration: none; }
   .lesson-mark-btn { order: 3; width: 100%; }
 }
 
+/* Intro alive — line-by-line CPU/GPU/shader/GLSL reveal.
+   Ported from academy live (.intro-alive). Plays once per session
+   on Start Here · 01 only (controlled by _introShownA flag in JS). */
+.intro-alive {
+  position: relative;
+  padding: clamp(28px, 4vw, 56px) 0 clamp(32px, 4vw, 64px);
+  margin: 0 0 clamp(28px, 3.5vw, 48px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+.intro-alive-line {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(20px, 3.4vw, 36px);
+  color: var(--ink);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transition: clip-path 1s cubic-bezier(0.22, 1, 0.36, 1), opacity .4s ease;
+}
+.intro-alive-line.visible {
+  clip-path: inset(0 0% 0 0);
+  opacity: 1;
+}
+.intro-alive-line .intro-glow {
+  color: #e8c89a;
+  text-shadow: 0 0 40px rgba(232,200,154,0.55);
+}
+.intro-alive-sub {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(20px, 3.4vw, 36px);
+  letter-spacing: -0.01em;
+  margin-top: clamp(22px, 2.5vw, 32px);
+  line-height: 1.4;
+  background: linear-gradient(90deg, #fff8ee, #e8c89a, #d4a876, #e8c89a, #fff8ee);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-sweep 3s linear infinite, sub-glow 4s ease-in-out infinite;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transition: clip-path 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity .5s ease;
+}
+.intro-alive-sub.visible {
+  clip-path: inset(0 0% 0 0);
+  opacity: 1;
+}
+@keyframes gradient-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+@keyframes sub-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 8px rgba(232,200,154,0)); }
+  50%      { filter: brightness(1.6) drop-shadow(0 0 30px rgba(232,200,154,0.6)); }
+}
+
 /* Card 3D tilt — desktop mouse follow, mobile auto-float.
    Applied at runtime by initCardTilt() to glossary / try-it /
    pulse-block / ref-block elements after the lesson DOM mounts. */
@@ -3897,6 +3957,7 @@ function academyRenderLesson(section, lessonIdx) {
     +     '<h1 class="lesson-title">' + academyEsc(title) + '</h1>'
     +     '<p class="lesson-desc">' + academyEsc(desc) + '</p>'
     +   '</div>'
+    +   (section === '00' && lessonIdx === 0 ? '<div id="introAlive"></div>' : '')
     +   '<div class="sandbox">'
     +     '<div class="canvas-wrap">'
     +       '<canvas id="lessonCanvas"></canvas>'
@@ -3967,6 +4028,57 @@ function academyMountSandbox() {
 
   /* Apply 3D tilt to copy blocks (glossary, try-it, pulse, ref-block). */
   initCardTilt();
+
+  /* Intro alive — line-by-line CPU/GPU/shader/GLSL reveal.
+     Plays once per session on Start Here · 01 only. */
+  mountIntroAlive();
+}
+
+var _introShown = false;
+function mountIntroAlive() {
+  var anchor = document.getElementById('introAlive');
+  if (!anchor) return;
+  if (_introShown) { anchor.style.display = 'none'; return; }
+  _introShown = true;
+  var lang = browseLang;
+  var lines = (lang === 'es')
+    ? [
+        'Tu computadora tiene dos motores.',
+        '<span class="intro-glow">CPU</span> corre tus apps — navegador, música, archivos.',
+        '<span class="intro-glow">GPU</span> corre los gráficos — cada pixel que ves en pantalla.',
+        'Un <span class="intro-glow">shader</span> es un programa que corre en la GPU. Decide el color de cada pixel.',
+        '<span class="intro-glow">GLSL</span> — el lenguaje en el que escribes shaders. WebGL lo manda a la GPU.'
+      ]
+    : [
+        'Your computer has two engines.',
+        '<span class="intro-glow">CPU</span> runs your apps — browser, music, files.',
+        '<span class="intro-glow">GPU</span> runs graphics — every pixel you see on screen.',
+        'A <span class="intro-glow">shader</span> is a program that runs on the GPU. It decides the color of every pixel.',
+        '<span class="intro-glow">GLSL</span> — the language you write shaders in. WebGL sends it to the GPU.'
+      ];
+  var subText = (lang === 'es')
+    ? 'Y aquí vas a aprender a construirlos todos.'
+    : 'And you will learn how to build them all here.';
+
+  var wrap = document.createElement('div');
+  wrap.className = 'intro-alive';
+  var lineEls = lines.map(function(html) {
+    var d = document.createElement('div');
+    d.className = 'intro-alive-line';
+    d.innerHTML = html;
+    wrap.appendChild(d);
+    return d;
+  });
+  var sub = document.createElement('div');
+  sub.className = 'intro-alive-sub';
+  sub.textContent = subText;
+  wrap.appendChild(sub);
+  anchor.appendChild(wrap);
+
+  lineEls.forEach(function(line, i) {
+    setTimeout(function(){ line.classList.add('visible'); }, 400 + i * 1800);
+  });
+  setTimeout(function(){ sub.classList.add('visible'); }, 400 + lineEls.length * 1800 + 600);
 }
 
 /* Card 3D tilt — desktop mouse follow, mobile auto-float.
