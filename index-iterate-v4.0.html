@@ -1552,6 +1552,7 @@ body::after {
   background:rgba(58,214,168,.12);border:1px solid rgba(58,214,168,.3);
   border-radius:30px;padding:3px 7px;
 }
+html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 
 /* orb mini gradients (avatar pieces · not theme accents) */
 .mus-o-nebula{ background:radial-gradient(circle at 35% 30%,#fff,#b06cff 25%,#4a1f7a 65%,#160a26); }
@@ -1986,15 +1987,15 @@ body::after {
       <div class="mus-plaque">
         <div class="mus-eyebrow" id="musEyebrow">Equipped Orb · Nebula</div>
         <h1 id="musName">—</h1>
-        <div class="mus-sub">Drag the orb to rotate your piece. Move your mouse for the spotlight.</div>
+        <div class="mus-sub" data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</div>
         <div class="mus-meta">
-          <span><b id="musMetaOrbs">4</b>orbs collected</span>
-          <span><b id="musMetaLessons">47</b>lessons</span>
-          <span><b id="musMetaStreak">23</b>day streak</span>
+          <span><b id="musMetaOrbs">4</b><span data-mus-i18n="metaOrbs">orbs collected</span></span>
+          <span><b id="musMetaLessons">47</b><span data-mus-i18n="metaLessons">lessons</span></span>
+          <span><b id="musMetaStreak">23</b><span data-mus-i18n="metaStreak">day streak</span></span>
         </div>
         <div class="mus-hint">
           <span class="dot"></span>
-          <span>Drag the orb · move your mouse for the spotlight</span>
+          <span data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</span>
         </div>
       </div>
     </div>
@@ -2003,16 +2004,16 @@ body::after {
   <div class="mus-wrap">
     <!-- IDENTITY STRIP -->
     <div class="mus-identity">
-      <span class="mus-rank">Shader Artist</span>
+      <span class="mus-rank" data-mus-i18n="rank">Shader Artist</span>
       <span class="mus-handle" id="musHandle">@— · joined —</span>
-      <button class="mus-edit-btn" id="musEditBtn">Edit profile</button>
+      <button class="mus-edit-btn" id="musEditBtn" data-mus-i18n="editProfile">Edit profile</button>
     </div>
 
     <!-- STREAK -->
     <div class="mus-streak">
       <span class="flame">🔥</span>
       <span class="mus-streak-num" id="musStreakNum">23</span>
-      <span class="mus-streak-txt"><b>days in a row.</b><br>You coded shaders every day this week.</span>
+      <span class="mus-streak-txt" data-mus-i18n-html="streakLine"><b>days in a row.</b><br>You coded shaders every day this week.</span>
       <div class="mus-week" id="musWeek">
         <div class="mus-day on">M</div><div class="mus-day on">T</div><div class="mus-day on">W</div>
         <div class="mus-day on">T</div><div class="mus-day on">F</div><div class="mus-day on">S</div>
@@ -2022,84 +2023,84 @@ body::after {
 
     <!-- ORB COLLECTION -->
     <div class="mus-sec-head">
-      <h2>Orb Collection</h2>
-      <span class="aside">4 of 6 unlocked · one per module</span>
+      <h2 data-mus-i18n="secCollection">Orb Collection</h2>
+      <span class="aside" data-mus-i18n="secCollectionAside">4 of 6 unlocked · one per module</span>
     </div>
     <div class="mus-collection" id="musCollection">
       <div class="mus-orb-card equipped" style="--c:#b06cff;--glow:rgba(176,108,255,.5)" data-orb="nebula">
-        <div class="mini mus-o-nebula"></div><div class="oname">Nebula</div><div class="ocond">Start Here ✓</div>
+        <div class="mini mus-o-nebula"></div><div class="oname">Nebula</div><div class="ocond" data-mus-i18n="ocondStartHere">Start Here ✓</div>
       </div>
       <div class="mus-orb-card" style="--c:#ff8a3d;--glow:rgba(255,138,61,.5)" data-orb="ember">
-        <div class="mini mus-o-ember"></div><div class="oname">Ember</div><div class="ocond">Patterns ✓</div>
+        <div class="mini mus-o-ember"></div><div class="oname">Ember</div><div class="ocond" data-mus-i18n="ocondPatterns">Patterns ✓</div>
       </div>
       <div class="mus-orb-card" style="--c:#3ad6a8;--glow:rgba(58,214,168,.5)" data-orb="aurora">
-        <div class="mini mus-o-aurora"></div><div class="oname">Aurora</div><div class="ocond">Forces ✓</div>
+        <div class="mini mus-o-aurora"></div><div class="oname">Aurora</div><div class="ocond" data-mus-i18n="ocondForces">Forces ✓</div>
       </div>
       <div class="mus-orb-card" style="--c:#5b8cff;--glow:rgba(91,140,255,.5)" data-orb="royal">
-        <div class="mini mus-o-royal"></div><div class="oname">Royal</div><div class="ocond">Noise · 7/10</div>
+        <div class="mini mus-o-royal"></div><div class="oname">Royal</div><div class="ocond" data-mus-i18n="ocondNoise">Noise · 7/10</div>
       </div>
       <div class="mus-orb-card locked">
-        <div class="mini">🔒</div><div class="oname">Void</div><div class="ocond">Finish Domain Warp</div>
+        <div class="mini">🔒</div><div class="oname">Void</div><div class="ocond" data-mus-i18n="ocondFinishDW">Finish Domain Warp</div>
       </div>
       <div class="mus-orb-card locked">
-        <div class="mini">🔒</div><div class="oname">Plasma</div><div class="ocond">Finish Motion</div>
+        <div class="mini">🔒</div><div class="oname">Plasma</div><div class="ocond" data-mus-i18n="ocondFinishMotion">Finish Motion</div>
       </div>
     </div>
 
     <!-- PROGRESS -->
     <div class="mus-sec-head">
-      <h2>Progress</h2>
-      <span class="aside">complete a module → earn its orb</span>
+      <h2 data-mus-i18n="secProgress">Progress</h2>
+      <span class="aside" data-mus-i18n="secProgressAside">complete a module → earn its orb</span>
     </div>
     <div class="mus-modules">
       <div class="mus-mod done" style="--mod-accent:#b06cff">
         <div class="num">00 · Start Here</div><div class="name">Foundations</div>
         <div class="mus-bar"><i style="width:100%"></i></div>
         <div class="count"><span>10 / 10</span><span class="pct">100%</span></div>
-        <div class="reward"><span class="rdot mus-o-nebula"></span> Nebula orb earned</div>
+        <div class="reward"><span class="rdot mus-o-nebula"></span> <span data-mus-i18n="rewardNebulaEarned">Nebula orb earned</span></div>
       </div>
       <div class="mus-mod done" style="--mod-accent:#ff8a3d">
         <div class="num">01 · Patterns</div><div class="name">Patterns</div>
         <div class="mus-bar"><i style="width:100%"></i></div>
         <div class="count"><span>10 / 10</span><span class="pct">100%</span></div>
-        <div class="reward"><span class="rdot mus-o-ember"></span> Ember orb earned</div>
+        <div class="reward"><span class="rdot mus-o-ember"></span> <span data-mus-i18n="rewardEmberEarned">Ember orb earned</span></div>
       </div>
       <div class="mus-mod done" style="--mod-accent:#3ad6a8">
         <div class="num">02 · Forces</div><div class="name">Forces</div>
         <div class="mus-bar"><i style="width:100%"></i></div>
         <div class="count"><span>10 / 10</span><span class="pct">100%</span></div>
-        <div class="reward"><span class="rdot mus-o-aurora"></span> Aurora orb earned</div>
+        <div class="reward"><span class="rdot mus-o-aurora"></span> <span data-mus-i18n="rewardAuroraEarned">Aurora orb earned</span></div>
       </div>
       <div class="mus-mod" style="--mod-accent:#5b8cff">
         <div class="num">03 · Noise</div><div class="name">Noise</div>
         <div class="mus-bar"><i style="width:70%"></i></div>
         <div class="count"><span>7 / 10</span><span class="pct">70%</span></div>
-        <div class="reward"><span class="rdot mus-o-royal"></span> Royal orb · 3 to go</div>
+        <div class="reward"><span class="rdot mus-o-royal"></span> <span data-mus-i18n="rewardRoyalToGo">Royal orb · 3 to go</span></div>
       </div>
       <div class="mus-mod" style="--mod-accent:#b06cff">
         <div class="num">04 · Domain Warp</div><div class="name">Domain Warp</div>
         <div class="mus-bar"><i style="width:40%"></i></div>
         <div class="count"><span>4 / 10</span><span class="pct">40%</span></div>
-        <div class="reward"><span class="rdot" style="background:#2a1042"></span> Void orb · locked</div>
+        <div class="reward"><span class="rdot" style="background:#2a1042"></span> <span data-mus-i18n="rewardVoidLocked">Void orb · locked</span></div>
       </div>
       <div class="mus-mod" style="--mod-accent:#ff8a3d">
         <div class="num">05 · Motion</div><div class="name">Motion</div>
         <div class="mus-bar"><i style="width:60%"></i></div>
         <div class="count"><span>6 / 10</span><span class="pct">60%</span></div>
-        <div class="reward"><span class="rdot mus-o-plasma"></span> Plasma orb · locked</div>
+        <div class="reward"><span class="rdot mus-o-plasma"></span> <span data-mus-i18n="rewardPlasmaLocked">Plasma orb · locked</span></div>
       </div>
     </div>
 
     <!-- LIFETIME STATS -->
     <div class="mus-sec-head">
-      <h2>Lifetime</h2>
+      <h2 data-mus-i18n="secLifetime">Lifetime</h2>
       <span class="aside" id="musLifetimeSince">since —</span>
     </div>
     <div class="mus-stats">
-      <div class="mus-stat"><div class="big n" id="musStatLessons">47</div><div class="lbl">Lessons done</div></div>
-      <div class="mus-stat"><div class="big l">112</div><div class="lbl">Challenges</div></div>
-      <div class="mus-stat"><div class="big a" id="musStatOrbs">4</div><div class="lbl">Orbs collected</div></div>
-      <div class="mus-stat"><div class="big r">8.4h</div><div class="lbl">Time coding</div></div>
+      <div class="mus-stat"><div class="big n" id="musStatLessons">47</div><div class="lbl" data-mus-i18n="statLessons">Lessons done</div></div>
+      <div class="mus-stat"><div class="big l">112</div><div class="lbl" data-mus-i18n="statChallenges">Challenges</div></div>
+      <div class="mus-stat"><div class="big a" id="musStatOrbs">4</div><div class="lbl" data-mus-i18n="statOrbs">Orbs collected</div></div>
+      <div class="mus-stat"><div class="big r">8.4h</div><div class="lbl" data-mus-i18n="statTime">Time coding</div></div>
     </div>
   </div>
 </section>
@@ -2108,39 +2109,39 @@ body::after {
 <div class="mus-modal-back" id="musEditModalBack" role="dialog" aria-modal="true">
   <div class="mus-modal">
     <div class="mus-modal-head">
-      <h3>Edit profile</h3>
+      <h3 data-mus-i18n="editHeading">Edit profile</h3>
       <button class="mus-modal-close" data-mus-close aria-label="Close">×</button>
     </div>
     <div class="mus-modal-tabs">
-      <button class="mus-modal-tab active" data-mus-pane="settings">Settings</button>
-      <button class="mus-modal-tab" data-mus-pane="theme">Theme</button>
+      <button class="mus-modal-tab active" data-mus-pane="settings" data-mus-i18n="tabSettings">Settings</button>
+      <button class="mus-modal-tab" data-mus-pane="theme" data-mus-i18n="tabTheme">Theme</button>
     </div>
     <div class="mus-modal-body">
       <!-- Settings pane -->
       <div class="mus-modal-pane active" data-mus-pane-content="settings">
         <div class="mus-field">
-          <label>Display name</label>
+          <label data-mus-i18n="lblName">Display name</label>
           <input type="text" id="musNameInput" maxlength="24" autocomplete="off">
           <div class="mus-field-feedback" id="musNameFeedback"></div>
-          <div class="mus-field-hint">3–24 chars · letters, numbers, _ or -</div>
+          <div class="mus-field-hint" data-mus-i18n="hintName">3–24 chars · letters, numbers, _ or -</div>
         </div>
         <div class="mus-field">
-          <label>Account language</label>
+          <label data-mus-i18n="lblLang">Account language</label>
           <div class="mus-lang-row">
-            <button class="mus-lang-btn" data-mus-lang="en">English</button>
-            <button class="mus-lang-btn" data-mus-lang="es">Español</button>
+            <button class="mus-lang-btn" data-mus-lang="en" data-mus-i18n="btnEN">English</button>
+            <button class="mus-lang-btn" data-mus-lang="es" data-mus-i18n="btnES">Español</button>
           </div>
-          <div class="mus-field-hint">The language the gallery speaks to you</div>
+          <div class="mus-field-hint" data-mus-i18n="hintLang">The language the gallery speaks to you</div>
         </div>
         <div class="mus-modal-actions">
-          <button class="mus-btn danger" data-mus-action="delete">Delete account</button>
-          <button class="mus-btn primary" data-mus-action="save-settings">Save</button>
+          <button class="mus-btn danger" data-mus-action="delete" data-mus-i18n="btnDelete">Delete account</button>
+          <button class="mus-btn primary" data-mus-action="save-settings" data-mus-i18n="btnSave">Save</button>
         </div>
       </div>
       <!-- Theme pane -->
       <div class="mus-modal-pane" data-mus-pane-content="theme">
         <div class="mus-field">
-          <label>Room light · decorative accent</label>
+          <label data-mus-i18n="lblTheme">Room light · decorative accent</label>
           <div class="mus-theme-grid">
             <div class="mus-theme-swatch" style="--sw:#b06cff" data-mus-theme="velvet"><span>Velvet</span></div>
             <div class="mus-theme-swatch" style="--sw:#d9a456" data-mus-theme="brass"><span>Brass</span></div>
@@ -2149,10 +2150,10 @@ body::after {
             <div class="mus-theme-swatch" style="--sw:#e0556b" data-mus-theme="crimson"><span>Crimson</span></div>
             <div class="mus-theme-swatch" style="--sw:#d4d8e8" data-mus-theme="pearl"><span>Pearl</span></div>
           </div>
-          <div class="mus-field-hint">Color across cards, glows and buttons · independent of your equipped orb</div>
+          <div class="mus-field-hint" data-mus-i18n="hintTheme">Color across cards, glows and buttons · independent of your equipped orb</div>
         </div>
         <div class="mus-modal-actions">
-          <button class="mus-btn ghost" data-mus-close>Done</button>
+          <button class="mus-btn ghost" data-mus-close data-mus-i18n="btnDone">Done</button>
         </div>
       </div>
     </div>
@@ -2165,8 +2166,8 @@ body::after {
   <div class="mus-reward-rays"></div>
   <div class="mus-reward-card">
     <div class="mus-reward-rarity" id="musRewardRarity">COMMON</div>
-    <div class="mus-reward-eyebrow">Module Complete</div>
-    <div class="mus-reward-unlocked">You finished · <b id="musRewardModule">Start Here</b></div>
+    <div class="mus-reward-eyebrow" data-mus-i18n="rewardEyebrow">Module Complete</div>
+    <div class="mus-reward-unlocked"><span data-mus-i18n="rewardFinishedPrefix">You finished ·</span> <b id="musRewardModule">Start Here</b></div>
     <div class="mus-reward-stage">
       <div class="mus-reward-ring"></div>
       <div class="mus-reward-ring r2"></div>
@@ -2176,8 +2177,8 @@ body::after {
     <div class="mus-reward-sub" id="musRewardSub">Orb · 01 of 06</div>
     <div class="mus-reward-desc" id="musRewardDesc">A small star, kept inside glass. Born when you closed <b>Start Here</b>. Made of light, color, coordinates.</div>
     <div class="mus-reward-actions">
-      <button class="mus-btn ghost" data-mus-reward-close>Later</button>
-      <button class="mus-btn primary" data-mus-reward-equip>Place on the pedestal</button>
+      <button class="mus-btn ghost" data-mus-reward-close data-mus-i18n="btnLater">Later</button>
+      <button class="mus-btn primary" data-mus-reward-equip data-mus-i18n="btnPlace">Place on the pedestal</button>
     </div>
   </div>
 </div>
@@ -3248,6 +3249,8 @@ function switchLanguage(newLang) {
   updateLangToggle();
   updateSidebarText();
   showContext(currentContext);
+  /* v4.0 · sync museo al cambiar idioma */
+  if (typeof window.applyMusLang === 'function') window.applyMusLang();
 }
 
 function updateSidebarText() {
@@ -5053,6 +5056,136 @@ document.addEventListener('DOMContentLoaded', function(){
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function museum(){
+  /* ════════════════════════════════════════════════════════════
+     i18n catalog del museo · resuelve via global `lang` del chassis
+     ════════════════════════════════════════════════════════════ */
+  var MUS_UI = {
+    equippedOrbPrefix:   { en:'Equipped Orb ·',                                   es:'Orbe equipado ·' },
+    hintDrag:            { en:'Drag the orb · move your mouse for the spotlight', es:'Arrastra el orbe · mueve el cursor para el foco' },
+    metaOrbs:            { en:'orbs collected',                                   es:'orbes colectados' },
+    metaLessons:         { en:'lessons',                                          es:'lecciones' },
+    metaStreak:          { en:'day streak',                                       es:'días seguidos' },
+    rank:                { en:'Shader Artist',                                    es:'Artista de shaders' },
+    joinedPrefix:        { en:'joined',                                           es:'desde' },
+    editProfile:         { en:'Edit profile',                                     es:'Editar perfil' },
+    streakDays:          { en:'days in a row.',                                   es:'días seguidos.' },
+    streakWeek:          { en:'You coded shaders every day this week.',           es:'Programaste shaders todos los días esta semana.' },
+    streakLine:          { en:'<b>days in a row.</b><br>You coded shaders every day this week.',
+                           es:'<b>días seguidos.</b><br>Programaste shaders todos los días esta semana.' },
+    secCollection:       { en:'Orb Collection',                                   es:'Colección de orbes' },
+    secCollectionAside:  { en:'4 of 6 unlocked · one per module',                 es:'4 de 6 desbloqueados · uno por módulo' },
+    secProgress:         { en:'Progress',                                         es:'Progreso' },
+    secProgressAside:    { en:'complete a module → earn its orb',                 es:'completa un módulo → gana su orbe' },
+    secLifetime:         { en:'Lifetime',                                         es:'Trayectoria' },
+    lifetimeSincePrefix: { en:'since',                                            es:'desde' },
+
+    ocondStartHere:      { en:'Start Here ✓',                                     es:'Start Here ✓' },
+    ocondPatterns:       { en:'Patterns ✓',                                       es:'Patterns ✓' },
+    ocondForces:         { en:'Forces ✓',                                         es:'Forces ✓' },
+    ocondNoise:          { en:'Noise · 7/10',                                     es:'Noise · 7/10' },
+    ocondFinishDW:       { en:'Finish Domain Warp',                               es:'Termina Domain Warp' },
+    ocondFinishMotion:   { en:'Finish Motion',                                    es:'Termina Motion' },
+
+    rewardNebulaEarned:  { en:'Nebula orb earned',                                es:'Orbe Nebula ganado' },
+    rewardEmberEarned:   { en:'Ember orb earned',                                 es:'Orbe Ember ganado' },
+    rewardAuroraEarned:  { en:'Aurora orb earned',                                es:'Orbe Aurora ganado' },
+    rewardRoyalToGo:     { en:'Royal orb · 3 to go',                              es:'Orbe Royal · faltan 3' },
+    rewardVoidLocked:    { en:'Void orb · locked',                                es:'Orbe Void · bloqueado' },
+    rewardPlasmaLocked:  { en:'Plasma orb · locked',                              es:'Orbe Plasma · bloqueado' },
+
+    statLessons:         { en:'Lessons done',                                     es:'Lecciones hechas' },
+    statChallenges:      { en:'Challenges',                                       es:'Retos' },
+    statOrbs:            { en:'Orbs collected',                                   es:'Orbes colectados' },
+    statTime:            { en:'Time coding',                                      es:'Tiempo programando' },
+
+    /* Edit modal */
+    editHeading:         { en:'Edit profile',                                     es:'Editar perfil' },
+    tabSettings:         { en:'Settings',                                         es:'Ajustes' },
+    tabTheme:            { en:'Theme',                                            es:'Tema' },
+    lblName:             { en:'Display name',                                     es:'Nombre' },
+    hintName:            { en:'3–24 chars · letters, numbers, _ or -',            es:'3–24 caracteres · letras, números, _ o -' },
+    lblLang:             { en:'Account language',                                 es:'Idioma de la cuenta' },
+    btnEN:               { en:'English',                                          es:'Inglés' },
+    btnES:               { en:'Español',                                          es:'Español' },
+    hintLang:            { en:'The language the gallery speaks to you',           es:'El idioma con el que la galería te habla' },
+    btnDelete:           { en:'Delete account',                                   es:'Eliminar cuenta' },
+    btnSave:             { en:'Save',                                             es:'Guardar' },
+    lblTheme:            { en:'Room light · decorative accent',                   es:'Luz del cuarto · acento decorativo' },
+    hintTheme:           { en:'Color across cards, glows and buttons · independent of your equipped orb', es:'Color en tarjetas, brillos y botones · independiente de tu orbe equipado' },
+    btnDone:             { en:'Done',                                             es:'Listo' },
+    nameFbFormat:        { en:'use letters, numbers, _ or -',                     es:'usa letras, números, _ o -' },
+    nameFbChecking:      { en:'checking…',                                        es:'verificando…' },
+    nameFbYours:         { en:'✓ your name',                                      es:'✓ tu nombre' },
+    nameFbAvailable:     { en:'✓ available',                                      es:'✓ disponible' },
+    nameFbTaken:         { en:'taken — try another',                              es:'ocupado — prueba otro' },
+    nameFbReady:         { en:'✓ ready',                                          es:'✓ listo' },
+    nameFbError:         { en:'could not save — try again',                       es:'no se pudo guardar — intenta de nuevo' },
+    deleteConfirm:       { en:'Delete your account? This cannot be undone.',      es:'¿Eliminar tu cuenta? No se puede deshacer.' },
+
+    /* Reward modal */
+    rewardEyebrow:       { en:'Module Complete',                                  es:'Módulo completo' },
+    rewardFinishedPrefix:{ en:'You finished ·',                                   es:'Terminaste ·' },
+    rewardSubPrefix:     { en:'Orb ·',                                            es:'Orbe ·' },
+    rewardSubMid:        { en:'of 06',                                            es:'de 06' },
+    btnLater:            { en:'Later',                                            es:'Después' },
+    btnPlace:            { en:'Place on the pedestal',                            es:'Pon en el pedestal' }
+  };
+
+  /* descripciones bilingual por orb (reward modal) */
+  var MUS_DESC = {
+    nebula: { en:'A small star, kept inside glass. Born when you closed <b>Start Here</b>. Made of light, color, coordinates.',
+              es:'Una pequeña estrella, guardada en cristal. Nació cuando cerraste <b>Start Here</b>. Hecha de luz, color, coordenadas.' },
+    ember:  { en:'A warm coal, slow to cool. Born when you closed <b>Patterns</b>. Kept alive by stripes, grids, rhythm.',
+              es:'Un carbón cálido, lento al enfriar. Nació cuando cerraste <b>Patterns</b>. Vivo por rayas, rejillas y ritmo.' },
+    aurora: { en:'A green sky, folded onto itself. Born when you closed <b>Forces</b>. Held by attractors, fields, silent gravity.',
+              es:'Un cielo verde, doblado sobre sí mismo. Nació cuando cerraste <b>Forces</b>. Sostenido por atractores, campos y gravedad silenciosa.' },
+    royal:  { en:'A blue stone, alive with texture. Born when you closed <b>Noise</b>. The grain inside the calm.',
+              es:'Una piedra azul, viva con textura. Nació cuando cerraste <b>Noise</b>. El grano dentro de la calma.' },
+    void:   { en:'The dark piece. Born when you closed <b>Domain Warp</b>. Space folded onto itself until it had a face.',
+              es:'La pieza oscura. Nació cuando cerraste <b>Domain Warp</b>. Espacio doblado hasta tener cara.' },
+    plasma: { en:'A piece of time. Born when you closed <b>Motion</b>. Made of flow and patient oscillation.',
+              es:'Una pieza del tiempo. Nació cuando cerraste <b>Motion</b>. Hecha de flujo y oscilación paciente.' }
+  };
+
+  /* resolver — usa global lang del chassis · default en */
+  function mt(key){
+    var k = MUS_UI[key]; if (!k) return key;
+    var L = window.lang || 'en';
+    return k[L] || k.en || '';
+  }
+
+  /* walker: actualiza [data-mus-i18n] textContent + [data-mus-i18n-html] innerHTML
+     + [data-mus-i18n-attr-X] attribute X */
+  window.applyMusLang = function(){
+    document.querySelectorAll('[data-mus-i18n]').forEach(function(el){
+      var key = el.dataset.musI18n;
+      var val = mt(key);
+      if (val) el.textContent = val;
+    });
+    document.querySelectorAll('[data-mus-i18n-html]').forEach(function(el){
+      var key = el.dataset.musI18nHtml;
+      var val = mt(key);
+      if (val) el.innerHTML = val;
+    });
+    /* equipped orb eyebrow: prefix from i18n + dynamic orb name */
+    var eb = document.getElementById('musEyebrow');
+    if (eb && window._profile){
+      var orb = window._profile.equipped_orb || 'nebula';
+      var disp = document.querySelector('.mus-orb-card[data-orb="' + orb + '"] .oname');
+      if (disp) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp.textContent;
+    }
+    /* handle + lifetime since · join with localized prefix */
+    if (window._profile && window._profile.display_name){
+      var joined = (window._user && window._user.created_at)
+        ? new Date(window._user.created_at).toLocaleDateString(window.lang === 'es' ? 'es' : 'en', { month:'short', year:'numeric' })
+        : '—';
+      var h = document.getElementById('musHandle');
+      if (h) h.textContent = '@' + window._profile.display_name + ' · ' + mt('joinedPrefix') + ' ' + joined;
+      var s = document.getElementById('musLifetimeSince');
+      if (s) s.textContent = mt('lifetimeSincePrefix') + ' ' + joined;
+    }
+  };
+
   /* ─── 6 orb palettes (cA core, cB mid, cC rim) ─── */
   var MUS_PAL = {
     nebula:{a:[0.95,0.90,1.00],b:[0.55,0.25,0.85],c:[0.69,0.42,1.00],name:'Nebula'},
@@ -5239,7 +5372,7 @@ document.addEventListener('DOMContentLoaded', function(){
         if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(name);
         var disp = card.querySelector('.oname').textContent;
         var eb = document.getElementById('musEyebrow');
-        if (eb) eb.textContent = 'Equipped Orb · ' + disp;
+        if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp;
         var hero = document.getElementById('musHero');
         if (hero){
           hero.classList.add('equipping');
@@ -5270,18 +5403,11 @@ document.addEventListener('DOMContentLoaded', function(){
     if (main) main.style.display = 'none';
     shell.classList.add('active');
 
-    /* hidrate from _profile */
+    /* hidrate from _profile (i18n via applyMusLang abajo) */
     if (window._profile){
       var name = window._profile.display_name || 'traveler';
       var elName = document.getElementById('musName');
       if (elName) elName.textContent = name;
-      var joined = (window._user && window._user.created_at)
-        ? new Date(window._user.created_at).toLocaleDateString('en', { month:'short', year:'numeric' })
-        : 'today';
-      var elH = document.getElementById('musHandle');
-      if (elH) elH.textContent = '@' + name + ' · joined ' + joined;
-      var elS = document.getElementById('musLifetimeSince');
-      if (elS) elS.textContent = 'since ' + joined;
 
       var orb = window._profile.equipped_orb || 'nebula';
       var theme = window._profile.theme_accent || 'velvet';
@@ -5291,14 +5417,12 @@ document.addEventListener('DOMContentLoaded', function(){
       document.querySelectorAll('.mus-orb-card').forEach(function(c){
         c.classList.toggle('equipped', c.dataset.orb === orb);
       });
-      var disp = document.querySelector('.mus-orb-card[data-orb="' + orb + '"] .oname');
-      if (disp){
-        var eb = document.getElementById('musEyebrow');
-        if (eb) eb.textContent = 'Equipped Orb · ' + disp.textContent;
-      }
     }
 
     initMuseumOrb();
+
+    /* aplica i18n al museo (cubre eyebrow + handle + lifetime since + tags) */
+    if (typeof window.applyMusLang === 'function') window.applyMusLang();
 
     /* progress bar entrance */
     document.querySelectorAll('.mus-bar i').forEach(function(b, i){
@@ -5418,26 +5542,26 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     if (!/^[a-zA-Z0-9_\-]{3,24}$/.test(val)){
       fb.className = 'mus-field-feedback err';
-      fb.textContent = 'use letters, numbers, _ or -';
+      fb.textContent = mt('nameFbFormat');
       return;
     }
     if (val === ((window._profile && window._profile.display_name) || '')){
       fb.className = 'mus-field-feedback ok';
-      fb.textContent = '✓ your name';
+      fb.textContent = mt('nameFbYours');
       return;
     }
     fb.className = 'mus-field-feedback';
-    fb.textContent = 'checking…';
+    fb.textContent = mt('nameFbChecking');
     _editNameTimer = setTimeout(function(){
-      if (!window._sb){ fb.className = 'mus-field-feedback ok'; fb.textContent = '✓ ready'; return; }
+      if (!window._sb){ fb.className = 'mus-field-feedback ok'; fb.textContent = mt('nameFbReady'); return; }
       window._sb.rpc('check_name_available', { candidate: val }).then(function(res){
         if (res && res.data === true){
-          fb.className = 'mus-field-feedback ok'; fb.textContent = '✓ available';
+          fb.className = 'mus-field-feedback ok'; fb.textContent = mt('nameFbAvailable');
         } else {
-          fb.className = 'mus-field-feedback err'; fb.textContent = 'taken — try another';
+          fb.className = 'mus-field-feedback err'; fb.textContent = mt('nameFbTaken');
         }
       }).catch(function(){
-        fb.className = 'mus-field-feedback ok'; fb.textContent = '✓ ready';
+        fb.className = 'mus-field-feedback ok'; fb.textContent = mt('nameFbReady');
       });
     }, 400);
   });
@@ -5458,7 +5582,7 @@ document.addEventListener('DOMContentLoaded', function(){
     window._sb.from('profiles').update(update).eq('id', window._user.id).then(function(res){
       if (!res || res.error){
         var fb = document.getElementById('musNameFeedback');
-        if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = 'could not save — try again'; }
+        if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = mt('nameFbError'); }
         return;
       }
       if (window._profile){
@@ -5481,14 +5605,14 @@ document.addEventListener('DOMContentLoaded', function(){
       closeMusEdit();
     }).catch(function(){
       var fb = document.getElementById('musNameFeedback');
-      if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = 'could not save — try again'; }
+      if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = mt('nameFbError'); }
     });
   });
 
   /* delete account · confirm + signOut (RPC delete_account si existe) */
   document.addEventListener('click', function(e){
     if (!e.target.matches || !e.target.matches('[data-mus-action="delete"]')) return;
-    if (!confirm('Delete your account? This cannot be undone.')) return;
+    if (!confirm(mt('deleteConfirm'))) return;
     if (window._sb && window._user){
       window._sb.rpc('delete_account').catch(function(){ /* silent · sign out anyway */ }).finally(function(){
         if (typeof signOutUser === 'function') signOutUser();
@@ -5527,9 +5651,11 @@ document.addEventListener('DOMContentLoaded', function(){
     _rewardOrbRenderer.setPalette(orbKey);
 
     document.getElementById('musRewardName').textContent = pal.name;
-    document.getElementById('musRewardSub').textContent = 'Orb · ' + String(data.order).padStart(2,'0') + ' of 06';
+    document.getElementById('musRewardSub').textContent = mt('rewardSubPrefix') + ' ' + String(data.order).padStart(2,'0') + ' ' + mt('rewardSubMid');
     document.getElementById('musRewardModule').textContent = data.module;
-    document.getElementById('musRewardDesc').innerHTML = data.desc;
+    var descObj = MUS_DESC[orbKey];
+    var L = window.lang || 'en';
+    document.getElementById('musRewardDesc').innerHTML = (descObj && (descObj[L] || descObj.en)) || data.desc;
     var tag = document.getElementById('musRewardRarity');
     tag.textContent = data.rarity;
     tag.className = 'mus-reward-rarity ' + data.rarity.toLowerCase();
@@ -5599,7 +5725,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var disp = document.querySelector('.mus-orb-card[data-orb="' + orb + '"] .oname');
     if (disp){
       var eb = document.getElementById('musEyebrow');
-      if (eb) eb.textContent = 'Equipped Orb · ' + disp.textContent;
+      if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp.textContent;
     }
     if (window._user && window._sb){
       window._sb.rpc('update_equipped_orb', { p_orb_key: orb }).then(function(){
