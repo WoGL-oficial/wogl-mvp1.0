@@ -1594,6 +1594,13 @@ body::after {
   margin-top:14px;font-family:var(--font-mono);font-size:10px;
   color:var(--gold);display:flex;align-items:center;gap:8px;letter-spacing:.5px;
 }
+.mus-mod.done .reward{ cursor:pointer; transition:color .2s ease; }
+.mus-mod.done .reward:hover{ color:var(--ink); }
+.mus-mod.done .reward::after{
+  content:"· view";font-family:var(--font-mono);font-size:10px;color:var(--ink-mute);
+  margin-left:auto;letter-spacing:.5px;opacity:0;transition:opacity .2s;
+}
+.mus-mod.done .reward:hover::after{ opacity:1; }
 .mus-mod .reward .rdot{
   width:16px;height:16px;border-radius:50%;flex-shrink:0;
   box-shadow:0 2px 8px -2px var(--glow,rgba(176,108,255,.4));
@@ -1751,6 +1758,91 @@ body::after {
 @media(max-width:480px){
   .mus-theme-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ─── cinematic reward modal ─── */
+.mus-reward-back{
+  position:fixed;inset:0;background:#06040a;
+  display:none;align-items:center;justify-content:center;z-index:1200;overflow:hidden;
+}
+.mus-reward-back.open{display:flex}
+.mus-reward-scene{
+  position:fixed;inset:0;
+  background:radial-gradient(700px 700px at 50% 45%, rgba(176,108,255,.20), transparent 60%);
+}
+.mus-reward-rays{
+  position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);
+  width:700px;height:700px;border-radius:50%;
+  animation:mus-rspin 24s linear infinite;
+  background:conic-gradient(from 0deg,
+    transparent 0deg, rgba(176,108,255,.10) 8deg, transparent 16deg,
+    transparent 40deg, rgba(232,200,154,.10) 48deg, transparent 56deg,
+    transparent 90deg, rgba(176,108,255,.10) 98deg, transparent 106deg,
+    transparent 140deg, rgba(232,200,154,.10) 148deg, transparent 156deg,
+    transparent 190deg, rgba(176,108,255,.10) 198deg, transparent 206deg,
+    transparent 250deg, rgba(232,200,154,.10) 258deg, transparent 266deg,
+    transparent 310deg, rgba(176,108,255,.10) 318deg, transparent 326deg);
+}
+@keyframes mus-rspin{ to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+.mus-reward-card{
+  position:relative;z-index:5;width:100%;max-width:400px;
+  padding:44px 38px 36px;text-align:center;
+  background:linear-gradient(180deg, rgba(30,20,44,.92), rgba(16,10,26,.97));
+  border:1px solid rgba(176,108,255,.3);border-radius:26px;
+  box-shadow:0 40px 120px -30px rgba(176,108,255,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:mus-cardIn 1.05s cubic-bezier(.2,.9,.3,1.2) both;
+}
+@keyframes mus-cardIn{from{opacity:0;transform:translateY(30px) scale(.92)}to{opacity:1;transform:none}}
+.mus-reward-rarity{
+  position:absolute;top:18px;right:18px;font-family:var(--font-mono);
+  font-size:9px;letter-spacing:1.5px;color:#3ad6a8;
+  border:1px solid rgba(58,214,168,.3);border-radius:20px;padding:4px 10px;font-weight:500;
+}
+.mus-reward-rarity.rare{color:#5b8cff;border-color:rgba(91,140,255,.3)}
+.mus-reward-rarity.epic{color:#b06cff;border-color:rgba(176,108,255,.3)}
+.mus-reward-rarity.legendary{color:var(--gold);border-color:rgba(232,200,154,.3)}
+.mus-reward-eyebrow{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:4px;
+  text-transform:uppercase;color:var(--gold);margin-bottom:8px;
+  animation:mus-rfade .8s .3s both;font-weight:500;
+}
+.mus-reward-unlocked{
+  font-size:13px;color:var(--ink-soft);letter-spacing:.5px;margin-bottom:28px;
+  animation:mus-rfade .8s .4s both;font-weight:300;
+}
+.mus-reward-unlocked b{color:var(--ink);font-weight:500}
+.mus-reward-stage{
+  position:relative;width:190px;height:190px;margin:0 auto 28px;
+  animation:mus-orbPop 1.15s .2s cubic-bezier(.2,.9,.3,1.3) both;
+}
+@keyframes mus-orbPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+#musRewardOrb{
+  width:190px;height:190px;display:block;
+  filter:drop-shadow(0 20px 50px rgba(176,108,255,.55));
+}
+.mus-reward-ring{
+  position:absolute;inset:-14px;border:1px solid rgba(176,108,255,.25);
+  border-radius:50%;animation:mus-ringPulse 3s ease-in-out infinite;
+}
+.mus-reward-ring.r2{inset:-30px;border-color:rgba(176,108,255,.12);animation-delay:.4s}
+@keyframes mus-ringPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+.mus-reward-name{
+  font-size:38px;font-weight:400;margin-bottom:4px;color:var(--gold);
+  animation:mus-rfade .8s .5s both;font-family:var(--font-display);letter-spacing:-.3px;
+}
+.mus-reward-sub{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:2.5px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:22px;
+  animation:mus-rfade .8s .55s both;font-weight:500;
+}
+.mus-reward-desc{
+  font-size:14px;color:var(--ink-soft);line-height:1.65;font-style:italic;
+  margin-bottom:30px;animation:mus-rfade .8s .6s both;font-weight:300;
+}
+.mus-reward-desc b{color:var(--ink);font-style:normal;font-weight:500}
+.mus-reward-actions{display:flex;gap:10px;animation:mus-rfade .8s .7s both}
+@keyframes mus-rfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 </style>
 </head>
@@ -2063,6 +2155,29 @@ body::after {
           <button class="mus-btn ghost" data-mus-close>Done</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROFILE MUSEUM · Cinematic reward modal ═══════════ -->
+<div class="mus-reward-back" id="musRewardBack" role="dialog" aria-modal="true">
+  <div class="mus-reward-scene"></div>
+  <div class="mus-reward-rays"></div>
+  <div class="mus-reward-card">
+    <div class="mus-reward-rarity" id="musRewardRarity">COMMON</div>
+    <div class="mus-reward-eyebrow">Module Complete</div>
+    <div class="mus-reward-unlocked">You finished · <b id="musRewardModule">Start Here</b></div>
+    <div class="mus-reward-stage">
+      <div class="mus-reward-ring"></div>
+      <div class="mus-reward-ring r2"></div>
+      <canvas id="musRewardOrb" width="380" height="380" aria-label="Reward orb"></canvas>
+    </div>
+    <div class="mus-reward-name" id="musRewardName">Nebula</div>
+    <div class="mus-reward-sub" id="musRewardSub">Orb · 01 of 06</div>
+    <div class="mus-reward-desc" id="musRewardDesc">A small star, kept inside glass. Born when you closed <b>Start Here</b>. Made of light, color, coordinates.</div>
+    <div class="mus-reward-actions">
+      <button class="mus-btn ghost" data-mus-reward-close>Later</button>
+      <button class="mus-btn primary" data-mus-reward-equip>Place on the pedestal</button>
     </div>
   </div>
 </div>
@@ -5382,6 +5497,116 @@ document.addEventListener('DOMContentLoaded', function(){
     } else {
       closeMusEdit();
     }
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     CINEMATIC REWARD MODAL — "A piece is born"
+     ════════════════════════════════════════════════════════════ */
+  var _rewardBack = null;
+  var _rewardOrbRenderer = null;
+  var _rewardData = {
+    nebula: { order:1, rarity:'COMMON',    module:'Start Here',  desc:'A small star, kept inside glass. Born when you closed <b>Start Here</b>. Made of light, color, coordinates.' },
+    ember:  { order:2, rarity:'COMMON',    module:'Patterns',    desc:'A warm coal, slow to cool. Born when you closed <b>Patterns</b>. Kept alive by stripes, grids, rhythm.' },
+    aurora: { order:3, rarity:'RARE',      module:'Forces',      desc:'A green sky, folded onto itself. Born when you closed <b>Forces</b>. Held by attractors, fields, silent gravity.' },
+    royal:  { order:4, rarity:'RARE',      module:'Noise',       desc:'A blue stone, alive with texture. Born when you closed <b>Noise</b>. The grain inside the calm.' },
+    void:   { order:5, rarity:'EPIC',      module:'Domain Warp', desc:'The dark piece. Born when you closed <b>Domain Warp</b>. Space folded onto itself until it had a face.' },
+    plasma: { order:6, rarity:'LEGENDARY', module:'Motion',      desc:'A piece of time. Born when you closed <b>Motion</b>. Made of flow and patient oscillation.' }
+  };
+
+  window.openMusReward = function(orbKey){
+    if (!MUS_PAL[orbKey]) return;
+    _rewardBack = _rewardBack || document.getElementById('musRewardBack');
+    if (!_rewardBack) return;
+    var data = _rewardData[orbKey];
+    var pal = MUS_PAL[orbKey];
+
+    /* lazy init reward orb renderer */
+    if (!_rewardOrbRenderer){
+      _rewardOrbRenderer = makeOrbRenderer(document.getElementById('musRewardOrb'), { pal: pal, interactive: false });
+    }
+    _rewardOrbRenderer.setPalette(orbKey);
+
+    document.getElementById('musRewardName').textContent = pal.name;
+    document.getElementById('musRewardSub').textContent = 'Orb · ' + String(data.order).padStart(2,'0') + ' of 06';
+    document.getElementById('musRewardModule').textContent = data.module;
+    document.getElementById('musRewardDesc').innerHTML = data.desc;
+    var tag = document.getElementById('musRewardRarity');
+    tag.textContent = data.rarity;
+    tag.className = 'mus-reward-rarity ' + data.rarity.toLowerCase();
+
+    _rewardBack.dataset.currentOrb = orbKey;
+    _rewardBack.classList.add('open');
+    rewardSparkBurst();
+  };
+
+  function closeMusReward(){
+    if (_rewardBack) _rewardBack.classList.remove('open');
+  }
+
+  function rewardSparkBurst(){
+    var cols = ['#b06cff','#e8c89a','#3ad6a8','#ff8a3d','#ffffff'];
+    setTimeout(function(){
+      for (var i=0; i<40; i++){
+        var sp = document.createElement('div');
+        sp.className = 'mus-spark';
+        sp.style.background = cols[i % cols.length];
+        sp.style.left = '50%';
+        sp.style.top = '42%';
+        document.body.appendChild(sp);
+        var ang = Math.random()*6.28;
+        var dist = 130 + Math.random()*220;
+        var x = Math.cos(ang)*dist;
+        var y = Math.sin(ang)*dist - 40;
+        sp.animate([
+          { transform:'translate(-50%,-50%) scale(1)', opacity:1 },
+          { transform:'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px)) scale(0)', opacity:0 }
+        ], { duration:900 + Math.random()*500, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = function(){ this.effect.target.remove(); };
+      }
+    }, 250);
+  }
+
+  /* trigger reward cinematic from done progress modules (preview) */
+  document.addEventListener('click', function(e){
+    var reward = e.target.closest && e.target.closest('.mus-mod.done .reward');
+    if (!reward) return;
+    var rdot = reward.querySelector('.rdot');
+    if (!rdot) return;
+    var orb = null;
+    ['nebula','ember','aurora','royal','void','plasma'].forEach(function(o){
+      if (rdot.classList.contains('mus-o-' + o)) orb = o;
+    });
+    if (orb) window.openMusReward(orb);
+  });
+
+  /* close handlers */
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.matches && e.target.matches('[data-mus-reward-close]')) closeMusReward();
+    if (e.target && e.target.id === 'musRewardBack') closeMusReward();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && _rewardBack && _rewardBack.classList.contains('open')) closeMusReward();
+  });
+
+  /* equip from reward modal · "Place on the pedestal" */
+  document.addEventListener('click', function(e){
+    if (!e.target.matches || !e.target.matches('[data-mus-reward-equip]')) return;
+    var orb = _rewardBack && _rewardBack.dataset.currentOrb;
+    if (!orb) { closeMusReward(); return; }
+    if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(orb);
+    document.querySelectorAll('.mus-orb-card').forEach(function(c){
+      c.classList.toggle('equipped', c.dataset.orb === orb);
+    });
+    var disp = document.querySelector('.mus-orb-card[data-orb="' + orb + '"] .oname');
+    if (disp){
+      var eb = document.getElementById('musEyebrow');
+      if (eb) eb.textContent = 'Equipped Orb · ' + disp.textContent;
+    }
+    if (window._user && window._sb){
+      window._sb.rpc('update_equipped_orb', { p_orb_key: orb }).then(function(){
+        if (window._profile) window._profile.equipped_orb = orb;
+      }).catch(function(){});
+    }
+    closeMusReward();
   });
 })();
 </script>
