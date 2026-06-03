@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
+<title>Noise Intro · B — Static Crash + Signal Recovery</title>
+
+<!-- ═══════════════════════════════════════
+     WoGL — World of GL
+     wogl.io | worldofgl.com | mundogl.com
+     hello@wogl.io | hola@mundogl.com
+
+     Proprietary. All rights reserved.
+
+     Noise intro · variant B
+     WebGL static crash that converges into the title.
+     From chaos to order — demonstrates what noise IS.
+     ═══════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000;
+  --ink: #f8f0e8;
+  --red: #ff2d4f;
+  --green: #39ff7f;
+  --ink-faint: #6a6470;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--ink); min-height: 100vh; }
+body { font-family: 'Outfit', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+.variant-nav {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,45,79,0.35);
+  border-radius: 999px; padding: 4px; z-index: 100; backdrop-filter: blur(8px);
+}
+.variant-nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+  color: var(--ink-faint); text-decoration: none;
+  padding: 8px 14px; border-radius: 999px; transition: all .2s;
+}
+.variant-nav a.active { color: var(--red); background: rgba(255,45,79,0.12); }
+.variant-nav a:hover:not(.active) { color: var(--ink); }
+
+.stage {
+  min-height: 100vh; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 80px clamp(20px, 4vw, 60px);
+}
+
+/* Static canvas — full bleed during crash */
+#staticCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#staticCanvas.recovered { opacity: 0.12; }
+
+/* Title — appears as signal recovers */
+.signal {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 1s cubic-bezier(0.22, 1, 0.36, 1) 1.6s,
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1) 1.6s;
+}
+.signal.tuned { opacity: 1; transform: translateY(0); }
+
+.signal-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.30em;
+  color: var(--green); text-transform: uppercase;
+  margin-bottom: 22px;
+  text-shadow: 0 0 18px rgba(57,255,127,0.55);
+}
+.signal-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: clamp(48px, 10vw, 130px);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: var(--ink);
+  text-shadow:
+    0 0 40px rgba(248,240,232,0.30),
+    0 0 80px rgba(255,45,79,0.15);
+}
+.signal-title em {
+  font-style: normal;
+  color: var(--red);
+  text-shadow: 0 0 40px rgba(255,45,79,0.55);
+}
+.signal-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.20em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-top: 26px;
+  opacity: 0.85;
+}
+
+/* RGB shift on the title during recovery — chromatic aberration */
+@keyframes chroma-shift {
+  0%, 100% { text-shadow: 0 0 40px rgba(248,240,232,0.30), 0 0 80px rgba(255,45,79,0.15); }
+  50%      { text-shadow:
+              -3px 0 0 rgba(255,45,79,0.65),
+               3px 0 0 rgba(57,255,127,0.55),
+               0 0 40px rgba(248,240,232,0.30); }
+}
+.signal.tuned .signal-title { animation: chroma-shift 6s ease-in-out infinite; }
+
+.scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 50;
+  background-image: repeating-linear-gradient(
+    0deg, rgba(57,255,127,0.025) 0px, rgba(57,255,127,0.025) 1px,
+    transparent 1px, transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+.replay {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--green); background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(57,255,127,0.45); border-radius: 4px;
+  padding: 12px 22px; cursor: pointer; z-index: 100;
+  backdrop-filter: blur(8px);
+  transition: all .2s;
+}
+.replay:hover { background: rgba(57,255,127,0.10); box-shadow: 0 0 22px rgba(57,255,127,0.35); }
+</style>
+</head>
+<body>
+
+<nav class="variant-nav">
+  <a href="2026-06-02-noise-intro-a.html">A</a>
+  <a href="2026-06-02-noise-intro-b.html" class="active">B</a>
+  <a href="2026-06-02-noise-intro-c.html">C</a>
+  <a href="2026-06-02-noise-intro-d.html">D</a>
+</nav>
+
+<div class="stage">
+  <canvas id="staticCanvas"></canvas>
+  <div class="signal" id="signal">
+    <div class="signal-eyebrow">Noise · 01</div>
+    <h1 class="signal-title">El <em>ruido</em></h1>
+    <div class="signal-sub">aleatoriedad estructurada</div>
+  </div>
+</div>
+
+<div class="scanlines"></div>
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+
+<script>
+/* ─── WebGL static crash → signal recovery ───
+   Phase 1 (0-1500ms): full-screen hash noise with red+green RGB shift,
+   loud and chaotic.
+   Phase 2 (1500-2900ms): noise opacity fades to 12%, title fades in,
+   chromatic aberration breathes on the title. */
+var canvas = document.getElementById('staticCanvas');
+var gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+var dpr = Math.min(window.devicePixelRatio || 1, 2);
+function resize() {
+  var w = window.innerWidth, h = window.innerHeight;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', resize);
+resize();
+
+var VERT = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+var FRAG = [
+  'precision mediump float;',
+  'uniform float T;',
+  'uniform vec2  R;',
+  'uniform float CRASH;',  /* 1.0 = full crash, 0.0 = recovered */
+  'float h(vec2 p){',
+  '  vec3 p3=fract(vec3(p.xyx)*0.1031);',
+  '  p3+=dot(p3,p3.yzx+33.33);',
+  '  return fract((p3.x+p3.y)*p3.z);',
+  '}',
+  'void main(){',
+  '  vec2 p = gl_FragCoord.xy;',
+  '  /* Hash noise per RGB channel, slightly offset for chromatic aberration. */',
+  '  float r = h(p + vec2(T*97., 0.));',
+  '  float g = h(p + vec2(-2., T*113.));',
+  '  float b = h(p + vec2(4., -T*89.));',
+  '  /* Red lifts hot, green floor stays magma-ish, blue suppressed. */',
+  '  vec3 col = vec3(r*1.05, g*0.55, b*0.18);',
+  '  /* Mix in some flat scanline darkening. */',
+  '  float scan = step(0.5, fract(p.y * 0.5)) * 0.08;',
+  '  col -= scan;',
+  '  /* Glitch bands — horizontal stripes of full red, sparse. */',
+  '  float band = step(0.985, fract(sin(floor(p.y / 24.) * 12.9 + T*3.)*43758.5));',
+  '  col = mix(col, vec3(1.0, 0.18, 0.30), band * 0.7);',
+  '  gl_FragColor = vec4(col, 1.);',
+  '}'
+].join('\n');
+
+var fs = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fs, FRAG); gl.compileShader(fs);
+var vs = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vs, VERT); gl.compileShader(vs);
+var prog = gl.createProgram();
+gl.attachShader(prog, vs); gl.attachShader(prog, fs);
+gl.bindAttribLocation(prog, 0, 'a');
+gl.linkProgram(prog); gl.useProgram(prog);
+
+var buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+var uT = gl.getUniformLocation(prog, 'T');
+var uR = gl.getUniformLocation(prog, 'R');
+var t0 = performance.now();
+
+function frame(now) {
+  requestAnimationFrame(frame);
+  gl.uniform1f(uT, (now - t0) * 0.001);
+  gl.uniform2f(uR, canvas.width, canvas.height);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+requestAnimationFrame(frame);
+
+/* Signal recovery — 1.5s of pure crash, then converge */
+setTimeout(function() {
+  canvas.classList.add('recovered');
+  document.getElementById('signal').classList.add('tuned');
+}, 1500);
+</script>
+
+</body>
+</html>

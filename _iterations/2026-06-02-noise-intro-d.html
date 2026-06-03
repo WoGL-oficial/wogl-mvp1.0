@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
+<title>Noise Intro · D — Matrix Rain Reveal</title>
+
+<!-- ═══════════════════════════════════════
+     WoGL — World of GL
+     wogl.io | worldofgl.com | mundogl.com
+     hello@wogl.io | hola@mundogl.com
+
+     Proprietary. All rights reserved.
+
+     Noise intro · variant D
+     Matrix-style character rain falling in columns,
+     converges into the centered title.
+     ═══════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000;
+  --ink: #f8f0e8;
+  --red: #ff2d4f;
+  --green: #39ff7f;
+  --green-deep: #1a8c45;
+  --ink-faint: #6a6470;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--ink); min-height: 100vh; height: 100%; }
+body { font-family: 'Outfit', sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+.variant-nav {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(57,255,127,0.35);
+  border-radius: 999px; padding: 4px; z-index: 100; backdrop-filter: blur(8px);
+}
+.variant-nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+  color: var(--ink-faint); text-decoration: none;
+  padding: 8px 14px; border-radius: 999px; transition: all .2s;
+}
+.variant-nav a.active { color: var(--green); background: rgba(57,255,127,0.12); }
+.variant-nav a:hover:not(.active) { color: var(--ink); }
+
+.stage {
+  position: relative; height: 100vh; height: 100dvh;
+  overflow: hidden;
+}
+
+#matrixCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+/* Title — converges in after the rain */
+.signal {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  z-index: 10;
+  padding: 0 20px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1) 2.6s,
+    transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 2.6s;
+  pointer-events: none;
+}
+.signal.tuned { opacity: 1; transform: translateY(0); }
+
+.signal-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.30em;
+  color: var(--green); text-transform: uppercase;
+  margin-bottom: 18px;
+  text-shadow: 0 0 18px rgba(57,255,127,0.55);
+}
+.signal-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: clamp(48px, 11vw, 140px);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: var(--ink);
+  text-shadow:
+    0 0 40px rgba(248,240,232,0.30),
+    0 0 100px rgba(57,255,127,0.25);
+}
+.signal-title em {
+  font-style: normal;
+  color: var(--green);
+  text-shadow: 0 0 50px rgba(57,255,127,0.75), 0 0 120px rgba(57,255,127,0.30);
+}
+.signal-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.20em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-top: 22px;
+  opacity: 0.85;
+}
+
+/* Backdrop wipe — dimmer applied as rain transitions to converge phase */
+.dimmer {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.85) 100%);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 1.2s ease 2.2s;
+  pointer-events: none;
+}
+.dimmer.on { opacity: 1; }
+
+.replay {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--green); background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(57,255,127,0.45); border-radius: 4px;
+  padding: 12px 22px; cursor: pointer; z-index: 100;
+  backdrop-filter: blur(8px);
+  transition: background .2s, box-shadow .2s;
+}
+.replay:hover { background: rgba(57,255,127,0.10); box-shadow: 0 0 22px rgba(57,255,127,0.35); }
+</style>
+</head>
+<body>
+
+<nav class="variant-nav">
+  <a href="2026-06-02-noise-intro-a.html">A</a>
+  <a href="2026-06-02-noise-intro-b.html">B</a>
+  <a href="2026-06-02-noise-intro-c.html">C</a>
+  <a href="2026-06-02-noise-intro-d.html" class="active">D</a>
+</nav>
+
+<div class="stage">
+  <canvas id="matrixCanvas"></canvas>
+  <div class="dimmer" id="dimmer"></div>
+  <div class="signal" id="signal">
+    <div class="signal-eyebrow">Noise · 01</div>
+    <h1 class="signal-title">El <em>ruido</em></h1>
+    <div class="signal-sub">structure from randomness</div>
+  </div>
+</div>
+
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+
+<script>
+/* Matrix rain — columns of falling katakana/glyph chars in neon green.
+   Heads brighter, tails fade. Runs full-screen for ~2.5s then the
+   dimmer applies and the title converges in. */
+
+var canvas = document.getElementById('matrixCanvas');
+var ctx = canvas.getContext('2d');
+var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+var glyphs = 'アァカサタナハマヤラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨロヲゴゾドボポ0123456789ABCDEF';
+var fontSize = 16;
+var cols = 0, drops = [];
+
+function resize() {
+  var w = window.innerWidth, h = window.innerHeight;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  fontSize = Math.max(14, Math.floor(w / 80));
+  cols = Math.floor(w / fontSize);
+  drops = [];
+  for (var i = 0; i < cols; i++) drops[i] = Math.random() * -h / fontSize;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function rand(n) { return Math.floor(Math.random() * n); }
+
+function draw() {
+  /* Soft trail — slight black overlay each frame for the comet tails. */
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  ctx.font = '500 ' + fontSize + 'px JetBrains Mono, monospace';
+  ctx.textBaseline = 'top';
+
+  for (var i = 0; i < cols; i++) {
+    var ch = glyphs.charAt(rand(glyphs.length));
+    var x = i * fontSize;
+    var y = drops[i] * fontSize;
+    /* Head = bright white-green; trail = deep green. */
+    ctx.fillStyle = '#caffd9';
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = 'rgba(57,255,127,0.85)';
+    ctx.fillText(ch, x, y);
+    ctx.shadowBlur = 0;
+
+    /* Body trail — render a second char behind, dimmer. */
+    if (drops[i] > 1) {
+      ctx.fillStyle = 'rgba(57, 255, 127, 0.55)';
+      var ch2 = glyphs.charAt(rand(glyphs.length));
+      ctx.fillText(ch2, x, y - fontSize);
+    }
+
+    drops[i]++;
+    if (y > window.innerHeight && Math.random() > 0.975) drops[i] = 0;
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* Converge — after 2.5s of pure rain, dim and reveal title */
+setTimeout(function() {
+  document.getElementById('dimmer').classList.add('on');
+  document.getElementById('signal').classList.add('tuned');
+}, 2500);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
+<title>Noise Intro · A — Cyberpunk OLED</title>
+
+<!-- ═══════════════════════════════════════
+     WoGL — World of GL
+     wogl.io | worldofgl.com | mundogl.com
+     hello@wogl.io | hola@mundogl.com
+
+     Proprietary. All rights reserved.
+
+     Noise intro · variant A
+     Typewriter cyberpunk with OLED black + neon red + magma green.
+     Standalone preview for A/B/C/D comparison.
+     ═══════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --ink: #f8f0e8;
+  --red: #ff2d4f;        /* neon red */
+  --green: #39ff7f;      /* magma green */
+  --green-deep: #1a8c45;
+  --ink-faint: #6a6470;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--ink); min-height: 100vh; }
+body {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Variant nav — minimal pill at top */
+.variant-nav {
+  position: fixed; top: 16px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 4px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,45,79,0.35);
+  border-radius: 999px;
+  padding: 4px;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+.variant-nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: all .2s;
+}
+.variant-nav a.active { color: var(--red); background: rgba(255,45,79,0.12); }
+.variant-nav a:hover:not(.active) { color: var(--ink); }
+
+/* Stage — full height for the intro */
+.stage {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: stretch; justify-content: center;
+  padding: 80px clamp(20px, 4vw, 60px);
+  position: relative;
+}
+
+/* Section eyebrow */
+.noise-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  text-shadow: 0 0 18px rgba(255,45,79,0.55);
+}
+
+/* Intro typewriter — neon red + magma green cyberpunk */
+.intro-tw {
+  position: relative;
+  padding: clamp(28px, 4vw, 56px) clamp(22px, 3vw, 38px) clamp(40px, 5vw, 64px);
+  border: 1px solid rgba(255,45,79,0.28);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255,45,79,0.04), rgba(0,0,0,0.6) 60%, rgba(57,255,127,0.025));
+  box-shadow:
+    inset 0 0 80px rgba(255,45,79,0.06),
+    0 0 80px rgba(255,45,79,0.10),
+    0 0 200px rgba(57,255,127,0.06);
+  overflow: hidden;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.intro-tw::before {
+  content: '> noise.what()';
+  position: absolute;
+  top: 14px; left: 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: rgba(255,45,79,0.78);
+  text-transform: lowercase;
+}
+.intro-tw::after {
+  content: '';
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 14px rgba(57,255,127,0.95), 0 0 28px rgba(57,255,127,0.55);
+  animation: tw-live 1.4s ease-in-out infinite;
+}
+@keyframes tw-live {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.2); }
+}
+.intro-tw-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: clamp(15px, 1.8vw, 22px);
+  line-height: 1.8;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+  min-height: 1.75em;
+  margin-top: clamp(28px, 3vw, 40px);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.intro-tw-text .tw-q {
+  color: var(--red);
+  font-weight: 700;
+  text-shadow: 0 0 22px rgba(255,45,79,0.65);
+}
+.intro-tw-text .tw-key {
+  color: var(--red);
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(255,45,79,0.65);
+  padding: 0 2px;
+}
+.intro-tw-text .tw-em {
+  color: var(--green);
+  font-weight: 600;
+  text-shadow: 0 0 22px rgba(57,255,127,0.60);
+}
+.intro-tw-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  background: var(--green);
+  margin-left: 2px;
+  vertical-align: -2px;
+  box-shadow: 0 0 14px rgba(57,255,127,0.95);
+  animation: tw-blink 1s steps(2, end) infinite;
+}
+@keyframes tw-blink {
+  0%, 49%  { opacity: 1; }
+  50%,100% { opacity: 0; }
+}
+
+/* Scanline overlay — subtle CRT */
+.scanlines {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255,45,79,0.025) 0px,
+    rgba(255,45,79,0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+/* Replay button */
+.replay {
+  display: block;
+  margin: 28px auto 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: transparent;
+  border: 1px solid rgba(57,255,127,0.45);
+  border-radius: 4px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.replay:hover {
+  background: rgba(57,255,127,0.08);
+  border-color: var(--green);
+  box-shadow: 0 0 22px rgba(57,255,127,0.35);
+}
+</style>
+</head>
+<body>
+
+<nav class="variant-nav">
+  <a href="2026-06-02-noise-intro-a.html" class="active">A</a>
+  <a href="2026-06-02-noise-intro-b.html">B</a>
+  <a href="2026-06-02-noise-intro-c.html">C</a>
+  <a href="2026-06-02-noise-intro-d.html">D</a>
+</nav>
+
+<div class="stage">
+  <div style="max-width:860px; margin:0 auto; width:100%;">
+    <div class="noise-eyebrow">Noise · 01</div>
+    <div id="introTw"></div>
+    <button class="replay" onclick="location.reload()">↻ Replay</button>
+  </div>
+</div>
+
+<div class="scanlines"></div>
+
+<script>
+function mountIntroA() {
+  var anchor = document.getElementById('introTw');
+  var segments = [
+    ['¿Qué es el ', null],
+    ['ruido',       'tw-q'],
+    ['?',           null],
+    ['\n',          null],
+    ['El ',         null],
+    ['ruido',       'tw-key'],
+    [' es ',        null],
+    ['aleatoriedad',  'tw-em'],
+    [' que aprendió a tener ', null],
+    ['estructura',    'tw-em'],
+    ['. Hash crudo. Valor suave. Capas que se apilan. Aquí adentro vas a aprender a ', null],
+    ['controlar el caos', 'tw-key'],
+    ['.',            null]
+  ];
+
+  var wrap = document.createElement('div');
+  wrap.className = 'intro-tw';
+  var textEl = document.createElement('div');
+  textEl.className = 'intro-tw-text';
+  var caret = document.createElement('span');
+  caret.className = 'intro-tw-caret';
+  textEl.appendChild(caret);
+  wrap.appendChild(textEl);
+  anchor.appendChild(wrap);
+
+  var segIdx = 0, charIdx = 0, currentSpan = null;
+  function ensureSpan(cls) {
+    if (currentSpan && currentSpan._cls === cls) return currentSpan;
+    var span = document.createElement('span');
+    if (cls) span.className = cls;
+    span._cls = cls;
+    textEl.insertBefore(span, caret);
+    currentSpan = span;
+    return span;
+  }
+  function step() {
+    if (segIdx >= segments.length) return;
+    var seg = segments[segIdx];
+    var text = seg[0], cls = seg[1];
+    if (charIdx >= text.length) {
+      segIdx++; charIdx = 0; currentSpan = null;
+      setTimeout(step, 40); return;
+    }
+    var ch = text.charAt(charIdx);
+    if (ch === '\n') {
+      textEl.insertBefore(document.createElement('br'), caret);
+      currentSpan = null; charIdx++;
+      setTimeout(step, 280); return;
+    }
+    var span = ensureSpan(cls);
+    span.appendChild(document.createTextNode(ch));
+    charIdx++;
+    var delay = 32;
+    if (ch === '.' || ch === ',' || ch === '?') delay = 240;
+    else if (ch === ' ') delay = 40;
+    else if (cls === 'tw-key' || cls === 'tw-q') delay = 55;
+    setTimeout(step, delay);
+  }
+  setTimeout(step, 600);
+}
+mountIntroA();
+</script>
+
+</body>
+</html>
