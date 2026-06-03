@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.85, maximum-scale=1.25">
-<title>Noise Intro · C — Screen Off → Welcome to the Terminal</title>
+<title>Noise Intro · C2 — Welcome + Matrix Background</title>
 
 <!-- ═══════════════════════════════════════
      WoGL — World of GL
@@ -12,26 +12,28 @@
 
      Proprietary. All rights reserved.
 
-     Noise intro · variant C (Gera's idea)
-     Black screen as if powered off → ignites → massive
-     centered typewriter "WELCOME TO THE TERMINAL".
+     Noise intro · variant C2
+     Hybrid of C1 + D: black screen → power-on zap →
+     matrix rain wakes up in the background → "WELCOME TO
+     THE TERMINAL" typewriter prints centered over it.
      ═══════════════════════════════════════ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg: #000000;
+  --bg: #000;
   --ink: #f8f0e8;
   --red: #ff2d4f;
   --green: #39ff7f;
+  --green-deep: #1a8c45;
   --ink-faint: #6a6470;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: var(--bg); color: var(--ink); min-height: 100vh; }
-body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+html, body { background: var(--bg); color: var(--ink); min-height: 100vh; height: 100%; }
+body { font-family: 'JetBrains Mono', monospace; overflow: hidden; -webkit-font-smoothing: antialiased; }
 
 .variant-nav {
   position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
@@ -40,7 +42,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   border: 1px solid rgba(57,255,127,0.35);
   border-radius: 999px; padding: 4px; z-index: 100; backdrop-filter: blur(8px);
   opacity: 0;
-  transition: opacity .6s ease 2s;
+  transition: opacity .6s ease 2.4s;
 }
 .variant-nav.ready { opacity: 1; }
 .variant-nav a {
@@ -53,12 +55,22 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
 .variant-nav a:hover:not(.active) { color: var(--ink); }
 
 .stage {
-  min-height: 100vh; position: relative;
+  position: relative; height: 100vh; height: 100dvh;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
 }
 
-/* Black-out overlay — covers everything for 1.5s, then fades */
+#matrixCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+#matrixCanvas.awake { opacity: 0.65; }
+
+/* Black-out overlay — covers everything for 1.3s */
 .blackout {
   position: fixed; inset: 0;
   background: #000;
@@ -69,7 +81,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
 }
 .blackout.gone { opacity: 0; }
 
-/* Power-on flash — bright green sliver crossing the screen */
+/* Power-on flash */
 .power-flash {
   position: fixed; inset: 0;
   z-index: 999;
@@ -82,9 +94,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   background-position: 0 -8px;
   opacity: 0;
 }
-.power-flash.zap {
-  animation: zap-cross 0.5s ease-out forwards;
-}
+.power-flash.zap { animation: zap-cross 0.5s ease-out forwards; }
 @keyframes zap-cross {
   0%   { opacity: 0; background-position: 0 -8px; }
   20%  { opacity: 1; background-position: 0 25vh; }
@@ -92,22 +102,30 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   100% { opacity: 0; background-position: 0 110vh; }
 }
 
-/* The massive typewriter title */
+/* Title sits over the rain — backdrop dimmer keeps it readable */
+.title-wrap {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 4vw, 56px);
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0.78) 0%,
+    rgba(0,0,0,0.55) 60%,
+    rgba(0,0,0,0.0) 100%);
+}
 .terminal-title {
   font-family: 'Outfit', sans-serif;
   font-weight: 900;
-  font-size: clamp(40px, 10vw, 120px);
+  font-size: clamp(36px, 8vw, 100px);
   letter-spacing: -0.04em;
-  line-height: 0.95;
+  line-height: 1;
   color: var(--green);
-  text-align: center;
   text-shadow:
-    0 0 30px rgba(57,255,127,0.55),
-    0 0 80px rgba(57,255,127,0.30),
-    0 0 160px rgba(57,255,127,0.15);
+    0 0 30px rgba(57,255,127,0.65),
+    0 0 80px rgba(57,255,127,0.35),
+    0 0 160px rgba(57,255,127,0.18);
   word-break: break-word;
   max-width: 100%;
-  padding: 0 12px;
 }
 .terminal-title .caret {
   display: inline-block;
@@ -116,7 +134,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   background: var(--green);
   margin-left: 0.08em;
   vertical-align: -0.05em;
-  box-shadow: 0 0 20px rgba(57,255,127,0.95);
+  box-shadow: 0 0 22px rgba(57,255,127,0.95);
   animation: tc-blink 1s steps(2, end) infinite;
 }
 @keyframes tc-blink {
@@ -124,7 +142,6 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   50%,100% { opacity: 0; }
 }
 
-/* Subtle scanlines + vignette for CRT feel */
 .scanlines {
   position: fixed; inset: 0; pointer-events: none; z-index: 50;
   background-image: repeating-linear-gradient(
@@ -138,7 +155,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
 .scanlines.on { opacity: 1; }
 .vignette {
   position: fixed; inset: 0; pointer-events: none; z-index: 40;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%);
+  background: radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.72) 100%);
   opacity: 0;
   transition: opacity .8s ease;
 }
@@ -152,7 +169,7 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
   border: 1px solid rgba(57,255,127,0.45); border-radius: 4px;
   padding: 12px 22px; cursor: pointer; z-index: 100;
   opacity: 0;
-  transition: opacity .6s ease 2s, background .2s, box-shadow .2s;
+  transition: opacity .6s ease 2.4s, background .2s, box-shadow .2s;
 }
 .replay.ready { opacity: 1; }
 .replay:hover { background: rgba(57,255,127,0.10); box-shadow: 0 0 22px rgba(57,255,127,0.35); }
@@ -166,12 +183,17 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
 <nav class="variant-nav" id="variantNav">
   <a href="2026-06-02-noise-intro-a.html">A</a>
   <a href="2026-06-02-noise-intro-b.html">B</a>
-  <a href="2026-06-02-noise-intro-c.html" class="active">C</a>
-  <a href="2026-06-02-noise-intro-d.html">D</a>
+  <a href="2026-06-02-noise-intro-c1.html">C1</a>
+  <a href="2026-06-02-noise-intro-c2.html" class="active">C2</a>
+  <a href="2026-06-02-noise-intro-d1.html">D1</a>
+  <a href="2026-06-02-noise-intro-d2.html">D2</a>
 </nav>
 
 <div class="stage">
-  <h1 class="terminal-title" id="title"><span class="caret"></span></h1>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="title-wrap">
+    <h1 class="terminal-title" id="title"><span class="caret"></span></h1>
+  </div>
 </div>
 
 <div class="scanlines" id="scanlines"></div>
@@ -179,41 +201,85 @@ body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; -webkit-fon
 <button class="replay" id="replay" onclick="location.reload()">↻ Replay</button>
 
 <script>
-/* Phase 1: 1500ms of full black (screen "off")
-   Phase 2: 500ms power-on flash crossing the screen
-   Phase 3: typewriter prints "WELCOME TO THE TERMINAL" letter by letter */
+/* ─── Matrix rain (always-on, fades in after the power zap) ─── */
+var canvas = document.getElementById('matrixCanvas');
+var ctx = canvas.getContext('2d');
+var dpr = Math.min(window.devicePixelRatio || 1, 2);
+var glyphs = 'アァカサタナハマヤラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨロヲゴゾドボポ0123456789ABCDEF';
+var fontSize = 16;
+var cols = 0, drops = [];
+
+function resize() {
+  var w = window.innerWidth, h = window.innerHeight;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+  fontSize = Math.max(14, Math.floor(w / 80));
+  cols = Math.floor(w / fontSize);
+  drops = [];
+  for (var i = 0; i < cols; i++) drops[i] = Math.random() * -h / fontSize;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function rand(n) { return Math.floor(Math.random() * n); }
+function draw() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  ctx.font = '500 ' + fontSize + 'px JetBrains Mono, monospace';
+  ctx.textBaseline = 'top';
+  for (var i = 0; i < cols; i++) {
+    var ch = glyphs.charAt(rand(glyphs.length));
+    var x = i * fontSize;
+    var y = drops[i] * fontSize;
+    ctx.fillStyle = '#caffd9';
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = 'rgba(57,255,127,0.85)';
+    ctx.fillText(ch, x, y);
+    ctx.shadowBlur = 0;
+    if (drops[i] > 1) {
+      ctx.fillStyle = 'rgba(57, 255, 127, 0.55)';
+      ctx.fillText(glyphs.charAt(rand(glyphs.length)), x, y - fontSize);
+    }
+    drops[i]++;
+    if (y > window.innerHeight && Math.random() > 0.975) drops[i] = 0;
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ─── Sequenced reveal ─── */
 var text = 'WELCOME TO THE TERMINAL';
 var title = document.getElementById('title');
 var caret = title.querySelector('.caret');
 
 setTimeout(function() {
-  /* Power-on zap */
   document.getElementById('powerFlash').classList.add('zap');
 }, 1300);
 
 setTimeout(function() {
-  /* Screen turns on — fade blackout, enable scanlines + vignette */
   document.getElementById('blackout').classList.add('gone');
+  document.getElementById('matrixCanvas').classList.add('awake');
   document.getElementById('scanlines').classList.add('on');
   document.getElementById('vignette').classList.add('on');
 }, 1600);
 
 setTimeout(function() {
-  /* Start typewriter */
   var i = 0;
   function tick() {
     if (i >= text.length) return;
     var ch = text.charAt(i);
     title.insertBefore(document.createTextNode(ch), caret);
     i++;
-    var delay = 75;
-    if (ch === ' ') delay = 180;
-    setTimeout(tick, delay);
+    setTimeout(tick, ch === ' ' ? 180 : 75);
   }
   tick();
   document.getElementById('variantNav').classList.add('ready');
   document.getElementById('replay').classList.add('ready');
-}, 2200);
+}, 2400);
 </script>
 
 </body>

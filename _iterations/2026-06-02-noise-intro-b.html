@@ -61,20 +61,23 @@ body { font-family: 'Outfit', sans-serif; overflow-x: hidden; -webkit-font-smoot
   width: 100%; height: 100%;
   z-index: 1;
   opacity: 1;
-  transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: crosshair;
 }
-#staticCanvas.recovered { opacity: 0.12; }
+/* After recovery the noise stays alive at 25% — it IS the section. */
+#staticCanvas.recovered { opacity: 0.28; }
 
 /* Title — appears as signal recovers */
 .signal {
   position: relative;
   z-index: 5;
   text-align: center;
+  pointer-events: none;
   opacity: 0;
   transform: translateY(8px);
   transition:
-    opacity 1s cubic-bezier(0.22, 1, 0.36, 1) 1.6s,
-    transform 1s cubic-bezier(0.22, 1, 0.36, 1) 1.6s;
+    opacity 1s cubic-bezier(0.22, 1, 0.36, 1) 3.4s,
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1) 3.4s;
 }
 .signal.tuned { opacity: 1; transform: translateY(0); }
 
@@ -149,8 +152,10 @@ body { font-family: 'Outfit', sans-serif; overflow-x: hidden; -webkit-font-smoot
 <nav class="variant-nav">
   <a href="2026-06-02-noise-intro-a.html">A</a>
   <a href="2026-06-02-noise-intro-b.html" class="active">B</a>
-  <a href="2026-06-02-noise-intro-c.html">C</a>
-  <a href="2026-06-02-noise-intro-d.html">D</a>
+  <a href="2026-06-02-noise-intro-c1.html">C1</a>
+  <a href="2026-06-02-noise-intro-c2.html">C2</a>
+  <a href="2026-06-02-noise-intro-d1.html">D1</a>
+  <a href="2026-06-02-noise-intro-d2.html">D2</a>
 </nav>
 
 <div class="stage">
@@ -188,7 +193,7 @@ var FRAG = [
   'precision mediump float;',
   'uniform float T;',
   'uniform vec2  R;',
-  'uniform float CRASH;',  /* 1.0 = full crash, 0.0 = recovered */
+  'uniform vec2  M;',       /* mouse / touch in canvas pixels (y flipped) */
   'float h(vec2 p){',
   '  vec3 p3=fract(vec3(p.xyx)*0.1031);',
   '  p3+=dot(p3,p3.yzx+33.33);',
@@ -196,18 +201,34 @@ var FRAG = [
   '}',
   'void main(){',
   '  vec2 p = gl_FragCoord.xy;',
-  '  /* Hash noise per RGB channel, slightly offset for chromatic aberration. */',
-  '  float r = h(p + vec2(T*97., 0.));',
-  '  float g = h(p + vec2(-2., T*113.));',
-  '  float b = h(p + vec2(4., -T*89.));',
-  '  /* Red lifts hot, green floor stays magma-ish, blue suppressed. */',
+  '  /* Distance from cursor, normalized to a screen-sized falloff. */',
+  '  float md = length(p - M) / min(R.x, R.y);',
+  '  /* heat = 1.0 right under the cursor, 0.0 far away. */',
+  '  float heat = exp(-md * 3.5);',
+  '  /* Hash noise per RGB channel; mouse heat boosts the temporal speed',
+  '     so the static under the cursor goes hyperactive (visible reaction). */',
+  '  float speed = 1.0 + heat * 4.0;',
+  '  float r = h(p + vec2(T*97.*speed, 0.));',
+  '  float g = h(p + vec2(-2., T*113.*speed));',
+  '  float b = h(p + vec2(4., -T*89.*speed));',
+  '  /* Channel offset widens near the cursor — RGB shift cyberpunk. */',
+  '  float ox = 2.0 + heat * 14.0;',
+  '  r = h(p + vec2(T*97.*speed - ox, 0.));',
+  '  b = h(p + vec2(T*89.*speed + ox, -T*61.));',
+  '  /* Red lifts hot, green floor magma, blue suppressed. */',
   '  vec3 col = vec3(r*1.05, g*0.55, b*0.18);',
-  '  /* Mix in some flat scanline darkening. */',
-  '  float scan = step(0.5, fract(p.y * 0.5)) * 0.08;',
+  '  /* Scanline darkening — denser near the cursor. */',
+  '  float scanDen = 0.5 + heat * 2.5;',
+  '  float scan = step(0.5, fract(p.y * scanDen)) * (0.08 + heat * 0.18);',
   '  col -= scan;',
-  '  /* Glitch bands — horizontal stripes of full red, sparse. */',
-  '  float band = step(0.985, fract(sin(floor(p.y / 24.) * 12.9 + T*3.)*43758.5));',
-  '  col = mix(col, vec3(1.0, 0.18, 0.30), band * 0.7);',
+  '  /* Horizontal glitch bands; density jumps where the cursor lives. */',
+  '  float bandFreq = step(0.985 - heat * 0.10,',
+  '                         fract(sin(floor(p.y / 24.) * 12.9 + T*3.)*43758.5));',
+  '  col = mix(col, vec3(1.0, 0.18, 0.30), bandFreq * (0.7 + heat * 0.25));',
+  '  /* A second band layer of magma green — sparse, only near cursor. */',
+  '  float greenBand = step(0.992 - heat * 0.07,',
+  '                          fract(sin(floor(p.y / 18. + p.x*0.001) * 8.7 + T*2.3)*12345.6));',
+  '  col = mix(col, vec3(0.22, 1.0, 0.50), greenBand * heat * 0.85);',
   '  gl_FragColor = vec4(col, 1.);',
   '}'
 ].join('\n');
@@ -229,21 +250,42 @@ gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
 var uT = gl.getUniformLocation(prog, 'T');
 var uR = gl.getUniformLocation(prog, 'R');
+var uM = gl.getUniformLocation(prog, 'M');
 var t0 = performance.now();
+
+/* Mouse / touch tracking. Default is center until the user moves. */
+var mouseX = canvas.width / 2;
+var mouseY = canvas.height / 2;
+function setMouse(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  mouseX = (clientX - rect.left) * dpr;
+  /* WebGL Y is bottom-up. */
+  mouseY = canvas.height - (clientY - rect.top) * dpr;
+}
+window.addEventListener('mousemove', function(e) { setMouse(e.clientX, e.clientY); });
+window.addEventListener('touchmove', function(e) {
+  if (e.touches.length) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: true });
+window.addEventListener('touchstart', function(e) {
+  if (e.touches.length) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: true });
 
 function frame(now) {
   requestAnimationFrame(frame);
   gl.uniform1f(uT, (now - t0) * 0.001);
   gl.uniform2f(uR, canvas.width, canvas.height);
+  gl.uniform2f(uM, mouseX, mouseY);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 requestAnimationFrame(frame);
 
-/* Signal recovery — 1.5s of pure crash, then converge */
+/* Signal recovery — 3.5s of pure crash (the SHSHSHSH lives long),
+   then the canvas drops to 28% and the title converges over it.
+   The noise stays alive after — this IS the Noise section. */
 setTimeout(function() {
   canvas.classList.add('recovered');
   document.getElementById('signal').classList.add('tuned');
-}, 1500);
+}, 3500);
 </script>
 
 </body>
