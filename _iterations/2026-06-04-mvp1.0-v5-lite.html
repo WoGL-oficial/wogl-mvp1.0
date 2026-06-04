@@ -1633,6 +1633,46 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
   font-size: 14px; line-height: 1.5; color: var(--ink-soft);
   text-align: center; margin: 4px 0 12px;
 }
+.mus-planet-voices,
+.mus-hero-voices {
+  display: flex; flex-direction: column; gap: 14px;
+  margin: 4px 0 6px; width: 100%;
+}
+.mus-hero-voices {
+  margin-top: 18px; max-width: 540px;
+}
+.mus-hero-voices .mus-voice {
+  animation: mus-voice-rise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.mus-hero-voices .mus-voice-cosmic { animation-delay: 0.18s; }
+.mus-hero-voices .mus-voice-wogl   { animation-delay: 0.42s; }
+@keyframes mus-voice-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mus-voice {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px; border-radius: 6px;
+  border: 1px solid rgba(232,200,154,0.10);
+  background: linear-gradient(180deg, rgba(232,200,154,0.04), rgba(232,200,154,0.01));
+}
+.mus-voice-label {
+  font-family: var(--font-mono); font-size: 8.5px;
+  letter-spacing: 0.22em; color: var(--gold);
+  text-transform: uppercase; opacity: 0.65;
+}
+.mus-voice-text {
+  margin: 0; color: var(--ink-soft);
+}
+.mus-voice-cosmic .mus-voice-text {
+  font-family: var(--font-display); font-weight: 300;
+  font-size: 13.5px; line-height: 1.55; font-style: italic;
+}
+.mus-voice-wogl .mus-voice-text {
+  font-family: var(--font-mono); font-weight: 400;
+  font-size: 11.5px; line-height: 1.55; letter-spacing: 0.02em;
+  color: var(--ink); font-style: normal;
+}
 .mus-planet-modal-cta {
   font-family: var(--font-mono); font-size: 11px;
   letter-spacing: 0.16em; color: var(--gold);
@@ -2172,9 +2212,19 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         <canvas id="museumOrb" width="600" height="600" aria-label="Equipped orb · drag to rotate"></canvas>
       </div>
       <div class="mus-plaque">
-        <div class="mus-eyebrow" id="musEyebrow">Equipped Orb · Nebula</div>
+        <div class="mus-eyebrow" id="musEyebrow">Equipped Orb · Earth</div>
         <h1 id="musName"><span id="musNameText">—</span><span class="mus-founder-chip hidden" id="musFounderChip" data-mus-i18n="founderChip">FOUNDER</span></h1>
         <div class="mus-sub" data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</div>
+        <div class="mus-hero-voices" id="musHeroVoices">
+          <div class="mus-voice mus-voice-cosmic">
+            <span class="mus-voice-label" data-mus-i18n="voiceCosmic">cosmic gossip</span>
+            <p class="mus-voice-text" id="musHeroChisme" data-mus-i18n="planetEarthChisme">Every atom heavier than helium in your body was forged inside a dying star.</p>
+          </div>
+          <div class="mus-voice mus-voice-wogl">
+            <span class="mus-voice-label" data-mus-i18n="voiceWogl">WoGL signal</span>
+            <p class="mus-voice-text" id="musHeroPunch" data-mus-i18n="planetEarthPunch">The only known node running biological code.</p>
+          </div>
+        </div>
         <!-- ░░░ RESERVED FOR FASE B (hero stats counters · uncomment when wiring real progress) ░░░
         <div class="mus-meta">
           <span><b id="musMetaOrbs">4</b><span data-mus-i18n="metaOrbs">orbs collected</span></span>
@@ -2422,7 +2472,16 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
     <div class="mus-planet-modal-orb mus-o-earth" id="musPlanetModalOrb"></div>
     <h2 class="mus-planet-modal-name" id="musPlanetModalName">Earth</h2>
     <p class="mus-planet-modal-tagline" id="musPlanetModalTagline">the cradle</p>
-    <p class="mus-planet-modal-lore" id="musPlanetModalLore">The only one with rivers, oceans and song. Your home.</p>
+    <div class="mus-planet-voices">
+      <div class="mus-voice mus-voice-cosmic">
+        <span class="mus-voice-label" data-mus-i18n="voiceCosmic">cosmic gossip</span>
+        <p class="mus-voice-text" id="musPlanetModalChisme">Every atom heavier than helium in your body was forged inside a dying star.</p>
+      </div>
+      <div class="mus-voice mus-voice-wogl">
+        <span class="mus-voice-label" data-mus-i18n="voiceWogl">WoGL signal</span>
+        <p class="mus-voice-text" id="musPlanetModalPunch">The only known node running biological code.</p>
+      </div>
+    </div>
     <button class="mus-planet-modal-cta" id="musPlanetModalCta">
       <span id="musPlanetModalCtaLabel" data-mus-i18n="planetSetAsMyOrb">Set as my orb</span>
     </button>
@@ -2586,12 +2645,12 @@ async function commitName() {
       display_name: name,
       account_lang: _accountLang || 'en',
       theme_accent: 'velvet',
-      equipped_orb: 'nebula'
+      equipped_orb: 'earth'
     });
     _profile = _profile || {};
     _profile.display_name = name;
     _profile.theme_accent = 'velvet';
-    _profile.equipped_orb = 'nebula';
+    _profile.equipped_orb = 'earth';
     /* v4.0 · brinca directo del name al welcome cinematic — ya no hay paneStep3 */
     closeAuthModal();
     playWelcome(name);
@@ -5417,51 +5476,75 @@ document.addEventListener('DOMContentLoaded', function(){
     founderSub:          { en:'Welcome aboard',                                   es:'Bienvenida a bordo' },
 
     /* 9 Planet names + taglines + lore */
-    planetMercuryName:   { en:'Mercury',                                          es:'Mercurio' },
-    planetMercuryTagline:{ en:'the messenger',                                    es:'el mensajero' },
-    planetMercuryLore:   { en:'Closest to the Sun. Tiny, fast, scorched. One year in 88 days.',
-                           es:'El más cercano al Sol. Pequeño, veloz, calcinado. Un año en 88 días.' },
+    planetMercuryName:    { en:'Mercury',  es:'Mercurio' },
+    planetMercuryTagline: { en:'the messenger', es:'el mensajero' },
+    planetMercuryChisme:  { en:"A day on Mercury lasts longer than its year — one rotation outruns a full orbit around the Sun.",
+                            es:'Un día en Mercurio dura más que su año — una rotación tarda más que una vuelta entera al Sol.' },
+    planetMercuryPunch:   { en:'Closest to the core. First to feel the heat. The fastest signal in the system.',
+                            es:'El más cercano al núcleo. El primero en sentir el calor. La señal más rápida del sistema.' },
 
-    planetVenusName:     { en:'Venus',                                            es:'Venus' },
-    planetVenusTagline:  { en:'the morning star',                                 es:'el lucero' },
-    planetVenusLore:     { en:'Hottest world. Atmosphere thick as deep ocean. Lit before dawn.',
-                           es:'El mundo más caliente. Atmósfera densa como océano profundo. Brilla antes del alba.' },
+    planetVenusName:      { en:'Venus', es:'Venus' },
+    planetVenusTagline:   { en:'the morning star', es:'el lucero' },
+    planetVenusChisme:    { en:'Venus rotates backward, so the Sun rises in the west — once every 243 Earth days, slower than its own year.',
+                            es:'Venus gira al revés, así que el Sol sale por el oeste — una vez cada 243 días, más lento que su propio año.' },
+    planetVenusPunch:     { en:'Brightest object in the sky after the Moon. Built like a furnace. Lit like a beacon.',
+                            es:'El objeto más brillante después de la Luna. Construido como horno. Encendido como faro.' },
 
-    planetEarthName:     { en:'Earth',                                            es:'Tierra' },
-    planetEarthTagline:  { en:'the cradle',                                       es:'la cuna' },
-    planetEarthLore:     { en:'The only one with rivers, oceans and song. Your home.',
-                           es:'El único con ríos, océanos y canto. Tu casa.' },
+    planetEarthName:      { en:'Earth', es:'Tierra' },
+    planetEarthTagline:   { en:'the cradle', es:'la cuna' },
+    planetEarthChisme:    { en:'Every atom heavier than helium in your body was forged inside a dying star. You are made of starlight.',
+                            es:'Cada átomo de tu cuerpo más pesado que el helio fue forjado en una estrella moribunda. Estás hecho de luz de estrella.' },
+    planetEarthPunch:     { en:'The only known node running biological code. Render rate: 4.5 billion years and counting.',
+                            es:'El único nodo conocido corriendo código biológico. Tasa de render: 4,500 millones de años y contando.' },
 
-    planetMarsName:      { en:'Mars',                                             es:'Marte' },
-    planetMarsTagline:   { en:'the red one',                                      es:'el rojo' },
-    planetMarsLore:      { en:'Iron desert. Two moons. Quiet wind. Future waiting.',
-                           es:'Desierto de hierro. Dos lunas. Viento quieto. Futuro esperando.' },
+    planetMarsName:       { en:'Mars', es:'Marte' },
+    planetMarsTagline:    { en:'the red one', es:'el rojo' },
+    planetMarsChisme:     { en:'Mars has the tallest volcano in the solar system — Olympus Mons, three times the height of Everest.',
+                            es:'Marte tiene el volcán más alto del sistema solar — Olympus Mons, tres veces más alto que el Everest.' },
+    planetMarsPunch:      { en:'Rusted desert. Patient wind. The next frontier compiled in red.',
+                            es:'Desierto oxidado. Viento paciente. La próxima frontera compilada en rojo.' },
 
-    planetJupiterName:   { en:'Jupiter',                                          es:'Júpiter' },
-    planetJupiterTagline:{ en:'the giant',                                        es:'el gigante' },
-    planetJupiterLore:   { en:'King of planets. Biggest gravity. A storm older than civilizations.',
-                           es:'Rey de planetas. Gravedad máxima. Una tormenta más vieja que civilizaciones.' },
+    planetJupiterName:    { en:'Jupiter', es:'Júpiter' },
+    planetJupiterTagline: { en:'the giant', es:'el gigante' },
+    planetJupiterChisme:  { en:"Jupiter's Great Red Spot is a storm bigger than Earth that's been raging for at least 350 years.",
+                            es:'La Gran Mancha Roja de Júpiter es una tormenta más grande que la Tierra rugiendo desde hace 350 años.' },
+    planetJupiterPunch:   { en:'Mass enough to be a failed star. Pull strong enough to bend everything around it.',
+                            es:'Masa suficiente para ser una estrella fallida. Atracción suficiente para doblar todo a su alrededor.' },
 
-    planetSaturnName:    { en:'Saturn',                                           es:'Saturno' },
-    planetSaturnTagline: { en:'the ringed',                                       es:'el de los anillos' },
-    planetSaturnLore:    { en:'Ice and rock spinning in symmetry. Mathematics made visible.',
-                           es:'Hielo y roca girando en simetría. Matemáticas hechas visibles.' },
+    planetSaturnName:     { en:'Saturn', es:'Saturno' },
+    planetSaturnTagline:  { en:'the ringed', es:'el de los anillos' },
+    planetSaturnChisme:   { en:"Saturn's rings are made of trillions of ice chunks, some as small as dust, some as big as houses.",
+                            es:'Los anillos de Saturno son billones de fragmentos de hielo — algunos polvo, otros del tamaño de casas.' },
+    planetSaturnPunch:    { en:'Mathematics made visible. Symmetry you can see from a billion kilometers away.',
+                            es:'Matemática hecha visible. Simetría que se ve desde un billón de kilómetros.' },
 
-    planetUranusName:    { en:'Uranus',                                           es:'Urano' },
-    planetUranusTagline: { en:'the tilted',                                       es:'el inclinado' },
-    planetUranusLore:    { en:'Spins on its side. Pale cyan. Mostly methane. Weird and beautiful.',
-                           es:'Gira de lado. Cian pálido. Casi todo metano. Raro y hermoso.' },
+    planetUranusName:     { en:'Uranus', es:'Urano' },
+    planetUranusTagline:  { en:'the tilted', es:'el inclinado' },
+    planetUranusChisme:   { en:'Uranus rolls through space on its side — its poles take 42 years of darkness, then 42 years of light.',
+                            es:'Urano rueda de lado por el espacio — sus polos viven 42 años de oscuridad y luego 42 de luz.' },
+    planetUranusPunch:    { en:'Tilted past the rules. Pale cyan rebel of the outer system.',
+                            es:'Inclinado más allá de las reglas. El rebelde cian del sistema exterior.' },
 
-    planetNeptuneName:   { en:'Neptune',                                          es:'Neptuno' },
-    planetNeptuneTagline:{ en:'the distant',                                      es:'el lejano' },
-    planetNeptuneLore:   { en:'Deepest blue. Winds at supersonic speed. Last of the rocky journey.',
-                           es:'Azul profundo. Vientos supersónicos. Último del viaje rocoso.' },
+    planetNeptuneName:    { en:'Neptune', es:'Neptuno' },
+    planetNeptuneTagline: { en:'the distant', es:'el lejano' },
+    planetNeptuneChisme:  { en:"Neptune's winds clock 2,100 km/h — the fastest in the solar system, faster than the speed of sound on Earth.",
+                            es:'Los vientos de Neptuno alcanzan 2,100 km/h — los más rápidos del sistema solar, más que la velocidad del sonido en la Tierra.' },
+    planetNeptunePunch:   { en:'Deepest blue ever discovered. Wind that breaks the local soundtrack.',
+                            es:'El azul más profundo jamás descubierto. Viento que rompe el soundtrack local.' },
 
-    planetSolName:       { en:'Sol',                                              es:'Sol' },
-    planetSolTagline:    { en:'the source',                                       es:'la fuente' },
-    planetSolLore:       { en:'Where everything begins. Light, gravity, time. The heart of the system.',
-                           es:'Donde todo empieza. Luz, gravedad, tiempo. El corazón del sistema.' }
+    planetSolName:        { en:'Sol', es:'Sol' },
+    planetSolTagline:     { en:'the source', es:'la fuente' },
+    planetSolChisme:      { en:'Every second the Sun converts 600 million tons of hydrogen into helium, releasing the energy of 100 billion nukes.',
+                            es:'Cada segundo el Sol convierte 600 millones de toneladas de hidrógeno en helio — energía de 100 mil millones de bombas.' },
+    planetSolPunch:       { en:"Source of every photon you've ever seen. The original kernel. The first uptime.",
+                            es:'Fuente de cada fotón que has visto. El kernel original. El primer uptime.' },
+
+    /* labels for the cinematic dual-voice display */
+    voiceCosmic:          { en:'cosmic gossip', es:'chisme cósmico' },
+    voiceWogl:            { en:'WoGL signal',   es:'señal WoGL' }
   };
+  /* v5 lite · expose catalog for cross-IIFE helpers (hero voices, planet modal) */
+  window.MUS_UI = MUS_UI;
 
   /* descripciones bilingual por orb (reward modal) */
   var MUS_DESC = {
@@ -5502,7 +5585,7 @@ document.addEventListener('DOMContentLoaded', function(){
     /* equipped orb eyebrow: prefix from i18n + dynamic orb name */
     var eb = document.getElementById('musEyebrow');
     if (eb && window._profile){
-      var orb = window._profile.equipped_orb || 'nebula';
+      var orb = window._profile.equipped_orb || 'earth';
       var disp = document.querySelector('.mus-orb-card[data-orb="' + orb + '"] .oname');
       if (disp) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp.textContent;
     }
@@ -5704,6 +5787,25 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
 
+    /* v5 lite · update hero voices to a planet · cinematic re-animation */
+    window.updateHeroVoices = function(planetKey){
+      var chismeEl = document.getElementById('musHeroChisme');
+      var punchEl  = document.getElementById('musHeroPunch');
+      if (!chismeEl || !punchEl) return;
+      var cap = planetKey.charAt(0).toUpperCase() + planetKey.slice(1);
+      chismeEl.dataset.musI18n = 'planet' + cap + 'Chisme';
+      punchEl.dataset.musI18n  = 'planet' + cap + 'Punch';
+      if (typeof window.applyMusLang === 'function') window.applyMusLang();
+      var voices = document.getElementById('musHeroVoices');
+      if (voices){
+        voices.querySelectorAll('.mus-voice').forEach(function(v){
+          v.style.animation = 'none';
+          /* force reflow */ void v.offsetHeight;
+          v.style.animation = '';
+        });
+      }
+    };
+
     /* v5 lite · ceremony reusable expuesta para uso desde planet modal CTA */
     window.runEquipCeremony = function(name){
       var card = document.querySelector('.mus-orb-card[data-orb="' + name + '"]');
@@ -5722,6 +5824,7 @@ document.addEventListener('DOMContentLoaded', function(){
         hero.classList.add('equipping');
         setTimeout(function(){ hero.classList.remove('equipping'); }, 850);
       }
+      window.updateHeroVoices(name);
       if (typeof equipBurst === 'function') equipBurst(name);
     };
   }
@@ -5752,7 +5855,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (founderChip) founderChip.classList.toggle('hidden', !isFounder);
       if (founderCard) founderCard.classList.toggle('hidden', !isFounder);
 
-      var orb = window._profile.equipped_orb || 'nebula';
+      var orb = window._profile.equipped_orb || 'earth';
       var theme = window._profile.theme_accent || 'velvet';
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('wogl-theme-accent', theme);
@@ -5760,6 +5863,16 @@ document.addEventListener('DOMContentLoaded', function(){
       document.querySelectorAll('.mus-orb-card').forEach(function(c){
         c.classList.toggle('equipped', c.dataset.orb === orb);
       });
+      /* v5 lite · sync eyebrow + hero voices to the equipped planet */
+      var planetCap = orb.charAt(0).toUpperCase() + orb.slice(1);
+      var eyebrowEl = document.getElementById('musEyebrow');
+      if (eyebrowEl){
+        var prefix = (typeof mt === 'function') ? mt('equippedOrbPrefix') : 'Equipped Orb ·';
+        var nameKey = window.MUS_UI && window.MUS_UI['planet' + planetCap + 'Name'];
+        var nameTxt = nameKey ? (nameKey[window.lang || 'en'] || nameKey.en) : planetCap;
+        eyebrowEl.textContent = prefix + ' ' + nameTxt;
+      }
+      if (typeof window.updateHeroVoices === 'function') window.updateHeroVoices(orb);
     }
 
     initMuseumOrb();
@@ -6127,7 +6240,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var rdot = reward.querySelector('.rdot');
     if (!rdot) return;
     var orb = null;
-    ['nebula','ember','aurora','royal','void','plasma'].forEach(function(o){
+    ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','sol','nebula','ember','aurora','royal','void','plasma'].forEach(function(o){
       if (rdot.classList.contains('mus-o-' + o)) orb = o;
     });
     if (orb) window.openMusReward(orb);
@@ -6181,15 +6294,17 @@ document.addEventListener('DOMContentLoaded', function(){
     var orb = document.getElementById('musPlanetModalOrb');
     var name = document.getElementById('musPlanetModalName');
     var tagline = document.getElementById('musPlanetModalTagline');
-    var lore = document.getElementById('musPlanetModalLore');
+    var chisme = document.getElementById('musPlanetModalChisme');
+    var punch = document.getElementById('musPlanetModalPunch');
     var cta = document.getElementById('musPlanetModalCta');
     var ctaLabel = document.getElementById('musPlanetModalCtaLabel');
-    if (!back || !orb || !name || !tagline || !lore || !cta || !ctaLabel) return;
+    if (!back || !orb || !name || !tagline || !chisme || !punch || !cta || !ctaLabel) return;
 
     orb.className = 'mus-planet-modal-orb mus-o-' + planetKey;
     name.dataset.musI18n    = i18nKey(planetKey, 'Name');
     tagline.dataset.musI18n = i18nKey(planetKey, 'Tagline');
-    lore.dataset.musI18n    = i18nKey(planetKey, 'Lore');
+    chisme.dataset.musI18n  = i18nKey(planetKey, 'Chisme');
+    punch.dataset.musI18n   = i18nKey(planetKey, 'Punch');
 
     var current = (window._profile && window._profile.equipped_orb) || 'earth';
     cta.dataset.targetPlanet = planetKey;
