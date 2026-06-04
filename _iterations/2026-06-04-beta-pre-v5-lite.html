@@ -1534,7 +1534,7 @@ body::after {
 }
 
 /* ─── orb collection ─── */
-.mus-collection{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mus-collection{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
 .mus-orb-card{
   background:var(--bg-card,rgba(20,10,40,0.78));border:1px solid var(--line);
   border-radius:13px;padding:18px 14px;text-align:center;
@@ -1566,126 +1566,12 @@ body::after {
 html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 
 /* orb mini gradients (avatar pieces · not theme accents) */
-/* ─── 9 Planet orbs · v5 lite Sistema Solar ─── */
-.mus-o-mercury { background:radial-gradient(circle at 35% 30%,#fff,#c7b59a 25%,#6d5e48 60%,#2a1e10); }
-.mus-o-venus   { background:radial-gradient(circle at 35% 30%,#fff,#f7d49a 25%,#c9923a 60%,#4a2b0a); }
-.mus-o-earth   { background:radial-gradient(circle at 35% 30%,#fff,#5ba3d6 25%,#1e5a8a 60%,#0a2a4a); }
-.mus-o-mars    { background:radial-gradient(circle at 35% 30%,#fff,#d6603a 25%,#8a2e10 60%,#2a0a0a); }
-.mus-o-jupiter { background:radial-gradient(circle at 35% 30%,#fff,#d6b08a 22%,#8a6940 55%,#3a2810); }
-.mus-o-saturn  { background:radial-gradient(circle at 35% 30%,#fff,#e8c890 25%,#a08040 60%,#3a2810); }
-.mus-o-uranus  { background:radial-gradient(circle at 35% 30%,#fff,#9ad6d6 28%,#3a8a90 65%,#0a2a2e); }
-.mus-o-neptune { background:radial-gradient(circle at 35% 30%,#fff,#5b7ad6 25%,#1e3a8a 60%,#0a142a); }
-.mus-o-sol     { background:radial-gradient(circle at 50% 50%,#fff,#ffe89a 18%,#ff9a2e 50%,#c94a08 75%,#5a1a04); }
-
-/* ─── v5 lite · Planet card modal lite ─── */
-.mus-planet-modal-back {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(3, 2, 10, 0.78);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  display: none; align-items: center; justify-content: center;
-  padding: 24px;
-}
-.mus-planet-modal-back.open {
-  display: flex; animation: mus-pm-fadein 0.32s ease both;
-}
-@keyframes mus-pm-fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.mus-planet-modal {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 14px; padding: 28px 24px;
-  width: 100%; max-width: 380px;
-  background: linear-gradient(180deg, rgba(20, 14, 32, 0.96), rgba(10, 6, 22, 0.96));
-  border: 1px solid rgba(232, 200, 154, 0.2);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
-  animation: mus-pm-scalein 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes mus-pm-scalein {
-  from { opacity: 0; transform: scale(0.94); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.mus-planet-modal-close {
-  position: absolute; top: 10px; right: 12px;
-  background: transparent; border: 0;
-  font-size: 24px; color: var(--ink-mute);
-  cursor: pointer; padding: 4px 8px;
-  transition: color 0.2s ease;
-}
-.mus-planet-modal-close:hover { color: var(--ink); }
-.mus-planet-modal-orb {
-  width: 140px; height: 140px; border-radius: 50%;
-  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-}
-.mus-planet-modal-name {
-  font-family: var(--font-display); font-weight: 300;
-  font-size: 32px; color: var(--ink); margin: 0;
-}
-.mus-planet-modal-tagline {
-  font-family: var(--font-mono); font-size: 11px;
-  letter-spacing: 0.18em; color: var(--gold);
-  text-transform: uppercase; margin: -8px 0 0;
-}
-.mus-planet-modal-lore {
-  font-family: var(--font-body); font-weight: 300;
-  font-size: 14px; line-height: 1.5; color: var(--ink-soft);
-  text-align: center; margin: 4px 0 12px;
-}
-.mus-planet-modal-cta {
-  font-family: var(--font-mono); font-size: 11px;
-  letter-spacing: 0.16em; color: var(--gold);
-  background: transparent; border: 1px solid var(--gold);
-  padding: 10px 22px; border-radius: 3px;
-  text-transform: uppercase; cursor: pointer;
-  transition: background 0.2s ease;
-}
-.mus-planet-modal-cta:hover { background: rgba(232, 200, 154, 0.08); }
-.mus-planet-modal-cta:disabled { opacity: 0.55; cursor: default; }
-.mus-planet-modal-cta.equipped {
-  color: var(--ink-mute); border-color: var(--ink-mute); cursor: default;
-}
-
-/* ─── v5 lite · Founder badge ─── */
-.mus-founder-chip {
-  display: inline-flex; align-items: center;
-  font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: 0.18em; color: var(--gold);
-  padding: 3px 8px; border: 1px solid var(--gold);
-  border-radius: 2px; text-transform: uppercase;
-  background: rgba(232, 200, 154, 0.04);
-  animation: founder-pulse 6s ease-in-out infinite;
-  margin-left: 8px;
-}
-@keyframes founder-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 200, 154, 0); }
-  50%      { box-shadow: 0 0 12px 0 rgba(232, 200, 154, 0.25); }
-}
-.mus-founder-chip.hidden { display: none; }
-
-.mus-founder-card {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 6px; padding: 18px 16px;
-  border: 1px solid rgba(232, 200, 154, 0.25);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(232, 200, 154, 0.06), rgba(232, 200, 154, 0.02));
-  margin-bottom: 18px;
-}
-.mus-founder-card .mus-founder-icon {
-  font-size: 22px; color: var(--gold);
-  text-shadow: 0 0 12px rgba(232, 200, 154, 0.4);
-}
-.mus-founder-card .mus-founder-title {
-  font-family: var(--font-display); font-weight: 400;
-  font-size: 18px; color: var(--gold); letter-spacing: 0.02em;
-}
-.mus-founder-card .mus-founder-sub {
-  font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: 0.18em; color: var(--ink-mute);
-  text-transform: uppercase;
-}
-.mus-founder-card.hidden { display: none; }
+.mus-o-nebula{ background:radial-gradient(circle at 35% 30%,#fff,#b06cff 25%,#4a1f7a 65%,#160a26); }
+.mus-o-ember { background:radial-gradient(circle at 35% 30%,#fff,#ff8a3d 25%,#c9551f 60%,#3a0f05); }
+.mus-o-aurora{ background:radial-gradient(circle at 35% 30%,#fff,#3ad6a8 28%,#0a3a2a 65%,#04140e); }
+.mus-o-royal { background:radial-gradient(circle at 35% 30%,#fff,#5b8cff 28%,#1f3a7a 65%,#0a142a); }
+.mus-o-void  { background:radial-gradient(circle at 35% 30%,#6a4f8a,#2a1042 45%,#0a0410); }
+.mus-o-plasma{ background:conic-gradient(from 30deg,#b06cff,#ff8a3d,#3ad6a8,#5b8cff,#b06cff); }
 
 /* ─── progress modules ─── */
 .mus-modules{ display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
@@ -1767,7 +1653,7 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 @media(max-width:480px){
   .mus-plaque h1{ font-size:32px; }
   #museumOrb{ width:200px;height:200px; }
-  .mus-collection{ grid-template-columns:repeat(3,1fr); }
+  .mus-collection{ grid-template-columns:repeat(2,1fr); }
   .mus-meta{ gap:16px; }
 }
 
@@ -2173,15 +2059,13 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       </div>
       <div class="mus-plaque">
         <div class="mus-eyebrow" id="musEyebrow">Equipped Orb · Nebula</div>
-        <h1 id="musName"><span id="musNameText">—</span><span class="mus-founder-chip hidden" id="musFounderChip" data-mus-i18n="founderChip">FOUNDER</span></h1>
+        <h1 id="musName">—</h1>
         <div class="mus-sub" data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</div>
-        <!-- ░░░ RESERVED FOR FASE B (hero stats counters · uncomment when wiring real progress) ░░░
         <div class="mus-meta">
           <span><b id="musMetaOrbs">4</b><span data-mus-i18n="metaOrbs">orbs collected</span></span>
           <span><b id="musMetaLessons">47</b><span data-mus-i18n="metaLessons">lessons</span></span>
           <span><b id="musMetaStreak">23</b><span data-mus-i18n="metaStreak">day streak</span></span>
         </div>
-        ░░░ END RESERVED ░░░ -->
         <div class="mus-hint">
           <span class="dot"></span>
           <span data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</span>
@@ -2205,7 +2089,7 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       <span class="mus-streak-txt" data-mus-i18n-html="enterLine"><b>the academy.</b><br>Continue where you left off.</span>
     </a>
 
-    <!-- ░░░ RESERVED FOR FASE B (streak section · uncomment when wiring real streak tracking) ░░░
+    <!-- STREAK -->
     <div class="mus-streak">
       <span class="flame">🔥</span>
       <span class="mus-streak-num" id="musStreakNum">23</span>
@@ -2216,44 +2100,34 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         <div class="mus-day on today">S</div>
       </div>
     </div>
-    ░░░ END RESERVED ░░░ -->
 
-    <!-- ORB COLLECTION · Sistema Solar v5 lite -->
+    <!-- ORB COLLECTION -->
     <div class="mus-sec-head">
-      <h2 data-mus-i18n="solarTitle">Your Solar System</h2>
-      <span class="aside" data-mus-i18n="solarSub">Choose your cosmic identity</span>
+      <h2 data-mus-i18n="secCollection">Orb Collection</h2>
+      <span class="aside" data-mus-i18n="secCollectionAside">4 of 6 unlocked · one per module</span>
     </div>
     <div class="mus-collection" id="musCollection">
-      <div class="mus-orb-card" style="--c:#c7b59a;--glow:rgba(199,181,154,.5)" data-orb="mercury">
-        <div class="mini mus-o-mercury"></div><div class="oname" data-mus-i18n="planetMercuryName">Mercury</div><div class="ocond" data-mus-i18n="planetMercuryTagline">the messenger</div>
+      <div class="mus-orb-card equipped" style="--c:#b06cff;--glow:rgba(176,108,255,.5)" data-orb="nebula">
+        <div class="mini mus-o-nebula"></div><div class="oname">Nebula</div><div class="ocond" data-mus-i18n="ocondStartHere">Start Here ✓</div>
       </div>
-      <div class="mus-orb-card" style="--c:#c9923a;--glow:rgba(201,146,58,.5)" data-orb="venus">
-        <div class="mini mus-o-venus"></div><div class="oname" data-mus-i18n="planetVenusName">Venus</div><div class="ocond" data-mus-i18n="planetVenusTagline">the morning star</div>
+      <div class="mus-orb-card" style="--c:#ff8a3d;--glow:rgba(255,138,61,.5)" data-orb="ember">
+        <div class="mini mus-o-ember"></div><div class="oname">Ember</div><div class="ocond" data-mus-i18n="ocondPatterns">Patterns ✓</div>
       </div>
-      <div class="mus-orb-card equipped" style="--c:#5ba3d6;--glow:rgba(91,163,214,.5)" data-orb="earth">
-        <div class="mini mus-o-earth"></div><div class="oname" data-mus-i18n="planetEarthName">Earth</div><div class="ocond" data-mus-i18n="planetEarthTagline">the cradle</div>
+      <div class="mus-orb-card" style="--c:#3ad6a8;--glow:rgba(58,214,168,.5)" data-orb="aurora">
+        <div class="mini mus-o-aurora"></div><div class="oname">Aurora</div><div class="ocond" data-mus-i18n="ocondForces">Forces ✓</div>
       </div>
-      <div class="mus-orb-card" style="--c:#d6603a;--glow:rgba(214,96,58,.5)" data-orb="mars">
-        <div class="mini mus-o-mars"></div><div class="oname" data-mus-i18n="planetMarsName">Mars</div><div class="ocond" data-mus-i18n="planetMarsTagline">the red one</div>
+      <div class="mus-orb-card" style="--c:#5b8cff;--glow:rgba(91,140,255,.5)" data-orb="royal">
+        <div class="mini mus-o-royal"></div><div class="oname">Royal</div><div class="ocond" data-mus-i18n="ocondNoise">Noise · 7/10</div>
       </div>
-      <div class="mus-orb-card" style="--c:#d6b08a;--glow:rgba(214,176,138,.5)" data-orb="jupiter">
-        <div class="mini mus-o-jupiter"></div><div class="oname" data-mus-i18n="planetJupiterName">Jupiter</div><div class="ocond" data-mus-i18n="planetJupiterTagline">the giant</div>
+      <div class="mus-orb-card locked">
+        <div class="mini">🔒</div><div class="oname">Void</div><div class="ocond" data-mus-i18n="ocondFinishDW">Finish Domain Warp</div>
       </div>
-      <div class="mus-orb-card" style="--c:#e8c890;--glow:rgba(232,200,144,.5)" data-orb="saturn">
-        <div class="mini mus-o-saturn"></div><div class="oname" data-mus-i18n="planetSaturnName">Saturn</div><div class="ocond" data-mus-i18n="planetSaturnTagline">the ringed</div>
-      </div>
-      <div class="mus-orb-card" style="--c:#9ad6d6;--glow:rgba(154,214,214,.5)" data-orb="uranus">
-        <div class="mini mus-o-uranus"></div><div class="oname" data-mus-i18n="planetUranusName">Uranus</div><div class="ocond" data-mus-i18n="planetUranusTagline">the tilted</div>
-      </div>
-      <div class="mus-orb-card" style="--c:#5b7ad6;--glow:rgba(91,122,214,.5)" data-orb="neptune">
-        <div class="mini mus-o-neptune"></div><div class="oname" data-mus-i18n="planetNeptuneName">Neptune</div><div class="ocond" data-mus-i18n="planetNeptuneTagline">the distant</div>
-      </div>
-      <div class="mus-orb-card" style="--c:#ff9a2e;--glow:rgba(255,154,46,.55)" data-orb="sol">
-        <div class="mini mus-o-sol"></div><div class="oname" data-mus-i18n="planetSolName">Sol</div><div class="ocond" data-mus-i18n="planetSolTagline">the source</div>
+      <div class="mus-orb-card locked">
+        <div class="mini">🔒</div><div class="oname">Plasma</div><div class="ocond" data-mus-i18n="ocondFinishMotion">Finish Motion</div>
       </div>
     </div>
 
-    <!-- ░░░ RESERVED FOR FASE B (progress modules with bars · uncomment when wiring lesson_progress) ░░░
+    <!-- PROGRESS -->
     <div class="mus-sec-head">
       <h2 data-mus-i18n="secProgress">Progress</h2>
       <span class="aside" data-mus-i18n="secProgressAside">complete a module → earn its orb</span>
@@ -2296,9 +2170,8 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         <div class="reward"><span class="rdot mus-o-plasma"></span> <span data-mus-i18n="rewardPlasmaLocked">Plasma orb · locked</span></div>
       </div>
     </div>
-    ░░░ END RESERVED ░░░ -->
 
-    <!-- ░░░ RESERVED FOR FASE B (lifetime stats · uncomment when wiring real metrics) ░░░
+    <!-- LIFETIME STATS -->
     <div class="mus-sec-head">
       <h2 data-mus-i18n="secLifetime">Lifetime</h2>
       <span class="aside" id="musLifetimeSince">since —</span>
@@ -2309,7 +2182,6 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       <div class="mus-stat"><div class="big a" id="musStatOrbs">4</div><div class="lbl" data-mus-i18n="statOrbs">Orbs collected</div></div>
       <div class="mus-stat"><div class="big r">8.4h</div><div class="lbl" data-mus-i18n="statTime">Time coding</div></div>
     </div>
-    ░░░ END RESERVED ░░░ -->
   </div>
 </section>
 
@@ -2327,11 +2199,6 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
     <div class="mus-modal-body">
       <!-- Settings pane -->
       <div class="mus-modal-pane active" data-mus-pane-content="settings">
-        <div class="mus-founder-card hidden" id="musFounderCard">
-          <div class="mus-founder-icon">★</div>
-          <div class="mus-founder-title" data-mus-i18n="founderTitle">Founder</div>
-          <div class="mus-founder-sub" data-mus-i18n="founderSub">Welcome aboard</div>
-        </div>
         <div class="mus-field">
           <label data-mus-i18n="lblName">Display name</label>
           <input type="text" id="musNameInput" maxlength="24" autocomplete="off">
@@ -2412,20 +2279,6 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ═══════════ PROFILE MUSEUM · Planet card modal lite (v5 lite) ═══════════ -->
-<div class="mus-planet-modal-back" id="musPlanetModalBack" role="dialog" aria-modal="true" aria-labelledby="musPlanetModalName">
-  <div class="mus-planet-modal">
-    <button class="mus-planet-modal-close" id="musPlanetModalClose" aria-label="Close">×</button>
-    <div class="mus-planet-modal-orb mus-o-earth" id="musPlanetModalOrb"></div>
-    <h2 class="mus-planet-modal-name" id="musPlanetModalName">Earth</h2>
-    <p class="mus-planet-modal-tagline" id="musPlanetModalTagline">the cradle</p>
-    <p class="mus-planet-modal-lore" id="musPlanetModalLore">The only one with rivers, oceans and song. Your home.</p>
-    <button class="mus-planet-modal-cta" id="musPlanetModalCta">
-      <span id="musPlanetModalCtaLabel" data-mus-i18n="planetSetAsMyOrb">Set as my orb</span>
-    </button>
   </div>
 </div>
 
@@ -5402,65 +5255,7 @@ document.addEventListener('DOMContentLoaded', function(){
     rewardSubPrefix:     { en:'Orb ·',                                            es:'Orbe ·' },
     rewardSubMid:        { en:'of 06',                                            es:'de 06' },
     btnLater:            { en:'Later',                                            es:'Después' },
-    btnPlace:            { en:'Place on the pedestal',                            es:'Pon en el pedestal' },
-
-    /* ─── v5 lite · Sistema Solar identity ─── */
-    solarTitle:          { en:'Your Solar System',                                es:'Tu Sistema Solar' },
-    solarSub:            { en:'Choose your cosmic identity',                      es:'Escoge tu identidad cósmica' },
-    planetSetAsMyOrb:    { en:'Set as my orb',                                    es:'Equiparlo' },
-    planetEquipped:      { en:'Set as your orb ✓',                                es:'Equipado ✓' },
-    planetCurrent:       { en:'Currently equipped',                               es:'Equipado ahora' },
-
-    /* Founder badge */
-    founderChip:         { en:'FOUNDER',                                          es:'FUNDADOR' },
-    founderTitle:        { en:'Founder',                                          es:'Fundador' },
-    founderSub:          { en:'Welcome aboard',                                   es:'Bienvenida a bordo' },
-
-    /* 9 Planet names + taglines + lore */
-    planetMercuryName:   { en:'Mercury',                                          es:'Mercurio' },
-    planetMercuryTagline:{ en:'the messenger',                                    es:'el mensajero' },
-    planetMercuryLore:   { en:'Closest to the Sun. Tiny, fast, scorched. One year in 88 days.',
-                           es:'El más cercano al Sol. Pequeño, veloz, calcinado. Un año en 88 días.' },
-
-    planetVenusName:     { en:'Venus',                                            es:'Venus' },
-    planetVenusTagline:  { en:'the morning star',                                 es:'el lucero' },
-    planetVenusLore:     { en:'Hottest world. Atmosphere thick as deep ocean. Lit before dawn.',
-                           es:'El mundo más caliente. Atmósfera densa como océano profundo. Brilla antes del alba.' },
-
-    planetEarthName:     { en:'Earth',                                            es:'Tierra' },
-    planetEarthTagline:  { en:'the cradle',                                       es:'la cuna' },
-    planetEarthLore:     { en:'The only one with rivers, oceans and song. Your home.',
-                           es:'El único con ríos, océanos y canto. Tu casa.' },
-
-    planetMarsName:      { en:'Mars',                                             es:'Marte' },
-    planetMarsTagline:   { en:'the red one',                                      es:'el rojo' },
-    planetMarsLore:      { en:'Iron desert. Two moons. Quiet wind. Future waiting.',
-                           es:'Desierto de hierro. Dos lunas. Viento quieto. Futuro esperando.' },
-
-    planetJupiterName:   { en:'Jupiter',                                          es:'Júpiter' },
-    planetJupiterTagline:{ en:'the giant',                                        es:'el gigante' },
-    planetJupiterLore:   { en:'King of planets. Biggest gravity. A storm older than civilizations.',
-                           es:'Rey de planetas. Gravedad máxima. Una tormenta más vieja que civilizaciones.' },
-
-    planetSaturnName:    { en:'Saturn',                                           es:'Saturno' },
-    planetSaturnTagline: { en:'the ringed',                                       es:'el de los anillos' },
-    planetSaturnLore:    { en:'Ice and rock spinning in symmetry. Mathematics made visible.',
-                           es:'Hielo y roca girando en simetría. Matemáticas hechas visibles.' },
-
-    planetUranusName:    { en:'Uranus',                                           es:'Urano' },
-    planetUranusTagline: { en:'the tilted',                                       es:'el inclinado' },
-    planetUranusLore:    { en:'Spins on its side. Pale cyan. Mostly methane. Weird and beautiful.',
-                           es:'Gira de lado. Cian pálido. Casi todo metano. Raro y hermoso.' },
-
-    planetNeptuneName:   { en:'Neptune',                                          es:'Neptuno' },
-    planetNeptuneTagline:{ en:'the distant',                                      es:'el lejano' },
-    planetNeptuneLore:   { en:'Deepest blue. Winds at supersonic speed. Last of the rocky journey.',
-                           es:'Azul profundo. Vientos supersónicos. Último del viaje rocoso.' },
-
-    planetSolName:       { en:'Sol',                                              es:'Sol' },
-    planetSolTagline:    { en:'the source',                                       es:'la fuente' },
-    planetSolLore:       { en:'Where everything begins. Light, gravity, time. The heart of the system.',
-                           es:'Donde todo empieza. Luz, gravedad, tiempo. El corazón del sistema.' }
+    btnPlace:            { en:'Place on the pedestal',                            es:'Pon en el pedestal' }
   };
 
   /* descripciones bilingual por orb (reward modal) */
@@ -5518,19 +5313,8 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  /* ─── orb palettes (cA core, cB mid, cC rim) · 9 planetas v5 lite + 6 legacy safety ─── */
+  /* ─── 6 orb palettes (cA core, cB mid, cC rim) ─── */
   var MUS_PAL = {
-    /* v5 lite · Sistema Solar */
-    mercury:{a:[0.95,0.92,0.85],b:[0.43,0.37,0.28],c:[0.78,0.71,0.60],name:'Mercury'},
-    venus:  {a:[1.00,0.95,0.85],b:[0.79,0.57,0.23],c:[0.97,0.83,0.60],name:'Venus'  },
-    earth:  {a:[0.85,0.95,1.00],b:[0.12,0.35,0.54],c:[0.36,0.64,0.84],name:'Earth'  },
-    mars:   {a:[1.00,0.92,0.85],b:[0.54,0.18,0.06],c:[0.84,0.38,0.23],name:'Mars'   },
-    jupiter:{a:[1.00,0.95,0.85],b:[0.54,0.41,0.25],c:[0.84,0.69,0.54],name:'Jupiter'},
-    saturn: {a:[1.00,0.95,0.80],b:[0.63,0.50,0.25],c:[0.91,0.78,0.56],name:'Saturn' },
-    uranus: {a:[0.92,1.00,1.00],b:[0.23,0.54,0.56],c:[0.60,0.84,0.84],name:'Uranus' },
-    neptune:{a:[0.85,0.92,1.00],b:[0.12,0.23,0.54],c:[0.36,0.48,0.84],name:'Neptune'},
-    sol:    {a:[1.00,1.00,0.95],b:[0.79,0.29,0.03],c:[1.00,0.91,0.60],name:'Sol'    },
-    /* Legacy (fallback safety si llega un value viejo) */
     nebula:{a:[0.95,0.90,1.00],b:[0.55,0.25,0.85],c:[0.69,0.42,1.00],name:'Nebula'},
     ember: {a:[1.00,0.95,0.85],b:[0.78,0.25,0.08],c:[1.00,0.54,0.24],name:'Ember' },
     aurora:{a:[0.90,1.00,0.95],b:[0.05,0.45,0.32],c:[0.23,0.84,0.66],name:'Aurora'},
@@ -5704,26 +5488,33 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
 
-    /* v5 lite · ceremony reusable expuesta para uso desde planet modal CTA */
-    window.runEquipCeremony = function(name){
-      var card = document.querySelector('.mus-orb-card[data-orb="' + name + '"]');
-      document.querySelectorAll('.mus-orb-card').forEach(function(c){ c.classList.remove('equipped'); });
-      if (card){
+    /* orb collection equip · with ceremony */
+    document.querySelectorAll('.mus-orb-card[data-orb]').forEach(function(card){
+      card.addEventListener('click', function(){
+        var name = card.dataset.orb;
+        document.querySelectorAll('.mus-orb-card').forEach(function(c){ c.classList.remove('equipped'); });
         card.classList.add('equipped');
         card.classList.add('rippling');
         setTimeout(function(){ card.classList.remove('rippling'); }, 920);
-      }
-      if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(name);
-      var disp = card ? card.querySelector('.oname').textContent : name;
-      var eb = document.getElementById('musEyebrow');
-      if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp;
-      var hero = document.getElementById('musHero');
-      if (hero){
-        hero.classList.add('equipping');
-        setTimeout(function(){ hero.classList.remove('equipping'); }, 850);
-      }
-      if (typeof equipBurst === 'function') equipBurst(name);
-    };
+        if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(name);
+        var disp = card.querySelector('.oname').textContent;
+        var eb = document.getElementById('musEyebrow');
+        if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp;
+        var hero = document.getElementById('musHero');
+        if (hero){
+          hero.classList.add('equipping');
+          setTimeout(function(){ hero.classList.remove('equipping'); }, 850);
+        }
+        equipBurst(name);
+
+        /* persist via RPC if user logged in */
+        if (window._user && window._sb){
+          window._sb.rpc('update_equipped_orb', { p_orb_key: name }).then(function(){
+            if (window._profile) window._profile.equipped_orb = name;
+          }).catch(function(){ /* silent · ceremony already played */ });
+        }
+      });
+    });
   }
 
   /* ─── mountMuseum: hidrata + show ─── */
@@ -5742,15 +5533,8 @@ document.addEventListener('DOMContentLoaded', function(){
     /* hidrate from _profile (i18n via applyMusLang abajo) */
     if (window._profile){
       var name = window._profile.display_name || 'traveler';
-      var elName = document.getElementById('musNameText');
+      var elName = document.getElementById('musName');
       if (elName) elName.textContent = name;
-
-      /* v5 lite · founder badge */
-      var isFounder = !!window._profile.is_founder;
-      var founderChip = document.getElementById('musFounderChip');
-      var founderCard = document.getElementById('musFounderCard');
-      if (founderChip) founderChip.classList.toggle('hidden', !isFounder);
-      if (founderCard) founderCard.classList.toggle('hidden', !isFounder);
 
       var orb = window._profile.equipped_orb || 'nebula';
       var theme = window._profile.theme_accent || 'velvet';
@@ -6165,106 +5949,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 </script>
-
-<!-- ═══════════ v5 lite · Planet modal lite handlers ═══════════ -->
-<script>
-(function(){
-  var PLANET_KEYS = ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','sol'];
-
-  function i18nKey(planet, suffix){
-    return 'planet' + planet.charAt(0).toUpperCase() + planet.slice(1) + suffix;
-  }
-
-  function openPlanetModal(planetKey){
-    if (PLANET_KEYS.indexOf(planetKey) === -1) return;
-    var back = document.getElementById('musPlanetModalBack');
-    var orb = document.getElementById('musPlanetModalOrb');
-    var name = document.getElementById('musPlanetModalName');
-    var tagline = document.getElementById('musPlanetModalTagline');
-    var lore = document.getElementById('musPlanetModalLore');
-    var cta = document.getElementById('musPlanetModalCta');
-    var ctaLabel = document.getElementById('musPlanetModalCtaLabel');
-    if (!back || !orb || !name || !tagline || !lore || !cta || !ctaLabel) return;
-
-    orb.className = 'mus-planet-modal-orb mus-o-' + planetKey;
-    name.dataset.musI18n    = i18nKey(planetKey, 'Name');
-    tagline.dataset.musI18n = i18nKey(planetKey, 'Tagline');
-    lore.dataset.musI18n    = i18nKey(planetKey, 'Lore');
-
-    var current = (window._profile && window._profile.equipped_orb) || 'earth';
-    cta.dataset.targetPlanet = planetKey;
-    if (planetKey === current){
-      cta.classList.add('equipped');
-      ctaLabel.dataset.musI18n = 'planetEquipped';
-      cta.disabled = true;
-    } else {
-      cta.classList.remove('equipped');
-      ctaLabel.dataset.musI18n = 'planetSetAsMyOrb';
-      cta.disabled = false;
-    }
-
-    if (typeof window.applyMusLang === 'function') window.applyMusLang();
-    back.classList.add('open');
-  }
-
-  function closePlanetModal(){
-    var back = document.getElementById('musPlanetModalBack');
-    if (back) back.classList.remove('open');
-  }
-
-  document.addEventListener('click', function(e){
-    var card = e.target && e.target.closest && e.target.closest('.mus-orb-card[data-orb]');
-    if (card) {
-      e.preventDefault();
-      openPlanetModal(card.dataset.orb);
-    }
-  });
-
-  var closeBtn = document.getElementById('musPlanetModalClose');
-  if (closeBtn) closeBtn.addEventListener('click', closePlanetModal);
-
-  var backLayer = document.getElementById('musPlanetModalBack');
-  if (backLayer) backLayer.addEventListener('click', function(e){
-    if (e.target === e.currentTarget) closePlanetModal();
-  });
-
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closePlanetModal();
-  });
-
-  var cta = document.getElementById('musPlanetModalCta');
-  if (cta) cta.addEventListener('click', async function(){
-    if (cta.disabled) return;
-    var planetKey = cta.dataset.targetPlanet;
-    cta.disabled = true;
-    try {
-      if (window._sb && window._user){
-        var res = await window._sb.rpc('update_equipped_orb', { p_orb_key: planetKey });
-        if (res.error || !res.data || !res.data.ok){
-          cta.disabled = false;
-          return;
-        }
-      }
-      if (window._profile) window._profile.equipped_orb = planetKey;
-      if (typeof window.runEquipCeremony === 'function'){
-        window.runEquipCeremony(planetKey);
-      } else {
-        document.querySelectorAll('.mus-orb-card').forEach(function(c){
-          c.classList.toggle('equipped', c.dataset.orb === planetKey);
-        });
-      }
-      setTimeout(closePlanetModal, 320);
-    } catch(e){
-      cta.disabled = false;
-    }
-  });
-
-  window.openPlanetModal = openPlanetModal;
-  window.closePlanetModal = closePlanetModal;
-})();
-</script>
-
-
 
 </body>
 </html>
