@@ -114,7 +114,7 @@
 </script>
 
 <!-- ░░░ SECURITY · meta CSP test local · prod headers viven en _headers de Cloudflare ░░░ -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://ubvtspvlrukuayucpnwl.supabase.co wss://ubvtspvlrukuayucpnwl.supabase.co https://challenges.cloudflare.com https://cdn.jsdelivr.net; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
@@ -1668,15 +1668,28 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 @keyframes mus-fadeIn{from{opacity:0}to{opacity:1}}
 .mus-modal{
   width:100%;max-width:480px;
-  background:linear-gradient(180deg, rgba(30,20,44,.95), rgba(16,10,26,.98));
-  border:1px solid var(--line-strong);border-radius:20px;
-  box-shadow:0 40px 120px -30px rgba(176,108,255,.4), inset 0 1px 0 rgba(255,255,255,.05);
-  overflow:hidden;animation:mus-modalIn .35s cubic-bezier(.2,.9,.3,1.1) both;
+  /* el modal ES el theme · accent color-mix + halo radial · respira con --accent */
+  background:
+    radial-gradient(900px 500px at 50% 0%, var(--bg-tint, rgba(176,108,255,.20)), transparent 60%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--accent, #b06cff) 14%, #1a1226),
+      color-mix(in srgb, var(--accent, #b06cff)  5%, #0c0710));
+  border:1px solid color-mix(in srgb, var(--accent, #b06cff) 28%, var(--line-strong));
+  border-radius:20px;
+  box-shadow:
+    0 40px 120px -30px var(--accent-soft, rgba(176,108,255,.4)),
+    0 0 60px -20px var(--accent-soft, rgba(176,108,255,.3)),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  overflow:hidden;
+  animation:mus-modalIn .35s cubic-bezier(.2,.9,.3,1.1) both;
+  transition: background .6s ease, border-color .6s ease, box-shadow .6s ease;
 }
 @keyframes mus-modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
 .mus-modal-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:22px 26px;border-bottom:1px solid var(--line);
+  padding:22px 26px;
+  border-bottom:1px solid color-mix(in srgb, var(--accent, #b06cff) 18%, var(--line));
+  transition: border-color .6s ease;
 }
 .mus-modal-head h3{
   font-size:18px;font-weight:500;color:var(--gold);
@@ -1688,7 +1701,11 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
   font-family:var(--font-mono);font-size:16px;transition:.2s;
 }
 .mus-modal-close:hover{color:var(--gold);border-color:var(--accent)}
-.mus-modal-tabs{display:flex;gap:0;padding:0 26px;border-bottom:1px solid var(--line);}
+.mus-modal-tabs{
+  display:flex;gap:0;padding:0 26px;
+  border-bottom:1px solid color-mix(in srgb, var(--accent, #b06cff) 14%, var(--line));
+  transition: border-color .6s ease;
+}
 .mus-modal-tab{
   background:transparent;border:none;color:var(--ink-soft);
   font-family:var(--font-mono);font-size:11px;letter-spacing:2px;
@@ -1731,33 +1748,71 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
   text-transform:uppercase;transition:.2s;font-weight:500;
 }
 .mus-lang-btn.active{color:var(--gold);border-color:var(--accent);background:rgba(176,108,255,.08)}
-.mus-theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mus-theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .mus-theme-swatch{
-  aspect-ratio:1;border-radius:12px;border:1px solid var(--line);cursor:pointer;
-  position:relative;overflow:hidden;transition:.2s;display:flex;align-items:flex-end;padding:10px;
+  aspect-ratio:1; border-radius:14px; border:1px solid var(--line); cursor:pointer;
+  position:relative; overflow:hidden; padding:14px 12px 12px;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  transition: transform .25s cubic-bezier(.2,.9,.3,1.2), border-color .25s ease, box-shadow .25s ease;
 }
-.mus-theme-swatch{ transition:transform .25s cubic-bezier(.2,.9,.3,1.2), border-color .25s ease, box-shadow .25s ease; }
-.mus-theme-swatch:hover{ transform:translateY(-3px) scale(1.03); border-color:var(--sw); box-shadow:0 8px 24px -8px var(--sw); }
-.mus-theme-swatch.active{ border-color:var(--sw); box-shadow:0 0 0 1px var(--sw), 0 0 22px -4px var(--sw); }
+.mus-theme-swatch:hover{
+  transform:translateY(-3px) scale(1.03);
+  border-color:var(--sw);
+  box-shadow:0 10px 28px -8px var(--sw), 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+.mus-theme-swatch.active{
+  border-color:var(--sw);
+  box-shadow:0 0 0 1px var(--sw), 0 0 28px -4px var(--sw);
+}
 @keyframes mus-swatch-commit {
   0%   { transform:scale(1) translateY(0); }
   35%  { transform:scale(1.10) translateY(-4px); }
   100% { transform:scale(1) translateY(0); }
 }
 .mus-theme-swatch.committing{ animation:mus-swatch-commit .55s cubic-bezier(.2,.9,.3,1.3); }
+
+/* el panel ES el theme · radial mouse-reactive + ambient halo */
 .mus-theme-swatch::before{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), transparent 50%),
-    radial-gradient(circle at 70% 80%, var(--sw), transparent 60%),
-    linear-gradient(135deg, #120c1a, #150e1f);
+  content:""; position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(220px 220px at var(--mx,50%) var(--my,50%), var(--sw), transparent 62%),
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.06), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--sw) 15%, #0c0418), #0a0410);
+  transition: background .6s ease, opacity .35s ease;
 }
-.mus-theme-swatch span{
-  position:relative;z-index:2;font-family:var(--font-mono);font-size:10px;
-  letter-spacing:1.5px;color:var(--ink);text-shadow:0 1px 3px rgba(0,0,0,.7);
-  text-transform:uppercase;font-weight:500;
+.mus-theme-swatch:hover::before{
+  background:
+    radial-gradient(260px 260px at var(--mx,50%) var(--my,50%), var(--sw), transparent 58%),
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.10), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--sw) 22%, #0c0418), #0a0410);
+}
+
+.mus-swatch-name{
+  position:relative; z-index:2;
+  font-family:var(--font-mono); font-size:11px;
+  letter-spacing:2px; color:var(--ink);
+  text-shadow:0 1px 4px rgba(0,0,0,.7);
+  text-transform:uppercase; font-weight:500;
+  margin-bottom:6px;
+}
+.mus-swatch-pills{
+  position:relative; z-index:2;
+  display:flex; gap:4px; flex-wrap:wrap;
+}
+.mus-swatch-pill{
+  font-family:var(--font-mono); font-size:7px;
+  letter-spacing:1.3px; text-transform:uppercase;
+  color:rgba(232,200,154,.7);
+  background:rgba(0,0,0,.32);
+  border:1px solid rgba(232,200,154,.18);
+  border-radius:30px; padding:2px 6px;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
 }
 .mus-modal-actions{
-  display:flex;gap:10px;margin-top:24px;padding-top:24px;border-top:1px solid var(--line);
+  display:flex;gap:10px;margin-top:24px;padding-top:24px;
+  border-top:1px solid color-mix(in srgb, var(--accent, #b06cff) 14%, var(--line));
+  transition: border-color .6s ease;
 }
 .mus-btn{
   flex:1;font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;
@@ -2161,12 +2216,54 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         <div class="mus-field">
           <label data-mus-i18n="lblTheme">Room light · decorative accent</label>
           <div class="mus-theme-grid">
-            <div class="mus-theme-swatch" style="--sw:#b06cff" data-mus-theme="velvet"><span>Velvet</span></div>
-            <div class="mus-theme-swatch" style="--sw:#d9a456" data-mus-theme="brass"><span>Brass</span></div>
-            <div class="mus-theme-swatch" style="--sw:#3ad6a8" data-mus-theme="jade"><span>Jade</span></div>
-            <div class="mus-theme-swatch" style="--sw:#5b8cff" data-mus-theme="cobalt"><span>Cobalt</span></div>
-            <div class="mus-theme-swatch" style="--sw:#e0556b" data-mus-theme="crimson"><span>Crimson</span></div>
-            <div class="mus-theme-swatch" style="--sw:#d4d8e8" data-mus-theme="pearl"><span>Pearl</span></div>
+            <div class="mus-theme-swatch" style="--sw:#b06cff" data-mus-theme="velvet">
+              <div class="mus-swatch-name">Velvet</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">dusk</span>
+                <span class="mus-swatch-pill">dream</span>
+                <span class="mus-swatch-pill">gallery</span>
+              </div>
+            </div>
+            <div class="mus-theme-swatch" style="--sw:#d9a456" data-mus-theme="brass">
+              <div class="mus-swatch-name">Brass</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">ore</span>
+                <span class="mus-swatch-pill">warm</span>
+                <span class="mus-swatch-pill">atelier</span>
+              </div>
+            </div>
+            <div class="mus-theme-swatch" style="--sw:#3ad6a8" data-mus-theme="jade">
+              <div class="mus-swatch-name">Jade</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">moss</span>
+                <span class="mus-swatch-pill">calm</span>
+                <span class="mus-swatch-pill">river</span>
+              </div>
+            </div>
+            <div class="mus-theme-swatch" style="--sw:#5b8cff" data-mus-theme="cobalt">
+              <div class="mus-swatch-name">Cobalt</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">ink</span>
+                <span class="mus-swatch-pill">deep</span>
+                <span class="mus-swatch-pill">storm</span>
+              </div>
+            </div>
+            <div class="mus-theme-swatch" style="--sw:#e0556b" data-mus-theme="crimson">
+              <div class="mus-swatch-name">Crimson</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">fire</span>
+                <span class="mus-swatch-pill">wine</span>
+                <span class="mus-swatch-pill">heart</span>
+              </div>
+            </div>
+            <div class="mus-theme-swatch" style="--sw:#d4d8e8" data-mus-theme="pearl">
+              <div class="mus-swatch-name">Pearl</div>
+              <div class="mus-swatch-pills">
+                <span class="mus-swatch-pill">mist</span>
+                <span class="mus-swatch-pill">dawn</span>
+                <span class="mus-swatch-pill">quiet</span>
+              </div>
+            </div>
           </div>
           <div class="mus-field-hint" data-mus-i18n="hintTheme">Color across cards, glows and buttons · independent of your equipped orb</div>
         </div>
@@ -5529,8 +5626,19 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 
+  /* theme swatch MOUSE TRACKING · el radial glow sigue el cursor adentro del swatch */
+  document.addEventListener('mousemove', function(e){
+    var sw = e.target.closest && e.target.closest('.mus-theme-swatch');
+    if (!sw) return;
+    var r = sw.getBoundingClientRect();
+    var mx = ((e.clientX - r.left) / r.width) * 100;
+    var my = ((e.clientY - r.top)  / r.height) * 100;
+    sw.style.setProperty('--mx', mx + '%');
+    sw.style.setProperty('--my', my + '%');
+  });
+
   /* theme swatch HOVER preview (delegated mouseover/out) ·
-     pinta el bg en vivo mientras el cursor está sobre el swatch */
+     pinta el bg del museo en vivo mientras el cursor está sobre el swatch */
   document.addEventListener('mouseover', function(e){
     var sw = e.target.closest && e.target.closest('.mus-theme-swatch');
     if (!sw) return;
