@@ -6264,6 +6264,36 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 
+<!-- ░░░ DEV-DUMMY-AUTH-START — NEVER COPY TO PRODUCTION OR STAGING ░░░ -->
+<script>
+(function(){
+  if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+  /* dummy profile para iteration testing local · cero auth real */
+  window._user = { id: 'dummy-local', email: 'gera@dummy.local' };
+  window._profile = {
+    id: 'dummy-local',
+    display_name: 'Gera',
+    account_lang: 'es',
+    equipped_orb: 'earth',
+    theme_accent: 'velvet',
+    is_founder: true
+  };
+  function go(){
+    if (typeof window.mountMuseum === 'function'){
+      window.mountMuseum();
+    } else {
+      setTimeout(go, 80);
+    }
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(go, 200); });
+  } else {
+    setTimeout(go, 200);
+  }
+})();
+</script>
+<!-- ░░░ DEV-DUMMY-AUTH-END ░░░ -->
+
 <!-- ░░░ DEV-AUTORELOAD-START — NEVER COPY TO PRODUCTION OR STAGING ░░░ -->
 <script>
 (function(){
