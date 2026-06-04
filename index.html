@@ -186,18 +186,25 @@
   --glow4: rgba(160,60,200,0.05);
 }
 
-/* ===== THEMES — 6 MATERIALS · solo accent decorativo cambia.
-   Bg/lines/glows quedan fijos en :root para identidad consistente.
-   Texto crema queda fijo. ===== */
-[data-theme="velvet"]  { --accent: #b06cff; --accent-soft: rgba(176,108,255,0.5); }
-[data-theme="brass"]   { --accent: #d9a456; --accent-soft: rgba(217,164,86,0.5);  }
-[data-theme="jade"]    { --accent: #3ad6a8; --accent-soft: rgba(58,214,168,0.5);  }
-[data-theme="cobalt"]  { --accent: #5b8cff; --accent-soft: rgba(91,140,255,0.5);  }
-[data-theme="crimson"] { --accent: #e0556b; --accent-soft: rgba(224,85,107,0.5);  }
-[data-theme="pearl"]   { --accent: #d4d8e8; --accent-soft: rgba(212,216,232,0.5); }
+/* ===== THEMES — 6 MATERIALS · accent + tint sutil del bg.
+   El bg base queda nebula del :root, pero cada theme proyecta un
+   glow radial del color encima · museum identity con respiración. ===== */
+[data-theme="velvet"]  { --accent: #b06cff; --accent-soft: rgba(176,108,255,0.5); --bg-tint: rgba(176,108,255,0.32); }
+[data-theme="brass"]   { --accent: #d9a456; --accent-soft: rgba(217,164,86,0.5);  --bg-tint: rgba(217,164,86,0.28);  }
+[data-theme="jade"]    { --accent: #3ad6a8; --accent-soft: rgba(58,214,168,0.5);  --bg-tint: rgba(58,214,168,0.26);  }
+[data-theme="cobalt"]  { --accent: #5b8cff; --accent-soft: rgba(91,140,255,0.5);  --bg-tint: rgba(91,140,255,0.32);  }
+[data-theme="crimson"] { --accent: #e0556b; --accent-soft: rgba(224,85,107,0.5);  --bg-tint: rgba(224,85,107,0.30);  }
+[data-theme="pearl"]   { --accent: #d4d8e8; --accent-soft: rgba(212,216,232,0.5); --bg-tint: rgba(212,216,232,0.16); }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html { background:var(--bg); transition:background .6s ease; }
-body { background:transparent; color:var(--ink); font-family:var(--font-body); font-weight:300; min-height:100vh; min-height:100dvh; -webkit-font-smoothing:antialiased; transition:color .6s ease; }
+body {
+  background:
+    radial-gradient(1400px 900px at 50% 0%,   var(--bg-tint, rgba(176,108,255,0.16)), transparent 65%),
+    radial-gradient(1000px 700px at 50% 100%, var(--bg-tint, rgba(176,108,255,0.16)), transparent 60%);
+  color:var(--ink); font-family:var(--font-body); font-weight:300;
+  min-height:100vh; min-height:100dvh; -webkit-font-smoothing:antialiased;
+  transition: color .6s ease, background .6s ease;
+}
 
 /* Background — Animated theme glows */
 body::before {
@@ -1311,10 +1318,13 @@ body::after {
   font-family: var(--font-display);
   font-weight: 400;
   font-style: italic;
-  font-size: clamp(36px, 6vw, 72px);
+  font-size: clamp(34px, 5vw, 58px);
   color: var(--gold);
   letter-spacing: -0.01em;
   margin-top: 18px;
+  padding: 0 0.4em;
+  max-width: 90vw;
+  word-break: break-word;
   text-shadow: 0 0 40px rgba(232, 200, 154, 0.45);
   opacity: 0;
   clip-path: inset(0 100% 0 0);
@@ -1390,8 +1400,9 @@ body::after {
 /* ─── museum hero ─── */
 .mus-hero{
   position:relative;margin:0;padding:60px 40px 50px;overflow:hidden;
-  background:radial-gradient(900px 500px at 50% -20%, rgba(176,108,255,.18), transparent 65%);
+  background:radial-gradient(900px 500px at 50% -20%, var(--bg-tint, rgba(176,108,255,.18)), transparent 65%);
   border-bottom:1px solid var(--line);
+  transition: background .6s ease;
 }
 .mus-spot{
   position:absolute;inset:0;pointer-events:none;z-index:1;
@@ -1648,8 +1659,8 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 
 /* ─── edit profile modal (mus-modal) ─── */
 .mus-modal-back{
-  position:fixed;inset:0;background:rgba(6,4,12,.85);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  position:fixed;inset:0;background:rgba(6,4,12,.55);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   display:none;align-items:center;justify-content:center;z-index:1100;
   padding:24px;animation:mus-fadeIn .25s ease both;
 }
@@ -1725,8 +1736,15 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
   aspect-ratio:1;border-radius:12px;border:1px solid var(--line);cursor:pointer;
   position:relative;overflow:hidden;transition:.2s;display:flex;align-items:flex-end;padding:10px;
 }
-.mus-theme-swatch:hover{transform:translateY(-2px);border-color:var(--sw)}
-.mus-theme-swatch.active{border-color:var(--sw);box-shadow:0 0 0 1px var(--sw)}
+.mus-theme-swatch{ transition:transform .25s cubic-bezier(.2,.9,.3,1.2), border-color .25s ease, box-shadow .25s ease; }
+.mus-theme-swatch:hover{ transform:translateY(-3px) scale(1.03); border-color:var(--sw); box-shadow:0 8px 24px -8px var(--sw); }
+.mus-theme-swatch.active{ border-color:var(--sw); box-shadow:0 0 0 1px var(--sw), 0 0 22px -4px var(--sw); }
+@keyframes mus-swatch-commit {
+  0%   { transform:scale(1) translateY(0); }
+  35%  { transform:scale(1.10) translateY(-4px); }
+  100% { transform:scale(1) translateY(0); }
+}
+.mus-theme-swatch.committing{ animation:mus-swatch-commit .55s cubic-bezier(.2,.9,.3,1.3); }
 .mus-theme-swatch::before{
   content:"";position:absolute;inset:0;
   background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), transparent 50%),
@@ -5511,7 +5529,45 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 
-  /* theme swatch click → apply + RPC update_theme_accent */
+  /* theme swatch HOVER preview (delegated mouseover/out) ·
+     pinta el bg en vivo mientras el cursor está sobre el swatch */
+  document.addEventListener('mouseover', function(e){
+    var sw = e.target.closest && e.target.closest('.mus-theme-swatch');
+    if (!sw) return;
+    document.documentElement.setAttribute('data-theme', sw.dataset.musTheme);
+  });
+  document.addEventListener('mouseout', function(e){
+    var sw = e.target.closest && e.target.closest('.mus-theme-swatch');
+    if (!sw) return;
+    var to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.mus-theme-swatch');
+    if (to) return; /* moviendo entre swatches · que el otro tome el preview */
+    /* salida real · revierte al committed */
+    var committed = document.querySelector('.mus-theme-swatch.active');
+    if (committed) document.documentElement.setAttribute('data-theme', committed.dataset.musTheme);
+  });
+
+  /* spark burst chico desde el centro del swatch (click dopamine) */
+  function swatchBurst(sw, accentHex){
+    var r = sw.getBoundingClientRect();
+    var cx = r.left + r.width/2, cy = r.top + r.height/2;
+    var cols = [accentHex, '#e8c89a', '#ffffff'];
+    for (var i=0; i<14; i++){
+      var sp = document.createElement('div');
+      sp.className = 'mus-spark';
+      sp.style.background = cols[i % cols.length];
+      sp.style.left = cx + 'px'; sp.style.top = cy + 'px';
+      document.body.appendChild(sp);
+      var ang = (i/14)*Math.PI*2 + Math.random()*0.25;
+      var dist = 50 + Math.random()*40;
+      var dx = Math.cos(ang)*dist, dy = Math.sin(ang)*dist;
+      sp.animate([
+        { transform:'translate(-50%,-50%) scale(1)', opacity:1 },
+        { transform:'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(0)', opacity:0 }
+      ], { duration:550 + Math.random()*200, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = function(){ this.effect.target.remove(); };
+    }
+  }
+
+  /* theme swatch CLICK → commit pulse + sparks + RPC persist */
   document.addEventListener('click', function(e){
     var sw = e.target.closest && e.target.closest('.mus-theme-swatch');
     if (!sw) return;
@@ -5521,6 +5577,14 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     document.documentElement.setAttribute('data-theme', key);
     localStorage.setItem('wogl-theme-accent', key);
+    /* dopamine */
+    sw.classList.remove('committing');
+    void sw.offsetWidth; /* reset animation */
+    sw.classList.add('committing');
+    setTimeout(function(){ sw.classList.remove('committing'); }, 560);
+    var accentMap = { velvet:'#b06cff', brass:'#d9a456', jade:'#3ad6a8', cobalt:'#5b8cff', crimson:'#e0556b', pearl:'#d4d8e8' };
+    swatchBurst(sw, accentMap[key] || '#e8c89a');
+    /* persist server-side */
     if (window._user && window._sb){
       window._sb.rpc('update_theme_accent', { p_theme_key: key }).then(function(){
         if (window._profile) window._profile.theme_accent = key;
