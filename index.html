@@ -2082,6 +2082,13 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       <button class="mus-edit-btn" id="musEditBtn" data-mus-i18n="editProfile">Edit profile</button>
     </div>
 
+    <!-- ENTER · portal a la academia (chassis dummy: reusa .mus-streak idéntico) -->
+    <a class="mus-streak" id="musEnterCard" href="https://academy.wogl.io" style="text-decoration:none;color:inherit;cursor:pointer">
+      <span class="flame">→</span>
+      <span class="mus-streak-num" data-mus-i18n="enterCta">Enter</span>
+      <span class="mus-streak-txt" data-mus-i18n-html="enterLine"><b>the academy.</b><br>Continue where you left off.</span>
+    </a>
+
     <!-- STREAK -->
     <div class="mus-streak">
       <span class="flame">🔥</span>
@@ -5187,6 +5194,9 @@ document.addEventListener('DOMContentLoaded', function(){
     streakWeek:          { en:'You coded shaders every day this week.',           es:'Programaste shaders todos los días esta semana.' },
     streakLine:          { en:'<b>days in a row.</b><br>You coded shaders every day this week.',
                            es:'<b>días seguidos.</b><br>Programaste shaders todos los días esta semana.' },
+    enterCta:            { en:'Enter',                                            es:'Entrar' },
+    enterLine:           { en:'<b>the academy.</b><br>Continue where you left off.',
+                           es:'<b>a la academia.</b><br>Continúa donde te quedaste.' },
     secCollection:       { en:'Orb Collection',                                   es:'Colección de orbes' },
     secCollectionAside:  { en:'4 of 6 unlocked · one per module',                 es:'4 de 6 desbloqueados · uno por módulo' },
     secProgress:         { en:'Progress',                                         es:'Progreso' },
