@@ -2145,29 +2145,38 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       </div>
     </div>
 
-    <!-- ORB COLLECTION -->
+    <!-- ORB COLLECTION · Sistema Solar v5 lite -->
     <div class="mus-sec-head">
-      <h2 data-mus-i18n="secCollection">Orb Collection</h2>
-      <span class="aside" data-mus-i18n="secCollectionAside">4 of 6 unlocked · one per module</span>
+      <h2 data-mus-i18n="solarTitle">Your Solar System</h2>
+      <span class="aside" data-mus-i18n="solarSub">Choose your cosmic identity</span>
     </div>
     <div class="mus-collection" id="musCollection">
-      <div class="mus-orb-card equipped" style="--c:#b06cff;--glow:rgba(176,108,255,.5)" data-orb="nebula">
-        <div class="mini mus-o-nebula"></div><div class="oname">Nebula</div><div class="ocond" data-mus-i18n="ocondStartHere">Start Here ✓</div>
+      <div class="mus-orb-card" style="--c:#c7b59a;--glow:rgba(199,181,154,.5)" data-orb="mercury">
+        <div class="mini mus-o-mercury"></div><div class="oname" data-mus-i18n="planetMercuryName">Mercury</div><div class="ocond" data-mus-i18n="planetMercuryTagline">the messenger</div>
       </div>
-      <div class="mus-orb-card" style="--c:#ff8a3d;--glow:rgba(255,138,61,.5)" data-orb="ember">
-        <div class="mini mus-o-ember"></div><div class="oname">Ember</div><div class="ocond" data-mus-i18n="ocondPatterns">Patterns ✓</div>
+      <div class="mus-orb-card" style="--c:#c9923a;--glow:rgba(201,146,58,.5)" data-orb="venus">
+        <div class="mini mus-o-venus"></div><div class="oname" data-mus-i18n="planetVenusName">Venus</div><div class="ocond" data-mus-i18n="planetVenusTagline">the morning star</div>
       </div>
-      <div class="mus-orb-card" style="--c:#3ad6a8;--glow:rgba(58,214,168,.5)" data-orb="aurora">
-        <div class="mini mus-o-aurora"></div><div class="oname">Aurora</div><div class="ocond" data-mus-i18n="ocondForces">Forces ✓</div>
+      <div class="mus-orb-card equipped" style="--c:#5ba3d6;--glow:rgba(91,163,214,.5)" data-orb="earth">
+        <div class="mini mus-o-earth"></div><div class="oname" data-mus-i18n="planetEarthName">Earth</div><div class="ocond" data-mus-i18n="planetEarthTagline">the cradle</div>
       </div>
-      <div class="mus-orb-card" style="--c:#5b8cff;--glow:rgba(91,140,255,.5)" data-orb="royal">
-        <div class="mini mus-o-royal"></div><div class="oname">Royal</div><div class="ocond" data-mus-i18n="ocondNoise">Noise · 7/10</div>
+      <div class="mus-orb-card" style="--c:#d6603a;--glow:rgba(214,96,58,.5)" data-orb="mars">
+        <div class="mini mus-o-mars"></div><div class="oname" data-mus-i18n="planetMarsName">Mars</div><div class="ocond" data-mus-i18n="planetMarsTagline">the red one</div>
       </div>
-      <div class="mus-orb-card locked">
-        <div class="mini">🔒</div><div class="oname">Void</div><div class="ocond" data-mus-i18n="ocondFinishDW">Finish Domain Warp</div>
+      <div class="mus-orb-card" style="--c:#d6b08a;--glow:rgba(214,176,138,.5)" data-orb="jupiter">
+        <div class="mini mus-o-jupiter"></div><div class="oname" data-mus-i18n="planetJupiterName">Jupiter</div><div class="ocond" data-mus-i18n="planetJupiterTagline">the giant</div>
       </div>
-      <div class="mus-orb-card locked">
-        <div class="mini">🔒</div><div class="oname">Plasma</div><div class="ocond" data-mus-i18n="ocondFinishMotion">Finish Motion</div>
+      <div class="mus-orb-card" style="--c:#e8c890;--glow:rgba(232,200,144,.5)" data-orb="saturn">
+        <div class="mini mus-o-saturn"></div><div class="oname" data-mus-i18n="planetSaturnName">Saturn</div><div class="ocond" data-mus-i18n="planetSaturnTagline">the ringed</div>
+      </div>
+      <div class="mus-orb-card" style="--c:#9ad6d6;--glow:rgba(154,214,214,.5)" data-orb="uranus">
+        <div class="mini mus-o-uranus"></div><div class="oname" data-mus-i18n="planetUranusName">Uranus</div><div class="ocond" data-mus-i18n="planetUranusTagline">the tilted</div>
+      </div>
+      <div class="mus-orb-card" style="--c:#5b7ad6;--glow:rgba(91,122,214,.5)" data-orb="neptune">
+        <div class="mini mus-o-neptune"></div><div class="oname" data-mus-i18n="planetNeptuneName">Neptune</div><div class="ocond" data-mus-i18n="planetNeptuneTagline">the distant</div>
+      </div>
+      <div class="mus-orb-card" style="--c:#ff9a2e;--glow:rgba(255,154,46,.55)" data-orb="sol">
+        <div class="mini mus-o-sol"></div><div class="oname" data-mus-i18n="planetSolName">Sol</div><div class="ocond" data-mus-i18n="planetSolTagline">the source</div>
       </div>
     </div>
 
@@ -5420,8 +5429,19 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  /* ─── 6 orb palettes (cA core, cB mid, cC rim) ─── */
+  /* ─── orb palettes (cA core, cB mid, cC rim) · 9 planetas v5 lite + 6 legacy safety ─── */
   var MUS_PAL = {
+    /* v5 lite · Sistema Solar */
+    mercury:{a:[0.95,0.92,0.85],b:[0.43,0.37,0.28],c:[0.78,0.71,0.60],name:'Mercury'},
+    venus:  {a:[1.00,0.95,0.85],b:[0.79,0.57,0.23],c:[0.97,0.83,0.60],name:'Venus'  },
+    earth:  {a:[0.85,0.95,1.00],b:[0.12,0.35,0.54],c:[0.36,0.64,0.84],name:'Earth'  },
+    mars:   {a:[1.00,0.92,0.85],b:[0.54,0.18,0.06],c:[0.84,0.38,0.23],name:'Mars'   },
+    jupiter:{a:[1.00,0.95,0.85],b:[0.54,0.41,0.25],c:[0.84,0.69,0.54],name:'Jupiter'},
+    saturn: {a:[1.00,0.95,0.80],b:[0.63,0.50,0.25],c:[0.91,0.78,0.56],name:'Saturn' },
+    uranus: {a:[0.92,1.00,1.00],b:[0.23,0.54,0.56],c:[0.60,0.84,0.84],name:'Uranus' },
+    neptune:{a:[0.85,0.92,1.00],b:[0.12,0.23,0.54],c:[0.36,0.48,0.84],name:'Neptune'},
+    sol:    {a:[1.00,1.00,0.95],b:[0.79,0.29,0.03],c:[1.00,0.91,0.60],name:'Sol'    },
+    /* Legacy (fallback safety si llega un value viejo) */
     nebula:{a:[0.95,0.90,1.00],b:[0.55,0.25,0.85],c:[0.69,0.42,1.00],name:'Nebula'},
     ember: {a:[1.00,0.95,0.85],b:[0.78,0.25,0.08],c:[1.00,0.54,0.24],name:'Ember' },
     aurora:{a:[0.90,1.00,0.95],b:[0.05,0.45,0.32],c:[0.23,0.84,0.66],name:'Aurora'},
