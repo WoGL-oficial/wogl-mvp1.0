@@ -1534,7 +1534,7 @@ body::after {
 }
 
 /* ─── orb collection ─── */
-.mus-collection{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.mus-collection{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .mus-orb-card{
   background:var(--bg-card,rgba(20,10,40,0.78));border:1px solid var(--line);
   border-radius:13px;padding:18px 14px;text-align:center;
@@ -1576,6 +1576,76 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 .mus-o-uranus  { background:radial-gradient(circle at 35% 30%,#fff,#9ad6d6 28%,#3a8a90 65%,#0a2a2e); }
 .mus-o-neptune { background:radial-gradient(circle at 35% 30%,#fff,#5b7ad6 25%,#1e3a8a 60%,#0a142a); }
 .mus-o-sol     { background:radial-gradient(circle at 50% 50%,#fff,#ffe89a 18%,#ff9a2e 50%,#c94a08 75%,#5a1a04); }
+
+/* ─── v5 lite · Planet card modal lite ─── */
+.mus-planet-modal-back {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(3, 2, 10, 0.78);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.mus-planet-modal-back.open {
+  display: flex; animation: mus-pm-fadein 0.32s ease both;
+}
+@keyframes mus-pm-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.mus-planet-modal {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; padding: 28px 24px;
+  width: 100%; max-width: 380px;
+  background: linear-gradient(180deg, rgba(20, 14, 32, 0.96), rgba(10, 6, 22, 0.96));
+  border: 1px solid rgba(232, 200, 154, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  animation: mus-pm-scalein 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes mus-pm-scalein {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.mus-planet-modal-close {
+  position: absolute; top: 10px; right: 12px;
+  background: transparent; border: 0;
+  font-size: 24px; color: var(--ink-mute);
+  cursor: pointer; padding: 4px 8px;
+  transition: color 0.2s ease;
+}
+.mus-planet-modal-close:hover { color: var(--ink); }
+.mus-planet-modal-orb {
+  width: 140px; height: 140px; border-radius: 50%;
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+}
+.mus-planet-modal-name {
+  font-family: var(--font-display); font-weight: 300;
+  font-size: 32px; color: var(--ink); margin: 0;
+}
+.mus-planet-modal-tagline {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; color: var(--gold);
+  text-transform: uppercase; margin: -8px 0 0;
+}
+.mus-planet-modal-lore {
+  font-family: var(--font-body); font-weight: 300;
+  font-size: 14px; line-height: 1.5; color: var(--ink-soft);
+  text-align: center; margin: 4px 0 12px;
+}
+.mus-planet-modal-cta {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.16em; color: var(--gold);
+  background: transparent; border: 1px solid var(--gold);
+  padding: 10px 22px; border-radius: 3px;
+  text-transform: uppercase; cursor: pointer;
+  transition: background 0.2s ease;
+}
+.mus-planet-modal-cta:hover { background: rgba(232, 200, 154, 0.08); }
+.mus-planet-modal-cta:disabled { opacity: 0.55; cursor: default; }
+.mus-planet-modal-cta.equipped {
+  color: var(--ink-mute); border-color: var(--ink-mute); cursor: default;
+}
 
 /* ─── v5 lite · Founder badge ─── */
 .mus-founder-chip {
@@ -1697,7 +1767,7 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 @media(max-width:480px){
   .mus-plaque h1{ font-size:32px; }
   #museumOrb{ width:200px;height:200px; }
-  .mus-collection{ grid-template-columns:repeat(2,1fr); }
+  .mus-collection{ grid-template-columns:repeat(3,1fr); }
   .mus-meta{ gap:16px; }
 }
 
@@ -2337,6 +2407,20 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROFILE MUSEUM · Planet card modal lite (v5 lite) ═══════════ -->
+<div class="mus-planet-modal-back" id="musPlanetModalBack" role="dialog" aria-modal="true" aria-labelledby="musPlanetModalName">
+  <div class="mus-planet-modal">
+    <button class="mus-planet-modal-close" id="musPlanetModalClose" aria-label="Close">×</button>
+    <div class="mus-planet-modal-orb mus-o-earth" id="musPlanetModalOrb"></div>
+    <h2 class="mus-planet-modal-name" id="musPlanetModalName">Earth</h2>
+    <p class="mus-planet-modal-tagline" id="musPlanetModalTagline">the cradle</p>
+    <p class="mus-planet-modal-lore" id="musPlanetModalLore">The only one with rivers, oceans and song. Your home.</p>
+    <button class="mus-planet-modal-cta" id="musPlanetModalCta">
+      <span id="musPlanetModalCtaLabel" data-mus-i18n="planetSetAsMyOrb">Set as my orb</span>
+    </button>
   </div>
 </div>
 
@@ -5615,33 +5699,26 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
 
-    /* orb collection equip · with ceremony */
-    document.querySelectorAll('.mus-orb-card[data-orb]').forEach(function(card){
-      card.addEventListener('click', function(){
-        var name = card.dataset.orb;
-        document.querySelectorAll('.mus-orb-card').forEach(function(c){ c.classList.remove('equipped'); });
+    /* v5 lite · ceremony reusable expuesta para uso desde planet modal CTA */
+    window.runEquipCeremony = function(name){
+      var card = document.querySelector('.mus-orb-card[data-orb="' + name + '"]');
+      document.querySelectorAll('.mus-orb-card').forEach(function(c){ c.classList.remove('equipped'); });
+      if (card){
         card.classList.add('equipped');
         card.classList.add('rippling');
         setTimeout(function(){ card.classList.remove('rippling'); }, 920);
-        if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(name);
-        var disp = card.querySelector('.oname').textContent;
-        var eb = document.getElementById('musEyebrow');
-        if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp;
-        var hero = document.getElementById('musHero');
-        if (hero){
-          hero.classList.add('equipping');
-          setTimeout(function(){ hero.classList.remove('equipping'); }, 850);
-        }
-        equipBurst(name);
-
-        /* persist via RPC if user logged in */
-        if (window._user && window._sb){
-          window._sb.rpc('update_equipped_orb', { p_orb_key: name }).then(function(){
-            if (window._profile) window._profile.equipped_orb = name;
-          }).catch(function(){ /* silent · ceremony already played */ });
-        }
-      });
-    });
+      }
+      if (window._museumOrbRenderer) window._museumOrbRenderer.setPalette(name);
+      var disp = card ? card.querySelector('.oname').textContent : name;
+      var eb = document.getElementById('musEyebrow');
+      if (eb) eb.textContent = mt('equippedOrbPrefix') + ' ' + disp;
+      var hero = document.getElementById('musHero');
+      if (hero){
+        hero.classList.add('equipping');
+        setTimeout(function(){ hero.classList.remove('equipping'); }, 850);
+      }
+      if (typeof equipBurst === 'function') equipBurst(name);
+    };
   }
 
   /* ─── mountMuseum: hidrata + show ─── */
@@ -6081,6 +6158,104 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     closeMusReward();
   });
+})();
+</script>
+
+<!-- ═══════════ v5 lite · Planet modal lite handlers ═══════════ -->
+<script>
+(function(){
+  var PLANET_KEYS = ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','sol'];
+
+  function i18nKey(planet, suffix){
+    return 'planet' + planet.charAt(0).toUpperCase() + planet.slice(1) + suffix;
+  }
+
+  function openPlanetModal(planetKey){
+    if (PLANET_KEYS.indexOf(planetKey) === -1) return;
+    var back = document.getElementById('musPlanetModalBack');
+    var orb = document.getElementById('musPlanetModalOrb');
+    var name = document.getElementById('musPlanetModalName');
+    var tagline = document.getElementById('musPlanetModalTagline');
+    var lore = document.getElementById('musPlanetModalLore');
+    var cta = document.getElementById('musPlanetModalCta');
+    var ctaLabel = document.getElementById('musPlanetModalCtaLabel');
+    if (!back || !orb || !name || !tagline || !lore || !cta || !ctaLabel) return;
+
+    orb.className = 'mus-planet-modal-orb mus-o-' + planetKey;
+    name.dataset.musI18n    = i18nKey(planetKey, 'Name');
+    tagline.dataset.musI18n = i18nKey(planetKey, 'Tagline');
+    lore.dataset.musI18n    = i18nKey(planetKey, 'Lore');
+
+    var current = (window._profile && window._profile.equipped_orb) || 'earth';
+    cta.dataset.targetPlanet = planetKey;
+    if (planetKey === current){
+      cta.classList.add('equipped');
+      ctaLabel.dataset.musI18n = 'planetEquipped';
+      cta.disabled = true;
+    } else {
+      cta.classList.remove('equipped');
+      ctaLabel.dataset.musI18n = 'planetSetAsMyOrb';
+      cta.disabled = false;
+    }
+
+    if (typeof window.applyMusLang === 'function') window.applyMusLang();
+    back.classList.add('open');
+  }
+
+  function closePlanetModal(){
+    var back = document.getElementById('musPlanetModalBack');
+    if (back) back.classList.remove('open');
+  }
+
+  document.addEventListener('click', function(e){
+    var card = e.target && e.target.closest && e.target.closest('.mus-orb-card[data-orb]');
+    if (card) {
+      e.preventDefault();
+      openPlanetModal(card.dataset.orb);
+    }
+  });
+
+  var closeBtn = document.getElementById('musPlanetModalClose');
+  if (closeBtn) closeBtn.addEventListener('click', closePlanetModal);
+
+  var backLayer = document.getElementById('musPlanetModalBack');
+  if (backLayer) backLayer.addEventListener('click', function(e){
+    if (e.target === e.currentTarget) closePlanetModal();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closePlanetModal();
+  });
+
+  var cta = document.getElementById('musPlanetModalCta');
+  if (cta) cta.addEventListener('click', async function(){
+    if (cta.disabled) return;
+    var planetKey = cta.dataset.targetPlanet;
+    cta.disabled = true;
+    try {
+      if (window._sb && window._user){
+        var res = await window._sb.rpc('update_equipped_orb', { p_orb_key: planetKey });
+        if (res.error || !res.data || !res.data.ok){
+          cta.disabled = false;
+          return;
+        }
+      }
+      if (window._profile) window._profile.equipped_orb = planetKey;
+      if (typeof window.runEquipCeremony === 'function'){
+        window.runEquipCeremony(planetKey);
+      } else {
+        document.querySelectorAll('.mus-orb-card').forEach(function(c){
+          c.classList.toggle('equipped', c.dataset.orb === planetKey);
+        });
+      }
+      setTimeout(closePlanetModal, 320);
+    } catch(e){
+      cta.disabled = false;
+    }
+  });
+
+  window.openPlanetModal = openPlanetModal;
+  window.closePlanetModal = closePlanetModal;
 })();
 </script>
 
