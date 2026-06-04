@@ -2201,9 +2201,7 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       <div class="mus-modal-pane active" data-mus-pane-content="settings">
         <div class="mus-field">
           <label data-mus-i18n="lblName">Display name</label>
-          <input type="text" id="musNameInput" maxlength="24" autocomplete="off">
-          <div class="mus-field-feedback" id="musNameFeedback"></div>
-          <div class="mus-field-hint" data-mus-i18n="hintName">3–24 chars · letters, numbers, _ or -</div>
+          <div class="mus-field-hint" data-mus-i18n-html="nameContact">To change your display name, <a href="mailto:hello@wogl.io" style="color:var(--accent);text-decoration:none">contact us</a>.</div>
         </div>
         <div class="mus-field">
           <label data-mus-i18n="lblLang">Account language</label>
@@ -5197,6 +5195,8 @@ document.addEventListener('DOMContentLoaded', function(){
     enterCta:            { en:'Enter',                                            es:'Entrar' },
     enterLine:           { en:'<b>the academy.</b><br>Continue where you left off.',
                            es:'<b>a la academia.</b><br>Continúa donde te quedaste.' },
+    nameContact:         { en:'To change your display name, <a href="mailto:hello@wogl.io" style="color:var(--accent);text-decoration:none">contact us</a>.',
+                           es:'Para cambiar tu nombre, <a href="mailto:hola@mundogl.com" style="color:var(--accent);text-decoration:none">contáctanos</a>.' },
     secCollection:       { en:'Orb Collection',                                   es:'Colección de orbes' },
     secCollectionAside:  { en:'4 of 6 unlocked · one per module',                 es:'4 de 6 desbloqueados · uno por módulo' },
     secProgress:         { en:'Progress',                                         es:'Progreso' },
