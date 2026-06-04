@@ -2734,7 +2734,8 @@ async function signOutUser() {
   try { await _sb.auth.signOut(); } catch (e) { /* defensive */ }
   _user = null;
   _profile = null;
-  syncHeaderForUser();
+  /* hard redirect al portal · garantiza unmount museum + state reset limpio */
+  window.location.href = 'https://wogl.io';
 }
 
 // ============================================================
