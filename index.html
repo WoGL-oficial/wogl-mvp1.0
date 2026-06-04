@@ -2201,7 +2201,9 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       <div class="mus-modal-pane active" data-mus-pane-content="settings">
         <div class="mus-field">
           <label data-mus-i18n="lblName">Display name</label>
-          <div class="mus-field-hint" data-mus-i18n-html="nameContact">To change your display name, <a href="mailto:hello@wogl.io" style="color:var(--accent);text-decoration:none">contact us</a>.</div>
+          <input type="text" id="musNameInput" maxlength="24" autocomplete="off">
+          <div class="mus-field-feedback" id="musNameFeedback"></div>
+          <div class="mus-field-hint" data-mus-i18n="hintName">3–24 chars · letters, numbers, _ or -</div>
         </div>
         <div class="mus-field">
           <label data-mus-i18n="lblLang">Account language</label>
@@ -5195,8 +5197,8 @@ document.addEventListener('DOMContentLoaded', function(){
     enterCta:            { en:'Enter',                                            es:'Entrar' },
     enterLine:           { en:'<b>the academy.</b><br>Continue where you left off.',
                            es:'<b>a la academia.</b><br>Continúa donde te quedaste.' },
-    nameContact:         { en:'To change your display name, <a href="mailto:hello@wogl.io" style="color:var(--accent);text-decoration:none">contact us</a>.',
-                           es:'Para cambiar tu nombre, <a href="mailto:hola@mundogl.com" style="color:var(--accent);text-decoration:none">contáctanos</a>.' },
+    nameFbLength:        { en:'use 3–24 characters',                              es:'usa de 3 a 24 caracteres' },
+    nameFbSaved:         { en:'✓ saved',                                          es:'✓ guardado' },
     secCollection:       { en:'Orb Collection',                                   es:'Colección de orbes' },
     secCollectionAside:  { en:'4 of 6 unlocked · one per module',                 es:'4 de 6 desbloqueados · uno por módulo' },
     secProgress:         { en:'Progress',                                         es:'Progreso' },
@@ -5748,45 +5750,74 @@ document.addEventListener('DOMContentLoaded', function(){
     }, 400);
   });
 
-  /* save settings · name + lang */
+  /* save settings · name + lang via dedicated RPCs */
+  var MUS_ERR_MAP = {
+    taken:           'nameFbTaken',
+    invalid_length:  'nameFbLength',
+    invalid_format:  'nameFbFormat',
+    invalid_lang:    'nameFbError',
+    unauthenticated: 'nameFbError'
+  };
   document.addEventListener('click', function(e){
     if (!e.target.matches || !e.target.matches('[data-mus-action="save-settings"]')) return;
     if (!window._user || !window._sb){ closeMusEdit(); return; }
+    var fb = document.getElementById('musNameFeedback');
     var nameIn = document.getElementById('musNameInput');
     var newName = nameIn ? nameIn.value.trim() : '';
+    var currentName = (window._profile && window._profile.display_name) || '';
     var newLang = (document.querySelector('.mus-lang-btn.active') || {}).dataset
       ? document.querySelector('.mus-lang-btn.active').dataset.musLang
       : 'en';
-    var update = { account_lang: newLang };
-    if (newName && newName !== ((window._profile && window._profile.display_name) || '')){
-      update.display_name = newName;
-    }
-    window._sb.from('profiles').update(update).eq('id', window._user.id).then(function(res){
-      if (!res || res.error){
-        var fb = document.getElementById('musNameFeedback');
-        if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = mt('nameFbError'); }
+    var currentLang = (window._profile && window._profile.account_lang) || 'en';
+    var nameChanged = !!newName && newName !== currentName;
+    var langChanged = newLang !== currentLang;
+    if (!nameChanged && !langChanged){ closeMusEdit(); return; }
+
+    var calls = [];
+    if (nameChanged) calls.push(window._sb.rpc('update_display_name', { candidate: newName }));
+    if (langChanged) calls.push(window._sb.rpc('update_account_lang', { lang: newLang }));
+
+    Promise.all(calls).then(function(results){
+      /* check every RPC for ok:true */
+      var firstError = null;
+      for (var i = 0; i < results.length; i++){
+        var r = results[i];
+        if (r && r.error){ firstError = 'rpc'; break; }
+        var d = r && r.data;
+        if (!d || d.ok !== true){ firstError = (d && d.error) || 'unknown'; break; }
+      }
+      if (firstError){
+        if (fb){
+          var key = MUS_ERR_MAP[firstError] || 'nameFbError';
+          fb.className = 'mus-field-feedback err';
+          fb.textContent = mt(key);
+        }
         return;
       }
+      /* success: update local state */
       if (window._profile){
-        if (update.display_name) window._profile.display_name = update.display_name;
-        window._profile.account_lang = newLang;
+        if (nameChanged) window._profile.display_name = newName;
+        if (langChanged) window._profile.account_lang = newLang;
       }
-      /* refresh visible UI */
-      if (update.display_name){
+      /* refresh visible UI if name changed */
+      if (nameChanged){
         var el = document.getElementById('musName');
-        if (el) el.textContent = update.display_name;
+        if (el) el.textContent = newName;
         var joined = (window._user && window._user.created_at)
           ? new Date(window._user.created_at).toLocaleDateString('en', { month:'short', year:'numeric' })
           : 'today';
         var elH = document.getElementById('musHandle');
-        if (elH) elH.textContent = '@' + update.display_name + ' · joined ' + joined;
-        /* header user btn */
+        if (elH) elH.textContent = '@' + newName + ' · joined ' + joined;
         var hu = document.getElementById('headerUser');
-        if (hu) hu.textContent = update.display_name;
+        if (hu) hu.textContent = newName;
       }
-      closeMusEdit();
+      /* sync lang switcher header if lang changed */
+      if (langChanged && typeof switchLanguage === 'function'){
+        switchLanguage(newLang);
+      }
+      if (fb){ fb.className = 'mus-field-feedback ok'; fb.textContent = mt('nameFbSaved'); }
+      setTimeout(closeMusEdit, 600);
     }).catch(function(){
-      var fb = document.getElementById('musNameFeedback');
       if (fb){ fb.className = 'mus-field-feedback err'; fb.textContent = mt('nameFbError'); }
     });
   });
