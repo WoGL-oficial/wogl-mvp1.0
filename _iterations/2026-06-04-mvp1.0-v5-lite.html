@@ -1573,6 +1573,46 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
 .mus-o-void  { background:radial-gradient(circle at 35% 30%,#6a4f8a,#2a1042 45%,#0a0410); }
 .mus-o-plasma{ background:conic-gradient(from 30deg,#b06cff,#ff8a3d,#3ad6a8,#5b8cff,#b06cff); }
 
+/* ─── v5 lite · Founder badge ─── */
+.mus-founder-chip {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.18em; color: var(--gold);
+  padding: 3px 8px; border: 1px solid var(--gold);
+  border-radius: 2px; text-transform: uppercase;
+  background: rgba(232, 200, 154, 0.04);
+  animation: founder-pulse 6s ease-in-out infinite;
+  margin-left: 8px;
+}
+@keyframes founder-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 200, 154, 0); }
+  50%      { box-shadow: 0 0 12px 0 rgba(232, 200, 154, 0.25); }
+}
+.mus-founder-chip.hidden { display: none; }
+
+.mus-founder-card {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 18px 16px;
+  border: 1px solid rgba(232, 200, 154, 0.25);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(232, 200, 154, 0.06), rgba(232, 200, 154, 0.02));
+  margin-bottom: 18px;
+}
+.mus-founder-card .mus-founder-icon {
+  font-size: 22px; color: var(--gold);
+  text-shadow: 0 0 12px rgba(232, 200, 154, 0.4);
+}
+.mus-founder-card .mus-founder-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 18px; color: var(--gold); letter-spacing: 0.02em;
+}
+.mus-founder-card .mus-founder-sub {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.mus-founder-card.hidden { display: none; }
+
 /* ─── progress modules ─── */
 .mus-modules{ display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
 .mus-mod{
@@ -2059,7 +2099,7 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
       </div>
       <div class="mus-plaque">
         <div class="mus-eyebrow" id="musEyebrow">Equipped Orb · Nebula</div>
-        <h1 id="musName">—</h1>
+        <h1 id="musName"><span id="musNameText">—</span><span class="mus-founder-chip hidden" id="musFounderChip" data-mus-i18n="founderChip">FOUNDER</span></h1>
         <div class="mus-sub" data-mus-i18n="hintDrag">Drag the orb · move your mouse for the spotlight</div>
         <div class="mus-meta">
           <span><b id="musMetaOrbs">4</b><span data-mus-i18n="metaOrbs">orbs collected</span></span>
@@ -2199,6 +2239,11 @@ html[lang="es"] .mus-orb-card.equipped::before{ content:"EQUIPADO"; }
     <div class="mus-modal-body">
       <!-- Settings pane -->
       <div class="mus-modal-pane active" data-mus-pane-content="settings">
+        <div class="mus-founder-card hidden" id="musFounderCard">
+          <div class="mus-founder-icon">★</div>
+          <div class="mus-founder-title" data-mus-i18n="founderTitle">Founder</div>
+          <div class="mus-founder-sub" data-mus-i18n="founderSub">Welcome aboard</div>
+        </div>
         <div class="mus-field">
           <label data-mus-i18n="lblName">Display name</label>
           <input type="text" id="musNameInput" maxlength="24" autocomplete="off">
@@ -5591,8 +5636,15 @@ document.addEventListener('DOMContentLoaded', function(){
     /* hidrate from _profile (i18n via applyMusLang abajo) */
     if (window._profile){
       var name = window._profile.display_name || 'traveler';
-      var elName = document.getElementById('musName');
+      var elName = document.getElementById('musNameText');
       if (elName) elName.textContent = name;
+
+      /* v5 lite · founder badge */
+      var isFounder = !!window._profile.is_founder;
+      var founderChip = document.getElementById('musFounderChip');
+      var founderCard = document.getElementById('musFounderCard');
+      if (founderChip) founderChip.classList.toggle('hidden', !isFounder);
+      if (founderCard) founderCard.classList.toggle('hidden', !isFounder);
 
       var orb = window._profile.equipped_orb || 'nebula';
       var theme = window._profile.theme_accent || 'velvet';
